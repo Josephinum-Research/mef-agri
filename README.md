@@ -13,14 +13,15 @@ evaluation framework for agricultural models
 
 - [ ] model definitions `mef_agri.models`
 
-  - [ ] SWAT atmosphere
-  - [ ] SWAT soil
-  - [ ] EPIC crop
-  - [ ] custom management
-  - [ ] INRAE Sentinel-2
+  - [x] SWAT atmosphere
+  - [ ] SWAT soil - TODO: check docstrings
+  - [x] EPIC crop
+  - [x] custom management
+  - [x] INRAE Sentinel-2
 
 - [ ] model evaluation
 
+  - [x] statistical utilities for evaluation `mef_agri.evaluation.stats_utils.py`
   - [ ] database
   - [ ] model input
   - [ ] estimators (model propagation, bootstrap particle filter)
