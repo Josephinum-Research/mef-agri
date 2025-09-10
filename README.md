@@ -2,6 +2,10 @@
 
 evaluation framework for agricultural models
 
+## documentation
+
+https://josephinum-research.github.io/mef-agri/
+
 ## initial tasks to set up repository
 
 - [ ] data sources
