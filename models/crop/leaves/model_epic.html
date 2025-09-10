@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>EPIC - crop.leaves &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="EPIC - crop.roots" href="../roots/model_epic.html" />
+    <link rel="prev" title="EPIC - crop.development" href="../development/model_epic.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../development/model_epic.html">EPIC - crop.development</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../roots/model_epic.html">EPIC - crop.roots</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="epic-crop-leaves">
+<h1>EPIC - crop.leaves<a class="headerlink" href="#epic-crop-leaves" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.crop.leaves.model_epic.</span></span><span class="sig-name descname"><span class="pre">Leaves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves" title="Link to this definition">¶</a></dt>
+<dd><p>Model which computes the leaf area index according to <a class="reference internal" href="../../../add/refs.html#r2" id="id1"><span>[R2]</span></a> (no biomass, 
+…).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.gc">
+<span class="sig-name descname"><span class="pre">gc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.gc" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'growth_constraint'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.stress'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{gc},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>crop biomass growth constraint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.hufl">
+<span class="sig-name descname"><span class="pre">hufl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.hufl" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'heat_unit_factor_leaves'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.development'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{L-huf},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>heat unit factor for leaves at current day</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.hui">
+<span class="sig-name descname"><span class="pre">hui</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.hui" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'heat_unit_index'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.development'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-hui},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current heat unit index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.hui_leaf_decline">
+<span class="sig-name descname"><span class="pre">hui_leaf_decline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.hui_leaf_decline" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{L-hld},0}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id2"><span>[R2]</span></a> (equ. 10, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>heat unit index at which leaf decline starts</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize class-intern variables and <a class="reference internal" href="#mef_agri.models.crop.leaves.model_epic.Leaves.lai_rate_pot" title="mef_agri.models.crop.leaves.model_epic.Leaves.lai_rate_pot"><code class="xref py py-func docutils literal notranslate"><span class="pre">lai_rate_pot()</span></code></a> with a zero 
+vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – intialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.lai">
+<span class="sig-name descname"><span class="pre">lai</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.lai" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - State</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{L-lai},k}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id3"><span>[R2]</span></a> (equ. 7)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current leaf area index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.lai_max">
+<span class="sig-name descname"><span class="pre">lai_max</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.lai_max" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{L-lmx},0}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id4"><span>[R2]</span></a> (equ. 8, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>max. possible value of lai</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.lai_rate_pot">
+<span class="sig-name descname"><span class="pre">lai_rate_pot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.lai_rate_pot" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{L-lrp},k}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id5"><span>[R2]</span></a> (equ. 8)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>potential daily increase of lai</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.lai_regr_coeff">
+<span class="sig-name descname"><span class="pre">lai_regr_coeff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.lai_regr_coeff" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{L-lc},0}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id6"><span>[R2]</span></a> (equ. 10, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>regression coefficient of lai computation at leaf decline stage</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.leaves.model_epic.Leaves.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.leaves.model_epic.Leaves.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul>
+<li><p>daily change of <a class="reference internal" href="#mef_agri.models.crop.leaves.model_epic.Leaves.hufl" title="mef_agri.models.crop.leaves.model_epic.Leaves.hufl"><code class="xref py py-func docutils literal notranslate"><span class="pre">hufl()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.leaves.model_epic.Leaves.lai_rate_pot" title="mef_agri.models.crop.leaves.model_epic.Leaves.lai_rate_pot"><code class="xref py py-func docutils literal notranslate"><span class="pre">lai_rate_pot()</span></code></a></p></li>
+<li><p>compute boolean/condition array <code class="docutils literal notranslate"><span class="pre">cld</span> <span class="pre">=</span> <span class="pre">self.hui.value</span> <span class="pre">&gt;</span> <span class="pre">self.hui_leaf_decline</span></code></p></li>
+<li><p>save value of <a class="reference internal" href="#mef_agri.models.crop.leaves.model_epic.Leaves.lai" title="mef_agri.models.crop.leaves.model_epic.Leaves.lai"><code class="xref py py-func docutils literal notranslate"><span class="pre">lai()</span></code></a> at the day when leaf decline starts (i.e. when a realization of <a class="reference internal" href="#mef_agri.models.crop.leaves.model_epic.Leaves.hui" title="mef_agri.models.crop.leaves.model_epic.Leaves.hui"><code class="xref py py-func docutils literal notranslate"><span class="pre">hui()</span></code></a> exceeds a realization of <a class="reference internal" href="#mef_agri.models.crop.leaves.model_epic.Leaves.hui_leaf_decline" title="mef_agri.models.crop.leaves.model_epic.Leaves.hui_leaf_decline"><code class="xref py py-func docutils literal notranslate"><span class="pre">hui_leaf_decline()</span></code></a>, or where <code class="docutils literal notranslate"><span class="pre">cld</span></code> contains <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+<li><p>two lai values are computed</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>one before leaf decline <code class="docutils literal notranslate"><span class="pre">lai1</span></code> <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../../add/refs.html#r2" id="id7"><span>[R2]</span></a> (equ. 7)</p></li>
+<li><p>one after leaf decline has started <code class="docutils literal notranslate"><span class="pre">lai2</span></code> <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../../add/refs.html#r2" id="id8"><span>[R2]</span></a> (equ. 10)</p></li>
+<li><p>depending on <code class="docutils literal notranslate"><span class="pre">cld</span></code>, <code class="docutils literal notranslate"><span class="pre">lai1</span></code> or <code class="docutils literal notranslate"><span class="pre">lai2</span></code> is set for <a class="reference internal" href="#mef_agri.models.crop.leaves.model_epic.Leaves.lai" title="mef_agri.models.crop.leaves.model_epic.Leaves.lai"><code class="xref py py-func docutils literal notranslate"><span class="pre">lai()</span></code></a></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../development/model_epic.html">EPIC - crop.development</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../roots/model_epic.html">EPIC - crop.roots</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

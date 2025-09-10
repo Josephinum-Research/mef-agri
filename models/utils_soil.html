@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Soil Utilities &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haiku.css?v=8527a269" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Used Symbols" href="../add/symb.html" />
+    <link rel="prev" title="Model Utilities" href="utils.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../index.html">
+          <img class="logo" src="../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="utils.html">Model Utilities</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../add/symb.html">Used Symbols</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="soil-utilities">
+<h1>Soil Utilities<a class="headerlink" href="#soil-utilities" title="Link to this heading">¶</a></h1>
+<p>mef_agri.models.utils_soil.py</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.models.utils_soil.init_layer_dimensions">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.models.utils_soil.</span></span><span class="sig-name descname"><span class="pre">init_layer_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils_soil.init_layer_dimensions" title="Link to this definition">¶</a></dt>
+<dd><p>Method which determines layer dimensions (i.e. depth and thickness) such 
+that the layers are equally spaced from zero (i.e. surface) to the max. 
+depth (i.e. the max. rootable depth <code class="docutils literal notranslate"><span class="pre">rdm</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smdl</strong> (<a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>) – soil model</p></li>
+<li><p><strong>rdm</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – max. rootable depth of the soil</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <code class="docutils literal notranslate"><span class="pre">smdl</span></code> does not have a <code class="docutils literal notranslate"><span class="pre">layers</span></code>-attribute containing the layer model instances</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.models.utils_soil.distribute_nutrient_amount">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.models.utils_soil.</span></span><span class="sig-name descname"><span class="pre">distribute_nutrient_amount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils_soil.distribute_nutrient_amount" title="Link to this definition">¶</a></dt>
+<dd><p>Possible values for <code class="docutils literal notranslate"><span class="pre">mode</span></code></p>
+<ul class="simple">
+<li><p><strong>linear</strong></p></li>
+</ul>
+<p>linearly decreasing partitioning such that a virtual amount of 0 is assigned 
+to the (n + 1)th layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nl</strong> (<em>int</em>) – number of soil layers</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – distribution mode, defaults to <code class="docutils literal notranslate"><span class="pre">'linear'</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>fractions partitioning and assigning nutrient amount to the corresponding layers</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="utils.html">Model Utilities</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../add/symb.html">Used Symbols</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

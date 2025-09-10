@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SWAT - soil.surface.water &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="SWAT - soil.surface.evapotranspiration" href="../evapotranspiration/model_swat.html" />
+    <link rel="prev" title="SWAT - soil.surface.temperature" href="../temperature/model_swat.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../../index.html">
+          <img class="logo" src="../../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../temperature/model_swat.html">SWAT - soil.surface.temperature</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../evapotranspiration/model_swat.html">SWAT - soil.surface.evapotranspiration</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="swat-soil-surface-water">
+<h1>SWAT - soil.surface.water<a class="headerlink" href="#swat-soil-surface-water" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.soil.surface.water.model_swat.</span></span><span class="sig-name descname"><span class="pre">Water_CNM_V2009</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009" title="Link to this definition">¶</a></dt>
+<dd><p>This surface water model corresponds to the SCS curve number procedure 
+outlined in <a class="reference internal" href="../../../../add/refs.html#r1" id="id1"><span>[R1]</span></a>. In its current version, the curve number is roughly 
+approximated by introducing it as a hyper-parameter and considering 
+crop cover (i.e. an approximation of <a class="reference internal" href="../../../../add/refs.html#r1" id="id2"><span>[R1]</span></a> table 2:1-1). The retention 
+parameter is computed by considering only the water content in the soil 
+profile (<a class="reference internal" href="../../../../add/refs.html#r1" id="id3"><span>[R1]</span></a> equ. 2:1.1.6), i.e. no evapotranspiration and frozen top 
+soil layer.</p>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.can_max">
+<span class="sig-name descname"><span class="pre">can_max</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.can_max" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from mode with id <code class="docutils literal notranslate"><span class="pre">'crop'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{W-csm},0}\ [mm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>max. water storage of canopy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.cn">
+<span class="sig-name descname"><span class="pre">cn</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.cn" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{cn},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>curve number considering crops</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.fc">
+<span class="sig-name descname"><span class="pre">fc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.fc" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-fc},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil moisture at field capacity</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.infiltration">
+<span class="sig-name descname"><span class="pre">infiltration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.infiltration" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{inf},s,k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>infiltration rate at current day</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialization of <a class="reference internal" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.water_canopy" title="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.water_canopy"><code class="xref py py-func docutils literal notranslate"><span class="pre">water_canopy()</span></code></a> and <a class="reference internal" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.runoff" title="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.runoff"><code class="xref py py-func docutils literal notranslate"><span class="pre">runoff()</span></code></a> with zero 
+arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.lai">
+<span class="sig-name descname"><span class="pre">lai</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.lai" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'crop.leaves'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{lai},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>leaf area index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.lai_max">
+<span class="sig-name descname"><span class="pre">lai_max</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.lai_max" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'crop.leaves'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{laimx},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>max. attainable lai</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.por">
+<span class="sig-name descname"><span class="pre">por</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.por" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{por},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil porosity (saturated water content)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.prec">
+<span class="sig-name descname"><span class="pre">prec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.prec" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{prec},k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily precipitation sum</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.precipitation_soil">
+<span class="sig-name descname"><span class="pre">precipitation_soil</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.precipitation_soil" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{prec},s,k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of precipitation reaching the soil surface</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.rdm">
+<span class="sig-name descname"><span class="pre">rdm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.rdm" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{rdm},0}\ [m]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum rootable depth of the soil</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.retention">
+<span class="sig-name descname"><span class="pre">retention</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.retention" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{ret},s,k}\ [mm]\)</span> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id4"><span>[R1]</span></a> (equ. 2:1.1.6)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>retention parameter</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.runoff">
+<span class="sig-name descname"><span class="pre">runoff</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.runoff" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-ro},s,k}\ [\frac{mm}{day}]\)</span> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id5"><span>[R1]</span></a> (equ. 2:1.1.3)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>runoff rate at current day</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.sw">
+<span class="sig-name descname"><span class="pre">sw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.sw" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-a},k}\ [mm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>water amount in the soil profile</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p>canopy water storage - <a class="reference internal" href="../../../../add/refs.html#r1" id="id6"><span>[R1]</span></a> (section 2:2.1)</p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.precipitation_soil" title="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.precipitation_soil"><code class="xref py py-func docutils literal notranslate"><span class="pre">precipitation_soil()</span></code></a></p></li>
+<li><p>curve number values for wilting point and field capacity - <a class="reference internal" href="../../../../add/refs.html#r1" id="id7"><span>[R1]</span></a> (equ. 2:1.1.4, 2:1.1.5)</p></li>
+<li><p>retention values for wilting point and field capacity - <a class="reference internal" href="../../../../add/refs.html#r1" id="id8"><span>[R1]</span></a> (equ. 2:1.1.2)</p></li>
+<li><p>shape parameters of retention parameter</p></li>
+<li><p>retention parameter - <a class="reference internal" href="../../../../add/refs.html#r1" id="id9"><span>[R1]</span></a> (equ. 2:1.1.6)</p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.runoff" title="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.runoff"><code class="xref py py-func docutils literal notranslate"><span class="pre">runoff()</span></code></a> and <a class="reference internal" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.infiltration" title="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.infiltration"><code class="xref py py-func docutils literal notranslate"><span class="pre">infiltration()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.water_canopy">
+<span class="sig-name descname"><span class="pre">water_canopy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.water_canopy" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-c},k}\ [mm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of water stored in the canopy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.wp">
+<span class="sig-name descname"><span class="pre">wp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.water.model_swat.Water_CNM_V2009.wp" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-wp},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil moisture at wilting point</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../temperature/model_swat.html">SWAT - soil.surface.temperature</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../evapotranspiration/model_swat.html">SWAT - soil.surface.evapotranspiration</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

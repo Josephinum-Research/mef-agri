@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SWAT - atmosphere.daylength &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SWAT - atmosphere.radiation" href="../radiation/model_swat.html" />
+    <link rel="prev" title="SWAT - atmosphere.weather" href="../weather/model_swat.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../weather/model_swat.html">SWAT - atmosphere.weather</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../radiation/model_swat.html">SWAT - atmosphere.radiation</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="swat-atmosphere-daylength">
+<h1>SWAT - atmosphere.daylength<a class="headerlink" href="#swat-atmosphere-daylength" title="Link to this heading">¶</a></h1>
+<p>Used constants in this module</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">EARTH_ROTATION_VELOCITY</span> <span class="pre">=</span> <span class="pre">0.2618</span></code> <span class="math notranslate nohighlight">\(\frac{rad}{h}\)</span></p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.compute_solar_declination">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.models.atmosphere.daylength.model_swat.</span></span><span class="sig-name descname"><span class="pre">compute_solar_declination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.compute_solar_declination" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>doy</strong> (<em>int</em>) – n-th day of the year</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>solar declination [rad]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.compute_daylength">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.models.atmosphere.daylength.model_swat.</span></span><span class="sig-name descname"><span class="pre">compute_daylength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.compute_daylength" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sd</strong> (<em>float</em>) – solar declination [rad]</p></li>
+<li><p><strong>lat</strong> (<em>float</em>) – geographic latitude [rad]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>daylength [h]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.atmosphere.daylength.model_swat.</span></span><span class="sig-name descname"><span class="pre">Daylength_V2009</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009" title="Link to this definition">¶</a></dt>
+<dd><p>This model computes daylength related quantities. They are all 
+deterministic outputs because they only depend on the site latitude.</p>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.daylength">
+<span class="sig-name descname"><span class="pre">daylength</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.daylength" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{dl},k}=2\cdot a_{\textrm{srh},k}\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id1"><span>[R1]</span></a> (equ. 1:1.1.6)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daylength</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.daylength_min">
+<span class="sig-name descname"><span class="pre">daylength_min</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.daylength_min" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{dlmin},k}\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>minimum daylength in a year at current site</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Here, <a class="reference internal" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.daylength_min" title="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.daylength_min"><code class="xref py py-func docutils literal notranslate"><span class="pre">daylength_min()</span></code></a> is computed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.solar_declination">
+<span class="sig-name descname"><span class="pre">solar_declination</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.solar_declination" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{sd},k}\ [rad]\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id2"><span>[R1]</span></a> (equ. 1:1.1.2)</p>
+<p>The solar declination is the earth’s latittude at which incoming solar 
+rays are normal to the earth’s surface. It is <span class="math notranslate nohighlight">\(0^\circ\)</span> in the 
+spring and fall equinox and approaches <span class="math notranslate nohighlight">\(\pm 23.5^\circ\)</span> 
+(summer and winter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>solar declination</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.sunrise_hour">
+<span class="sig-name descname"><span class="pre">sunrise_hour</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.sunrise_hour" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{srh},k}\ [h]\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id3"><span>[R1]</span></a> (equ. 1:1.1.4)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>hour of sunrise</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.sunset_hour">
+<span class="sig-name descname"><span class="pre">sunset_hour</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.sunset_hour" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{ssh},k}=-a_{\textrm{srh},k}\ [h]\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id4"><span>[R1]</span></a> (equ. 1:1.1.5)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>hour of sunset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.solar_declination" title="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.solar_declination"><code class="xref py py-func docutils literal notranslate"><span class="pre">solar_declination()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.daylength" title="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.daylength"><code class="xref py py-func docutils literal notranslate"><span class="pre">daylength()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.sunrise_hour" title="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.sunrise_hour"><code class="xref py py-func docutils literal notranslate"><span class="pre">sunrise_hour()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.sunset_hour" title="mef_agri.models.atmosphere.daylength.model_swat.Daylength_V2009.sunset_hour"><code class="xref py py-func docutils literal notranslate"><span class="pre">sunset_hour()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../weather/model_swat.html">SWAT - atmosphere.weather</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../radiation/model_swat.html">SWAT - atmosphere.radiation</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

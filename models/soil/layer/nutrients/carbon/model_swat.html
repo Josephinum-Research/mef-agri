@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SWAT - soil.layer.nutrients.carbon &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="SWAT - soil.layer.nutrients.nitrogen" href="../nitrogen/model_swat.html" />
+    <link rel="prev" title="SWAT - soil.layer.nutrients" href="../model_swat.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../../../index.html">
+          <img class="logo" src="../../../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../model_swat.html">SWAT - soil.layer.nutrients</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../nitrogen/model_swat.html">SWAT - soil.layer.nutrients.nitrogen</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="swat-soil-layer-nutrients-carbon">
+<h1>SWAT - soil.layer.nutrients.carbon<a class="headerlink" href="#swat-soil-layer-nutrients-carbon" title="Link to this heading">¶</a></h1>
+<p>mef_agri.models.soil.layer.nutrients.carbon.model_swat.py</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.soil.layer.nutrients.carbon.model_swat.</span></span><span class="sig-name descname"><span class="pre">C_Corg_Cres_V2009</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009" title="Link to this definition">¶</a></dt>
+<dd><p>This model implements the carbon model from <a class="reference internal" href="../../../../../add/refs.html#r1" id="id1"><span>[R1]</span></a> section 3:5, which is 
+composed of differential equations. Herein, these differential equations 
+are used directly because they are solved on a daily basis (i.e. 
+numerical integration). This seems to be reasonable compared to <a class="reference internal" href="../../../../../add/refs.html#r1" id="id2"><span>[R1]</span></a> 
+section 3:5.3, where the analytical solutions are derived and evaluated 
+at time steps of one year.</p>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.C_org">
+<span class="sig-name descname"><span class="pre">C_org</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.C_org" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - State</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{C-org},i,k}\ [\frac{kg}{ha}]\)</span> - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id3"><span>[R1]</span></a> (section 3:5.1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>organic C-pool (~humus)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.C_res">
+<span class="sig-name descname"><span class="pre">C_res</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.C_res" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - State</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{C-res},i,k}\ [\frac{kg}{ha}]\)</span> - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id4"><span>[R1]</span></a> (section 3:5.1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>C-pool in the crop residues</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.dC_res_opt">
+<span class="sig-name descname"><span class="pre">dC_res_opt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.dC_res_opt" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{C-rdo},0}\ [\frac{1}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optimum decomposition rate of crop residual C-pool (percent per day)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.decomposed_C_res">
+<span class="sig-name descname"><span class="pre">decomposed_C_res</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.decomposed_C_res" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{C-rd},i,k}\ [\frac{kg}{ha\cdot day}]\)</span> - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id5"><span>[R1]</span></a> (equ. 3:5.1.1a)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>C decomposed from crop residuals at current day</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.fnc">
+<span class="sig-name descname"><span class="pre">fnc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.fnc" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'.__parent__'</span></code> (parent nutrient model)</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{ncf},i,k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>factor combining soil temperatur and water influence on nutrient cycle</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.humified_C_res">
+<span class="sig-name descname"><span class="pre">humified_C_res</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.humified_C_res" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{C-rdh},i,k}\ [\frac{kg}{ha\cdot day}]\)</span> - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id6"><span>[R1]</span></a> (equ. 3:5.1.2a)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of decomposed C from crop residuals which is added to the organic C-pool (humus)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Only the super-call is done here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.lt">
+<span class="sig-name descname"><span class="pre">lt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.lt" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'.__parent__.__parent__'</span></code> (parent layer)</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{lt},i,0}\ [m]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>layer thickness</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.min_opt">
+<span class="sig-name descname"><span class="pre">min_opt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.min_opt" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{C-omo},0}\ [\frac{1}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optimum mineralization rate from organic C-pool (percent per day)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.mineralization">
+<span class="sig-name descname"><span class="pre">mineralization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.mineralization" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{min},i,k}\ [\frac{1}{day}]\)</span> <a class="reference internal" href="../../../../../add/refs.html#r1" id="id7"><span>[R1]</span></a> (equ. 3:5.1.7 neglecting tillage factor)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mineralization rate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.mineralized_C_org">
+<span class="sig-name descname"><span class="pre">mineralized_C_org</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.mineralized_C_org" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{C-om},i,k}\ [\frac{kg}{ha\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mineralized C from organic C-pool</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.sbd">
+<span class="sig-name descname"><span class="pre">sbd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.sbd" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{bd},0}\ [\frac{g}{cm^3}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bulk density of the soil</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.scl">
+<span class="sig-name descname"><span class="pre">scl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.scl" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{clay},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>clay content of soil</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.carbon.model_swat.C_Corg_Cres_V2009.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p>decomposed C on the current day <span class="math notranslate nohighlight">\(s_{\textrm{C-rd},i,k}=s_{\textrm{C-res},i,k}\cdot s_{\textrm{C-rdo},0}\cdot s_{\textrm{ncf},i,k}\)</span></p></li>
+<li><p>reference organic carbon - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id8"><span>[R1]</span></a> (equ. 3:5.1.4)</p></li>
+<li><p>auxiliary variable <em>hx</em> - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id9"><span>[R1]</span></a> (equ. 3:5.1.3b)</p></li>
+<li><p>humified C from crop residuals - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id10"><span>[R1]</span></a> (equ. 3:5.1.3a)</p></li>
+<li><p>current mineralization rate - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id11"><span>[R1]</span></a> (equ. 3:5.1.7 - neglecting tillage factor)</p></li>
+<li><p>mineralized C - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id12"><span>[R1]</span></a> (subtracting term in equ. 3:5.1.2a)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../model_swat.html">SWAT - soil.layer.nutrients</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../nitrogen/model_swat.html">SWAT - soil.layer.nutrients.nitrogen</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SWAT - soil.layer.nutrients.nitrogen &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="SWAT - soil.surface" href="../../../surface/model_swat.html" />
+    <link rel="prev" title="SWAT - soil.layer.nutrients.carbon" href="../carbon/model_swat.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../../../index.html">
+          <img class="logo" src="../../../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../carbon/model_swat.html">SWAT - soil.layer.nutrients.carbon</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../../surface/model_swat.html">SWAT - soil.surface</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="swat-soil-layer-nutrients-nitrogen">
+<h1>SWAT - soil.layer.nutrients.nitrogen<a class="headerlink" href="#swat-soil-layer-nutrients-nitrogen" title="Link to this heading">¶</a></h1>
+<p>mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.py</p>
+<section id="nitrate-and-ammonia">
+<h2>Nitrate and Ammonia<a class="headerlink" href="#nitrate-and-ammonia" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.</span></span><span class="sig-name descname"><span class="pre">N_NO3_NH4_V2009</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009" title="Link to this definition">¶</a></dt>
+<dd><p>Soil layer model for mineral nitrogen which contains the 
+<span class="math notranslate nohighlight">\(NO_3^-\)</span> and the <span class="math notranslate nohighlight">\(NH_4^+\)</span>-pool. 
+Nitrification is the only process considered herein - no losses such as 
+nitrate leaching, denitrification or ammonia volatilization.</p>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.NH4">
+<span class="sig-name descname"><span class="pre">NH4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.NH4" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - State</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{NH}_{4}^+,i,k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of ammonium in the soil layer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.NH4_uptake">
+<span class="sig-name descname"><span class="pre">NH4_uptake</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.NH4_uptake" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{NH}_{4}^{+}-u,i,k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of ammonium removed from soil layer by the crop</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.NO3">
+<span class="sig-name descname"><span class="pre">NO3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.NO3" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - State</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{NO}_{3}^-,i,k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of nitrate in the soil layer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.NO3_uptake">
+<span class="sig-name descname"><span class="pre">NO3_uptake</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.NO3_uptake" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{NO}_{3}^{-}-u,i,k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of nitrate removed from soil layer by the crop</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.fc">
+<span class="sig-name descname"><span class="pre">fc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.fc" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-fc},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil moisture at field capacity</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Only the super-call is done here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.lt">
+<span class="sig-name descname"><span class="pre">lt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.lt" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'.__parent__.__parent__'</span></code> (parent soil layer)</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{lt},i,0}\ [mm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>layer thickness</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.ltemp">
+<span class="sig-name descname"><span class="pre">ltemp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.ltemp" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'.__parent__.__parent__.temperature'</span></code> (temperature model of parent soil layer)</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{T-t},i,k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil layer temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.lwa">
+<span class="sig-name descname"><span class="pre">lwa</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.lwa" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'.__parent__.__parent__.water'</span></code> (water model of parent soil layer)</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-a},i,k}\ [mm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>water amount of soil layer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.nitrification">
+<span class="sig-name descname"><span class="pre">nitrification</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.nitrification" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{N-nit},i,k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of ammonium which is removed from the pool at current day (i.e. added to the NO3-pool)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p>nitrification temperature factor - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id1"><span>[R1]</span></a> (equ. 3:1.3.1)</p></li>
+<li><p>nitrification soil water factor - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id2"><span>[R1]</span></a> (equ. 3:1.3.2, 3:1.3.3)</p></li>
+<li><p>nitrification factor - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id3"><span>[R1]</span></a> (equ. 3:1.3.6)</p></li>
+<li><p>nitrification rate - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id4"><span>[R1]</span></a> (equ. 3:1.3.11 with setting volatilization factor to zero <span class="math notranslate nohighlight">\(\Rightarrow\)</span> equ. 3:1.3.11 is equal to equ. 3:1.3.8)</p></li>
+<li><p>update N-pools</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.wp">
+<span class="sig-name descname"><span class="pre">wp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.wp" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-wp},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil moisture at wilting point</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="nitrate-ammonia-and-organic-n">
+<h2>Nitrate, Ammonia and organic N<a class="headerlink" href="#nitrate-ammonia-and-organic-n" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.</span></span><span class="sig-name descname"><span class="pre">N_NO3_NH4_Norg_V2009</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009" title="Link to this definition">¶</a></dt>
+<dd><p>Contrary to <a class="reference internal" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009" title="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009"><code class="xref py py-class docutils literal notranslate"><span class="pre">N_NO3_NH4_V2009</span></code></a>, this model additionally considers the 
+organic N-pool and mineralization. Again no losses such as 
+nitrate leaching, denitrification or ammonia volatilization.</p>
+<p>Inherits from <a class="reference internal" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009" title="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009"><code class="xref py py-class docutils literal notranslate"><span class="pre">N_NO3_NH4_V2009</span></code></a></p>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.N_org">
+<span class="sig-name descname"><span class="pre">N_org</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.N_org" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - State</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{N-org},i,k}\ [\frac{kg}{ha}]\)</span> - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id5"><span>[R1]</span></a> (section 3:5.1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>organic N-pool</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.N_org_add">
+<span class="sig-name descname"><span class="pre">N_org_add</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.N_org_add" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{N-}\Delta\textrm{o},i,k}\ [\frac{kg}{ha\cdot day}]\)</span> - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id6"><span>[R1]</span></a> (equ. 3:5.1.2b)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>input from decomposed crop residuals to the organic N-pool</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.chum_res">
+<span class="sig-name descname"><span class="pre">chum_res</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.chum_res" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'.__parent__.carbon'</span></code> (carbon model from parent nutrient model)</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{C-rdh},i,k}\ [\frac{kg}{ha\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of decomposed C from crop residuals which is added to the organic C-pool (humus)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.cnorg">
+<span class="sig-name descname"><span class="pre">cnorg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.cnorg" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'.__parent__'</span></code> (parent nutrient model)</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{CN-o},i,k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>C/N ratio of organic matter in the soil layer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.fmin">
+<span class="sig-name descname"><span class="pre">fmin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.fmin" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'.__parent__.carbon'</span></code> (carbon model from parent nutrient model)</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{min},i,k}\ [\frac{1}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mineralization rate</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.initialize" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.N_org_add" title="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.N_org_add"><code class="xref py py-func docutils literal notranslate"><span class="pre">N_org_add()</span></code></a> is initialized with a zero array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.mineralized_N">
+<span class="sig-name descname"><span class="pre">mineralized_N</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.mineralized_N" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{N-mo},i,k}\ [\frac{kg}{ha\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mineralized N from organic N-pool</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_Norg_V2009.update" title="Link to this definition">¶</a></dt>
+<dd><p>Additionally to <a class="reference internal" href="#mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.update" title="mef_agri.models.soil.layer.nutrients.nitrogen.model_swat.N_NO3_NH4_V2009.update"><code class="xref py py-func docutils literal notranslate"><span class="pre">N_NO3_NH4_V2009.update()</span></code></a>, 
+the following computations are performed</p>
+<ul class="simple">
+<li><p>increase of organic N-pool (proportional to humified C) - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id7"><span>[R1]</span></a> (equ. 3:5.1.2b)</p></li>
+<li><p>mineralization of organic N which feeds the <span class="math notranslate nohighlight">\(\textrm{NH}_4^+\)</span>-pool - <a class="reference internal" href="../../../../../add/refs.html#r1" id="id8"><span>[R1]</span></a> (equ. 3:5.1.2b)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../carbon/model_swat.html">SWAT - soil.layer.nutrients.carbon</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../../surface/model_swat.html">SWAT - soil.surface</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

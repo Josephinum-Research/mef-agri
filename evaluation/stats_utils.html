@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Statistic utilities &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haiku.css?v=8527a269" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Estimation Base" href="estimation/base.html" />
+    <link rel="prev" title="EPIC - crop.uptake" href="../models/crop/uptake/model_epic.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../index.html">
+          <img class="logo" src="../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../models/crop/uptake/model_epic.html">EPIC - crop.uptake</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="estimation/base.html">Estimation Base</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="statistic-utilities">
+<h1>Statistic utilities<a class="headerlink" href="#statistic-utilities" title="Link to this heading">¶</a></h1>
+<p>mef_agri.evaluation.stats_utils.py</p>
+<p>Utilities for statistical computations.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.evaluation.stats_utils.get_gamma_params">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.evaluation.stats_utils.</span></span><span class="sig-name descname"><span class="pre">get_gamma_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.evaluation.stats_utils.get_gamma_params" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the shape and rate parameter for the gamma-distribution from the 
+provided standard deviation as well as mean or mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>std</strong> (<em>float</em>) – standard deviation of the gamma-distribution</p></li>
+<li><p><strong>mean</strong> (<em>float</em><em>, </em><em>optional</em>) – mean or expectation value of the gamma-distribution, defaults to None</p></li>
+<li><p><strong>mode</strong> (<em>float</em><em>, </em><em>optional</em>) – mode of the gamma-distribution, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>shape and rate parameter of the gamma distribution</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.evaluation.stats_utils.get_beta_params">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.evaluation.stats_utils.</span></span><span class="sig-name descname"><span class="pre">get_beta_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.evaluation.stats_utils.get_beta_params" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the shape parameters for the beta-distribution from the provided 
+standard deviation as well as mean or mode.</p>
+<p>Important Notes:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">mode</span></code> is specified, it will be treated as mean value.
+The reason is, that the computation of the shape parameters with the mode 
+equation of the beta-distribution cannot be solved analytically. 
+Attempts to solve this numerically (e.g. scipy.optimize.fsolve) do not yield 
+satisfying results.</p>
+<p>Edge cases (<code class="docutils literal notranslate"><span class="pre">mean</span></code> values close to 0.0 or 1.0 with “low” 
+<code class="docutils literal notranslate"><span class="pre">std</span></code>) lead to non-intuitive resulting distribution shapes or even to 
+negative shape-parameters (i.e. beta-distribution is not defined for 
+the provided combination of <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">std</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>std</strong> (<em>float</em>) – standard deviation of the beta-distribution</p></li>
+<li><p><strong>mean</strong> (<em>float</em><em>, </em><em>optional</em>) – mean or expectation value of the beta-distribution, defaults to None</p></li>
+<li><p><strong>mode</strong> (<em>float</em><em>, </em><em>optional</em>) – mode of the beta-distribution, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>shape paramaters of the beta-distribution</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.evaluation.stats_utils.get_truncnorm_params">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.evaluation.stats_utils.</span></span><span class="sig-name descname"><span class="pre">get_truncnorm_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_thresh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_thresh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.evaluation.stats_utils.get_truncnorm_params" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the <cite>a</cite> and <cite>b</cite> parameter which are used in
+<code class="docutils literal notranslate"><span class="pre">scipy.stats.truncnorm.rvs()</span></code> from the given standard deviation and mean 
+value as well as from the lower and upper thresholds of the resulting 
+truncated normal distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>std</strong> (<em>float</em>) – standard deviation of non-truncated normal distribution</p></li>
+<li><p><strong>mean</strong> (<em>float</em>) – mean value of non-truncated normal distribution, which will be the mode of the resulting truncated normal distr.</p></li>
+<li><p><strong>lower_thresh</strong> (<em>float</em>) – lower threshold of resulting truncated normal distr.</p></li>
+<li><p><strong>upper_thresh</strong> (<em>float</em>) – upper threshold of resulting truncated normal distr.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> parameters used by <code class="docutils literal notranslate"><span class="pre">scipy.stats.truncnorm.rvs()</span></code></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.evaluation.stats_utils.get_values_probs">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.evaluation.stats_utils.</span></span><span class="sig-name descname"><span class="pre">get_values_probs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ub</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.evaluation.stats_utils.get_values_probs" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a categorical distribution (details in <a class="reference internal" href="#mef_agri.evaluation.stats_utils.RVSampler.get_sampled_values" title="mef_agri.evaluation.stats_utils.RVSampler.get_sampled_values"><code class="xref py py-func docutils literal notranslate"><span class="pre">RVSampler.get_sampled_values()</span></code></a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>int</em>) – most probable value (i.e. mode)</p></li>
+<li><p><strong>std</strong> (<em>int</em>) – number of discrete values on “one” side of <code class="docutils literal notranslate"><span class="pre">value</span></code></p></li>
+<li><p><strong>lb</strong> (<em>int</em>) – lower bound</p></li>
+<li><p><strong>ub</strong> (<em>int</em>) – upper bound</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>two arrays - first one contains the values and the second one the corresponding probabilities</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[numpy.ndarray, numpy.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.evaluation.stats_utils.DISTRIBUTIONS">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.evaluation.stats_utils.</span></span><span class="sig-name descname"><span class="pre">DISTRIBUTIONS</span></span><a class="headerlink" href="#mef_agri.evaluation.stats_utils.DISTRIBUTIONS" title="Link to this definition">¶</a></dt>
+<dd><p>Helper class which holds string values (class variables) to define the 
+distribution type:</p>
+<ul class="simple">
+<li><p><em>NORMAL_1D</em> = <code class="docutils literal notranslate"><span class="pre">'normal'</span></code></p></li>
+<li><p><em>GAMMA_1D</em> = <code class="docutils literal notranslate"><span class="pre">'gamma'</span></code></p></li>
+<li><p><em>BETA_1D</em> = <code class="docutils literal notranslate"><span class="pre">'beta'</span></code></p></li>
+<li><p><em>CATEGORICAL_1D</em> = <code class="docutils literal notranslate"><span class="pre">'categorical'</span></code></p></li>
+<li><p><em>TRUNCNORM_1D</em> = <code class="docutils literal notranslate"><span class="pre">'truncnorm'</span></code></p></li>
+</ul>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.evaluation.stats_utils.DISTRIBUTION_TYPE">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.evaluation.stats_utils.</span></span><span class="sig-name descname"><span class="pre">DISTRIBUTION_TYPE</span></span><a class="headerlink" href="#mef_agri.evaluation.stats_utils.DISTRIBUTION_TYPE" title="Link to this definition">¶</a></dt>
+<dd><p>Helper class which holds string values (class variables) to specify if a 
+distribution is continuous or discrete:</p>
+<ul class="simple">
+<li><p><em>DISCRETE</em> = <code class="docutils literal notranslate"><span class="pre">'discrete'</span></code></p></li>
+<li><p><em>CONTINUOUS</em> = <code class="docutils literal notranslate"><span class="pre">'continuous'</span></code></p></li>
+</ul>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.evaluation.stats_utils.RVSampler">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.evaluation.stats_utils.</span></span><span class="sig-name descname"><span class="pre">RVSampler</span></span><a class="headerlink" href="#mef_agri.evaluation.stats_utils.RVSampler" title="Link to this definition">¶</a></dt>
+<dd><p>Class which is used to sample model quantities. It is especially 
+important in the case of multiprocessing as the random state of the 
+<cite>scipy.stats</cite> distributions is initialized in each instanciation of this 
+class (i.e. in each core used for evaluation). Otherwise, the samples 
+within each process/core would be equal.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.evaluation.stats_utils.RVSampler.get_sampled_values">
+<span class="sig-name descname"><span class="pre">get_sampled_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.evaluation.stats_utils.RVSampler.get_sampled_values" title="Link to this definition">¶</a></dt>
+<dd><p>Get a sample from the distribution specified in the <cite>distr</cite> dictionary. 
+Thus each <cite>dinfo</cite> dict has to contain at least a key <cite>distr_id</cite> to 
+specify the distribution to be used for sampling.
+Depending on the chosen distribution, the provided <cite>value</cite> will be 
+used accordingly.</p>
+<p><strong>Normal distribution</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">value</span></code> will be used as mean value and <code class="docutils literal notranslate"><span class="pre">distr</span></code> should 
+contain the following keys</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'std'</span></code> (<em>float</em>) - standard deviation</p></li>
+</ul>
+<p><strong>Gamma distribution</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">value</span></code> will be used as mode and the <code class="docutils literal notranslate"><span class="pre">distr</span></code> should contain the 
+following keys</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'std'</span></code> (<em>float</em>) - standard deviation</p></li>
+</ul>
+<p><strong>Beta distribution</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">value</span></code> will be used as mean value and the <code class="docutils literal notranslate"><span class="pre">distr</span></code> should 
+contain the following keys</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'std'</span></code> (<em>float</em>) - standard deviation</p></li>
+</ul>
+<p><strong>Categorical distribution</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">value</span></code> will be used as category/integer/discrete value with the 
+highest probability and <code class="docutils literal notranslate"><span class="pre">distr</span></code> should contain the following keys</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'std'</span></code> (<em>float</em>) - will be used as number of possible categories/values on “one side” of <code class="docutils literal notranslate"><span class="pre">value</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'lb'</span></code> (<em>float</em>) - lower bound of the possible values (truncates if <code class="docutils literal notranslate"><span class="pre">std</span></code> would exceed this value)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ub'</span></code> (<em>float</em>) - upper bound of the possible values (truncates if <code class="docutils literal notranslate"><span class="pre">std</span></code> would exceed this value)</p></li>
+</ul>
+<p><strong>truncated Normal distribution</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">value</span></code> will be the mean/mode of the resulting truncated normal 
+distribution and <code class="docutils literal notranslate"><span class="pre">distr</span></code> should contain the following keys</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'std'</span></code> (<em>float</em>): standard deviation of original normal distribution</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'lb'</span></code> (<em>float</em>) - lower bound of the truncated normal distribution</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'ub'</span></code> (<em>float</em>) - upper bound of the truncated normal dsitribution</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>float</em>) – reference value for sampled distribution - usage depends on the sampling distribution</p></li>
+<li><p><strong>dinfo</strong> (<em>dict</em>) – dictionary containing the the values which are necessary to compute the paramters used in <code class="docutils literal notranslate"><span class="pre">scipy.stats</span></code> which is necessary to draw samples</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – number of samples drawn from the distribution</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array containing sampled values (length according to <code class="docutils literal notranslate"><span class="pre">size</span></code>)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../models/crop/uptake/model_epic.html">EPIC - crop.uptake</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="estimation/base.html">Estimation Base</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

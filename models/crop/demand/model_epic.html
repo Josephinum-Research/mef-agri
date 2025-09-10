@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>EPIC - crop.demand &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="EPIC - crop.development" href="../development/model_epic.html" />
+    <link rel="prev" title="EPIC - crop.cyield" href="../cyield/model_epic.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../cyield/model_epic.html">EPIC - crop.cyield</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../development/model_epic.html">EPIC - crop.development</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="epic-crop-demand">
+<h1>EPIC - crop.demand<a class="headerlink" href="#epic-crop-demand" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.crop.demand.model_epic.</span></span><span class="sig-name descname"><span class="pre">Demand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.bmt">
+<span class="sig-name descname"><span class="pre">bmt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.bmt" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'biomass'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{bm},k}\ [\frac{t}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>total dry biomass (aboveground + roots)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.hui">
+<span class="sig-name descname"><span class="pre">hui</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.hui" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'heat_unit_index'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.development'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-hui},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current heat unit index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialization of random outputs with zero vectors.</p>
+<p>Except: <span class="math notranslate nohighlight">\(c_{\textrm{N-co},0} = c_{\textrm{N-c1},0} + c_{\textrm{N-c2},0}\)</span> 
+which is the result when setting <span class="math notranslate nohighlight">\(c_{\textrm{D-hui},0} = 0.0\)</span> in equ. 26 <a class="reference internal" href="../../../add/refs.html#r2" id="id1"><span>[R2]</span></a> .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.n_amount_opt">
+<span class="sig-name descname"><span class="pre">n_amount_opt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.n_amount_opt" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-ao},k} = c_{\textrm{N-co},k}\cdot c_{\textrm{bm},k} \ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optimal N-amount in crop biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.n_concentration_opt">
+<span class="sig-name descname"><span class="pre">n_concentration_opt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.n_concentration_opt" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-co},k}\ [\frac{kg}{t}]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id2"><span>[R2]</span></a> (equ, 25, 26)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optimal N-concentration in crop biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.ncoeff1">
+<span class="sig-name descname"><span class="pre">ncoeff1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.ncoeff1" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-c1},0}\ [\frac{kg}{t}]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id3"><span>[R2]</span></a> (equ 26, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>coefficient to determine optimal N-concentration in crop biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.ncoeff2">
+<span class="sig-name descname"><span class="pre">ncoeff2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.ncoeff2" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-c2},0}\ [\frac{kg}{t}]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id4"><span>[R2]</span></a> (equ 26, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>coefficient to determine optimal N-concentration in crop biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.ncoeff3">
+<span class="sig-name descname"><span class="pre">ncoeff3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.ncoeff3" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-c3},0}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id5"><span>[R2]</span></a> (equ 26, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>coefficient to determine optimal N-concentration in crop biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.nitrogen">
+<span class="sig-name descname"><span class="pre">nitrogen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.nitrogen" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-dem},k}\ [\frac{kg}{ha}]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id6"><span>[R2]</span></a> (equ. 25)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nitrogen demand of the crop</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.nsum">
+<span class="sig-name descname"><span class="pre">nsum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.nsum" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'nitrogen_sum'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.uptake'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-ups},k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sum of nitrogen uptake of current crop/vegetation period</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.transpiration_pot">
+<span class="sig-name descname"><span class="pre">transpiration_pot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.transpiration_pot" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'transpiration_pot'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.surface.evapotranspiration'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-tp},s,k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>potential transpiration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mef_agri.models.crop.demand.model_epic.Demand.water" title="mef_agri.models.crop.demand.model_epic.Demand.water"><code class="xref py py-func docutils literal notranslate"><span class="pre">water()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.demand.model_epic.Demand.n_concentration_opt" title="mef_agri.models.crop.demand.model_epic.Demand.n_concentration_opt"><code class="xref py py-func docutils literal notranslate"><span class="pre">n_concentration_opt()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.demand.model_epic.Demand.n_amount_opt" title="mef_agri.models.crop.demand.model_epic.Demand.n_amount_opt"><code class="xref py py-func docutils literal notranslate"><span class="pre">n_amount_opt()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.demand.model_epic.Demand.nitrogen" title="mef_agri.models.crop.demand.model_epic.Demand.nitrogen"><code class="xref py py-func docutils literal notranslate"><span class="pre">nitrogen()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.demand.model_epic.Demand.water">
+<span class="sig-name descname"><span class="pre">water</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.demand.model_epic.Demand.water" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{W-dem},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>water demand of the crop &gt; is set to the potential transpiration from the soil evaporation model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../cyield/model_epic.html">EPIC - crop.cyield</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../development/model_epic.html">EPIC - crop.development</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

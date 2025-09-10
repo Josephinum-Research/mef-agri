@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SWAT - soil.surface.evapotranspiration &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="EPIC - soil.supply" href="../../supply/model_epic.html" />
+    <link rel="prev" title="SWAT - soil.surface.water" href="../water/model_swat.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../../index.html">
+          <img class="logo" src="../../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../water/model_swat.html">SWAT - soil.surface.water</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../supply/model_epic.html">EPIC - soil.supply</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="swat-soil-surface-evapotranspiration">
+<h1>SWAT - soil.surface.evapotranspiration<a class="headerlink" href="#swat-soil-surface-evapotranspiration" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.soil.surface.evapotranspiration.model_swat.</span></span><span class="sig-name descname"><span class="pre">Evapotranspiration_V2009</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009" title="Link to this definition">¶</a></dt>
+<dd><p>This evapotranspiration model uses the Penman-Monteith method to compute 
+potential evapotranspiration.</p>
+<p>In <a class="reference internal" href="../../../../add/refs.html#r1" id="id1"><span>[R1]</span></a> either soil evaporation or (crop) transpiration occurs.
+This approach seems to be unrealistic especially in early growing stages of 
+the crop (much bare soil area). 
+Here, the soil cover index will be used to split the remaining potential 
+evapotranspiration (i.e. after evaporating the canopy water) into 
+transpiration and soil evaporation. 
+Snow covers will be neglected for now.</p>
+<p>Used constants</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SOIL_HEAT_FLUX</span> <span class="pre">=</span> <span class="pre">0.0</span></code> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id2"><span>[R1]</span></a> (section 2:2.2.1.1)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">KARMAN_CONST</span> <span class="pre">=</span> <span class="pre">0.41</span></code> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id3"><span>[R1]</span></a> (section 2:2.2.1.2)</p></li>
+</ul>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.cw">
+<span class="sig-name descname"><span class="pre">cw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.cw" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.surface.water'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-c},k}\ [mm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of water stored in the canopy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evaporation_pot">
+<span class="sig-name descname"><span class="pre">evaporation_pot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evaporation_pot" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-ep},s,k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>potential evaporation from soil</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evapotranspiration_pot">
+<span class="sig-name descname"><span class="pre">evapotranspiration_pot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evapotranspiration_pot" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-etp},s,k}\ [\frac{mm}{day}]\)</span> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id4"><span>[R1]</span></a> (equ. 2:2.2.2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>potential evapotranspiration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.hc">
+<span class="sig-name descname"><span class="pre">hc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.hc" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'crop'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{h},k}\ [cm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current crop height</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.hh">
+<span class="sig-name descname"><span class="pre">hh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.hh" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{h-hum}}\ [cm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ref. height of the humidity observations</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.hw">
+<span class="sig-name descname"><span class="pre">hw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.hw" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{h-wnd}}\ [cm]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ref. height of the wind observations</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialization of <a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evapotranspiration_pot" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evapotranspiration_pot"><code class="xref py py-func docutils literal notranslate"><span class="pre">evapotranspiration_pot()</span></code></a>, 
+<a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evaporation_pot" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evaporation_pot"><code class="xref py py-func docutils literal notranslate"><span class="pre">evaporation_pot()</span></code></a> and <a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.transpiration_pot" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.transpiration_pot"><code class="xref py py-func docutils literal notranslate"><span class="pre">transpiration_pot()</span></code></a> with zero arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – intialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.lai">
+<span class="sig-name descname"><span class="pre">lai</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.lai" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'crop.leaves'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{lai},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>leaf area index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.lh">
+<span class="sig-name descname"><span class="pre">lh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.lh" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{lhv},k}\ [\frac{MJ}{kg}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>latent heat of vaporization</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.nrad">
+<span class="sig-name descname"><span class="pre">nrad</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.nrad" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.radiation'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{nrad},k}\ [\frac{MJ}{m^2\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily net radiation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.psyc">
+<span class="sig-name descname"><span class="pre">psyc</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.psyc" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{psyc},k}\ [\frac{kPa}{^\circ C}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>psychrometric constant at site elevation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.rad">
+<span class="sig-name descname"><span class="pre">rad</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.rad" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{rad},k}\ [\frac{W}{m^2}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily radiation sum</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air">
+<span class="sig-name descname"><span class="pre">resistance_air</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{ra},s,k}\ [\frac{s}{m}]\)</span> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id5"><span>[R1]</span></a> (equ. 2:2.2.3)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>diffusion resistance of the air layer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_crop">
+<span class="sig-name descname"><span class="pre">resistance_crop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_crop" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{rc},s,k}\ [\frac{s}{m}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>diffusion resistance of crop canopy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.sci">
+<span class="sig-name descname"><span class="pre">sci</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.sci" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.surface'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{sci},s,k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil cover index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.slp">
+<span class="sig-name descname"><span class="pre">slp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.slp" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{ssvpc}}\ [\frac{kPa}{^\circ C}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>slope of the saturated vapor pressure curve (d_vpr_sat / d_temp)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.temp">
+<span class="sig-name descname"><span class="pre">temp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.temp" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{temp},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily mean temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.transpiration_pot">
+<span class="sig-name descname"><span class="pre">transpiration_pot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.transpiration_pot" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-tp},s,k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>potential transpiration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul>
+<li><p><a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air"><code class="xref py py-func docutils literal notranslate"><span class="pre">resistance_air()</span></code></a></p>
+<blockquote>
+<div><ul>
+<li><p>if a crop is present</p>
+<blockquote>
+<div><ul>
+<li><p>roughness length of momentum transfer - <a class="reference internal" href="../../../../add/refs.html#r1" id="id6"><span>[R1]</span></a> (equ. 2:2.2.4, 2:2.2.5)</p></li>
+<li><p>roughness length of vapor transfer - <a class="reference internal" href="../../../../add/refs.html#r1" id="id7"><span>[R1]</span></a> (equ. 2:2.2.6)</p></li>
+<li><p>zero plane displacement of the wind profile - <a class="reference internal" href="../../../../add/refs.html#r1" id="id8"><span>[R1]</span></a> (equ. 2:2.2.7)</p></li>
+<li><p>check the <span class="math notranslate nohighlight">\(\ln\)</span>-arguments in the computation of <a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air"><code class="xref py py-func docutils literal notranslate"><span class="pre">resistance_air()</span></code></a> -</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>if the min. value is lower than <code class="docutils literal notranslate"><span class="pre">1e-8</span></code>, <a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air"><code class="xref py py-func docutils literal notranslate"><span class="pre">resistance_air()</span></code></a> will be computed for a reference crop - <a class="reference internal" href="../../../../add/refs.html#r1" id="id9"><span>[R1]</span></a> (equ. 2:2.2.20)</p></li>
+<li><p>else - <a class="reference internal" href="../../../../add/refs.html#r1" id="id10"><span>[R1]</span></a> (equ. 2:2.2.3)</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>if no crop is present, <a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_air"><code class="xref py py-func docutils literal notranslate"><span class="pre">resistance_air()</span></code></a> will be computed for a reference crop - <a class="reference internal" href="../../../../add/refs.html#r1" id="id11"><span>[R1]</span></a> (equ. 2:2.2.20)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_crop" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_crop"><code class="xref py py-func docutils literal notranslate"><span class="pre">resistance_crop()</span></code></a></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>absorbed photosynthetically active radiation (<code class="docutils literal notranslate"><span class="pre">apar</span></code>) - <a class="reference internal" href="../../../../add/refs.html#r4" id="id12"><span>[R4]</span></a> (equ. 6, section Discussion)</p></li>
+<li><p>stomatal resistance with regression function - <a class="reference internal" href="../../../../add/refs.html#r4" id="id13"><span>[R4]</span></a> (approximate conversion value of 4.0 from fig. 1)</p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_crop" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.resistance_crop"><code class="xref py py-func docutils literal notranslate"><span class="pre">resistance_crop()</span></code></a> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id14"><span>[R1]</span></a> (equ. 2:2.2.8)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>combined term of Penman-Monteith method <code class="docutils literal notranslate"><span class="pre">ct</span> <span class="pre">=</span> <span class="pre">1710.0</span> <span class="pre">-</span> <span class="pre">6.85</span> <span class="pre">*</span> <span class="pre">self.temp.value</span></code></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evapotranspiration_pot" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.evapotranspiration_pot"><code class="xref py py-func docutils literal notranslate"><span class="pre">evapotranspiration_pot()</span></code></a></p></li>
+<li><p>evaporation of canopy water</p></li>
+<li><p>splitting remaining evapotranspiration into potential transpiration and potential evaporation from soil using <a class="reference internal" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.sci" title="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.sci"><code class="xref py py-func docutils literal notranslate"><span class="pre">sci()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.vpr">
+<span class="sig-name descname"><span class="pre">vpr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.vpr" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{vpr},k}\ [kPa]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>actual vapor pressure</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.vpr_sat">
+<span class="sig-name descname"><span class="pre">vpr_sat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.vpr_sat" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{vprs},k}\ [kPa]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>saturated vapor pressure</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.ws">
+<span class="sig-name descname"><span class="pre">ws</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.evapotranspiration.model_swat.Evapotranspiration_V2009.ws" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{wsp},k}\ [\frac{m}{s}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mean daily wind speed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../water/model_swat.html">SWAT - soil.surface.water</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../supply/model_epic.html">EPIC - soil.supply</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

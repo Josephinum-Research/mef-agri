@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>EPIC - crop.uptake &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Statistic utilities" href="../../../evaluation/stats_utils.html" />
+    <link rel="prev" title="EPIC - crop.stress" href="../stress/model_epic.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../stress/model_epic.html">EPIC - crop.stress</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../../evaluation/stats_utils.html">Statistic utilities</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="epic-crop-uptake">
+<h1>EPIC - crop.uptake<a class="headerlink" href="#epic-crop-uptake" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.crop.uptake.model_epic.Uptake">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.crop.uptake.model_epic.</span></span><span class="sig-name descname"><span class="pre">Uptake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.uptake.model_epic.Uptake" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.uptake.model_epic.Uptake.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.uptake.model_epic.Uptake.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialization of <a class="reference internal" href="#mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen_sum" title="mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen_sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">nitrogen_sum()</span></code></a> with zero vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen">
+<span class="sig-name descname"><span class="pre">nitrogen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-up},k}\ [\frac{kg}{ha\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>uptake of nitrogen at current day (equal to supplied nitrogen by soil <a class="reference internal" href="#mef_agri.models.crop.uptake.model_epic.Uptake.nsup" title="mef_agri.models.crop.uptake.model_epic.Uptake.nsup"><code class="xref py py-func docutils literal notranslate"><span class="pre">nsup()</span></code></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen_sum">
+<span class="sig-name descname"><span class="pre">nitrogen_sum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen_sum" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-ups},k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sum of nitrogen uptake of current crop/vegetation period</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.uptake.model_epic.Uptake.nsup">
+<span class="sig-name descname"><span class="pre">nsup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.uptake.model_epic.Uptake.nsup" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'nitrogen'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.supply'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{N-avl},k}\ [\frac{kg}{ha\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount of nitrogen which is available for the crop</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.uptake.model_epic.Uptake.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.uptake.model_epic.Uptake.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mef_agri.models.crop.uptake.model_epic.Uptake.water" title="mef_agri.models.crop.uptake.model_epic.Uptake.water"><code class="xref py py-func docutils literal notranslate"><span class="pre">water()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen" title="mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen"><code class="xref py py-func docutils literal notranslate"><span class="pre">nitrogen()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen_sum" title="mef_agri.models.crop.uptake.model_epic.Uptake.nitrogen_sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">nitrogen_sum()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.uptake.model_epic.Uptake.water">
+<span class="sig-name descname"><span class="pre">water</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.uptake.model_epic.Uptake.water" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{W-up},k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>uptake of water at current day (equal to supplied water by soil <a class="reference internal" href="#mef_agri.models.crop.uptake.model_epic.Uptake.wsup" title="mef_agri.models.crop.uptake.model_epic.Uptake.wsup"><code class="xref py py-func docutils literal notranslate"><span class="pre">wsup()</span></code></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.uptake.model_epic.Uptake.wsup">
+<span class="sig-name descname"><span class="pre">wsup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.uptake.model_epic.Uptake.wsup" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'water'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.supply'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-avl},k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>water supplied by soil</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../stress/model_epic.html">EPIC - crop.stress</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../../evaluation/stats_utils.html">Statistic utilities</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

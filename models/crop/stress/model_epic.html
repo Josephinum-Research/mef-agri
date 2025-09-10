@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>EPIC - crop.stress &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="EPIC - crop.uptake" href="../uptake/model_epic.html" />
+    <link rel="prev" title="EPIC - crop.roots" href="../roots/model_epic.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../roots/model_epic.html">EPIC - crop.roots</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../uptake/model_epic.html">EPIC - crop.uptake</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="epic-crop-stress">
+<h1>EPIC - crop.stress<a class="headerlink" href="#epic-crop-stress" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.crop.stress.model_epic.</span></span><span class="sig-name descname"><span class="pre">Stress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress" title="Link to this definition">¶</a></dt>
+<dd><p>Stress model which considers water-, temperature-, aeration and nitrogen-stress 
+according to <a class="reference internal" href="../../../add/refs.html#r2" id="id1"><span>[R2]</span></a> .</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.aeration_stress">
+<span class="sig-name descname"><span class="pre">aeration_stress</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.aeration_stress" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{astr},k}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id2"><span>[R2]</span></a> (equ. 49, 50)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>aeration stress factor</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.caf">
+<span class="sig-name descname"><span class="pre">caf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.caf" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'critical_aeration_factor'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{caf},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>critical aeration factor of crop</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.growth_constraint">
+<span class="sig-name descname"><span class="pre">growth_constraint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.growth_constraint" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{gc},k}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id3"><span>[R2]</span></a> (last paragraph in “Growth Constraints” &gt; “Biomass”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(biomass) growth constraint (min. value of several stress factors)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialization of stress factors with one vectors (i.e. no stress)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.m1m">
+<span class="sig-name descname"><span class="pre">m1m</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.m1m" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">moisture_1m</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.supply'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{W-m1m},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>moisture of first meter of soil</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.nao">
+<span class="sig-name descname"><span class="pre">nao</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.nao" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'n_amount_opt'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.demand'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-ao},k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optimal N-amount in crop biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.nitrogen_stress">
+<span class="sig-name descname"><span class="pre">nitrogen_stress</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.nitrogen_stress" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-str},k}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id4"><span>[R2]</span></a> (equ. 47)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nitrogen stress factor</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.nsum">
+<span class="sig-name descname"><span class="pre">nsum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.nsum" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'nitrogen_sum'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.uptake'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{N-ups},k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sum of nitrogen uptake of current crop/vegetation period</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.por">
+<span class="sig-name descname"><span class="pre">por</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.por" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'porosity'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{por},0}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil porosity (fraction of total volume)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.stemp">
+<span class="sig-name descname"><span class="pre">stemp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.stemp" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'temperature'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.surface.temperature'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{T-t},s,k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil surface temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.tb">
+<span class="sig-name descname"><span class="pre">tb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.tb" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">temperature_base</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.development'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-tb},0}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>crop specific base temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.temperature_stress">
+<span class="sig-name descname"><span class="pre">temperature_stress</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.temperature_stress" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{tstr},k}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id5"><span>[R2]</span></a> (equ. 46)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>temperature stress factor</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.to">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.to" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">temperature_opt</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.development'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-to},0}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>crop specific optimum temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mef_agri.models.crop.stress.model_epic.Stress.water_stress" title="mef_agri.models.crop.stress.model_epic.Stress.water_stress"><code class="xref py py-func docutils literal notranslate"><span class="pre">water_stress()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.stress.model_epic.Stress.aeration_stress" title="mef_agri.models.crop.stress.model_epic.Stress.aeration_stress"><code class="xref py py-func docutils literal notranslate"><span class="pre">aeration_stress()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.stress.model_epic.Stress.temperature_stress" title="mef_agri.models.crop.stress.model_epic.Stress.temperature_stress"><code class="xref py py-func docutils literal notranslate"><span class="pre">temperature_stress()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.stress.model_epic.Stress.nitrogen_stress" title="mef_agri.models.crop.stress.model_epic.Stress.nitrogen_stress"><code class="xref py py-func docutils literal notranslate"><span class="pre">nitrogen_stress()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.stress.model_epic.Stress.growth_constraint" title="mef_agri.models.crop.stress.model_epic.Stress.growth_constraint"><code class="xref py py-func docutils literal notranslate"><span class="pre">growth_constraint()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.water_stress">
+<span class="sig-name descname"><span class="pre">water_stress</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.water_stress" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{W-str},k}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id6"><span>[R2]</span></a> (equ. 45)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>water stress factor</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.wdem">
+<span class="sig-name descname"><span class="pre">wdem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.wdem" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'water'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.demand'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{W-dem},k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>water demand of crop</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.stress.model_epic.Stress.wupt">
+<span class="sig-name descname"><span class="pre">wupt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.stress.model_epic.Stress.wupt" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'water'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.uptake'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{W-up},k}\ [\frac{mm}{day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>uptake of water at current day</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../roots/model_epic.html">EPIC - crop.roots</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../uptake/model_epic.html">EPIC - crop.uptake</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

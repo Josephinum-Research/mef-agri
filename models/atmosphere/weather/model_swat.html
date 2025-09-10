@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SWAT - atmosphere.weather &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SWAT - atmosphere.daylength" href="../daylength/model_swat.html" />
+    <link rel="prev" title="SWAT - atmosphere" href="../model_swat.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../model_swat.html">SWAT - atmosphere</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../daylength/model_swat.html">SWAT - atmosphere.daylength</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="swat-atmosphere-weather">
+<h1>SWAT - atmosphere.weather<a class="headerlink" href="#swat-atmosphere-weather" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.atmosphere.weather.model_swat.</span></span><span class="sig-name descname"><span class="pre">Weather_V2009</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009" title="Link to this definition">¶</a></dt>
+<dd><p>This model inherits from 
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ssc_csm.models.atmosphere.weather.inca_obs.WeatherINCA</span></code> and computes 
+further quantities from the INCA observations based on <a class="reference internal" href="../../../add/refs.html#r1" id="id1"><span>[R1]</span></a> .</p>
+<p>Used constants</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SPECIFIC_HEAT</span> <span class="pre">=</span> <span class="pre">1.013e-3</span></code> - <span class="math notranslate nohighlight">\(\frac{MJ}{kg\cdot\ ^\circ C}\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GRAVITY</span> <span class="pre">=</span> <span class="pre">9.80665</span></code> - <span class="math notranslate nohighlight">\(\frac{m}{s^2}\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MOLAR_MASS_DRY_AIR</span> <span class="pre">=</span> <span class="pre">0.02896968</span></code> - <span class="math notranslate nohighlight">\(\frac{kg}{mol}\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SEALVL_STD_TEMP</span> <span class="pre">=</span> <span class="pre">288.15</span></code> - <span class="math notranslate nohighlight">\(^\circ K\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UNIV_GAS_CONST</span> <span class="pre">=</span> <span class="pre">8.314462618</span></code> - <span class="math notranslate nohighlight">\(\frac{J}{mol\cdot ^\circ K}\)</span></p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Get site height/elevation from model-tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.latent_heat">
+<span class="sig-name descname"><span class="pre">latent_heat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.latent_heat" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{lhv},k}\ [\frac{MJ}{kg}]\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id2"><span>[R1]</span></a> (equ. 1:2.3.6)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>latent heat of vaporization</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.pressure">
+<span class="sig-name descname"><span class="pre">pressure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.pressure" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{apr},k}\ [kPa]\)</span> - <a class="reference external" href="https://en.wikipedia.org/wiki/Barometric_formula">https://en.wikipedia.org/wiki/Barometric_formula</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>atmospheric pressure at site elevation (computed with barometric formula)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.psychrometric_const">
+<span class="sig-name descname"><span class="pre">psychrometric_const</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.psychrometric_const" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{psyc},k}\ [\frac{kPa}{^\circ C}]\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id3"><span>[R1]</span></a> (equ. 1:2.3.7)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>psychrometric constant at site elevation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.slope_vpr_sat">
+<span class="sig-name descname"><span class="pre">slope_vpr_sat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.slope_vpr_sat" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{slp-vpr}}\ [\frac{kPa}{^\circ C}]\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id4"><span>[R1]</span></a> (equ. 1:2.3.4)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>slope of the saturated vapor pressure curve <span class="math notranslate nohighlight">\(\frac{\delta a_{\textrm{vprs},k}}{\delta a_{\textrm{temp},k}}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.temperature_mean_annual">
+<span class="sig-name descname"><span class="pre">temperature_mean_annual</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.temperature_mean_annual" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(a_{\bar{\textrm{t}}}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mean annual temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.vapor_pressure_sat" title="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.vapor_pressure_sat"><code class="xref py py-func docutils literal notranslate"><span class="pre">vapor_pressure_sat()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.vapor_pressure" title="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.vapor_pressure"><code class="xref py py-func docutils literal notranslate"><span class="pre">vapor_pressure()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.slope_vpr_sat" title="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.slope_vpr_sat"><code class="xref py py-func docutils literal notranslate"><span class="pre">slope_vpr_sat()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.latent_heat" title="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.latent_heat"><code class="xref py py-func docutils literal notranslate"><span class="pre">latent_heat()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.pressure" title="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.pressure"><code class="xref py py-func docutils literal notranslate"><span class="pre">pressure()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.psychrometric_const" title="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.psychrometric_const"><code class="xref py py-func docutils literal notranslate"><span class="pre">psychrometric_const()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.vapor_pressure">
+<span class="sig-name descname"><span class="pre">vapor_pressure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.vapor_pressure" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{vpr},k}\ [kPa]\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id5"><span>[R1]</span></a> (equ. 1:2.3.3)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>actual vapor pressure</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.vapor_pressure_sat">
+<span class="sig-name descname"><span class="pre">vapor_pressure_sat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.model_swat.Weather_V2009.vapor_pressure_sat" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{vprs},k}\ [kPa]\)</span> - <a class="reference internal" href="../../../add/refs.html#r1" id="id6"><span>[R1]</span></a> (equ. 1:2.3.2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>saturated vapor pressure</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../model_swat.html">SWAT - atmosphere</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../daylength/model_swat.html">SWAT - atmosphere.daylength</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

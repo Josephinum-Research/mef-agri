@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>INCA - atmosphere.weather &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SWAT - soil" href="../../soil/model_swat.html" />
+    <link rel="prev" title="SWAT - atmosphere.radiation" href="../radiation/model_swat.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../radiation/model_swat.html">SWAT - atmosphere.radiation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../soil/model_swat.html">SWAT - soil</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="inca-atmosphere-weather">
+<h1>INCA - atmosphere.weather<a class="headerlink" href="#inca-atmosphere-weather" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.atmosphere.weather.inca_obs.</span></span><span class="sig-name descname"><span class="pre">WeatherINCA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA" title="Link to this definition">¶</a></dt>
+<dd><p>This model acts as INCA weather observation “container”. No computations 
+are done within this model but it can be used as super-class to perform 
+further meterological computations based on the weather observations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.dewpoint_mean">
+<span class="sig-name descname"><span class="pre">dewpoint_mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.dewpoint_mean" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{dewp},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mean daily dewpoint temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.height_hum_obs">
+<span class="sig-name descname"><span class="pre">height_hum_obs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.height_hum_obs" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{h-hum}}\ [m]\)</span> - <a class="reference internal" href="../../../add/refs.html#r5" id="id1"><span>[R5]</span></a> (fig. 5.1.5)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>reference height of the humidity observations</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.height_temp_obs">
+<span class="sig-name descname"><span class="pre">height_temp_obs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.height_temp_obs" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{h-tmp}}\ [m]\)</span> - <a class="reference internal" href="../../../add/refs.html#r5" id="id2"><span>[R5]</span></a> (fig. 4.7)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>reference height of the temperature observations</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.height_wind_obs">
+<span class="sig-name descname"><span class="pre">height_wind_obs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.height_wind_obs" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{h-wnd}}\ [m]\)</span> - <a class="reference internal" href="../../../add/refs.html#r5" id="id3"><span>[R5]</span></a> (fig. 5.2.3)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>reference height of the wind observations</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.humidity_max">
+<span class="sig-name descname"><span class="pre">humidity_max</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.humidity_max" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{hmax},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum value of daily humidity 2 m above surface <a class="reference internal" href="../../../add/refs.html#r5" id="id4"><span>[R5]</span></a> (fig. 5.1.5)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.humidity_mean">
+<span class="sig-name descname"><span class="pre">humidity_mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.humidity_mean" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{hum},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mean value of daily humidity 2 m above surface <a class="reference internal" href="../../../add/refs.html#r5" id="id5"><span>[R5]</span></a> (fig. 5.1.5)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.humidity_min">
+<span class="sig-name descname"><span class="pre">humidity_min</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.humidity_min" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{hmin},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>minimum value of daily humidity 2 m above surface - <a class="reference internal" href="../../../add/refs.html#r5" id="id6"><span>[R5]</span></a> (fig. 5.1.5)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialization of the heights of observed temperature, wind and humidity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.precipitation_sum">
+<span class="sig-name descname"><span class="pre">precipitation_sum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.precipitation_sum" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{prec},k}\ [\frac{mm}{m^2\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily precipitation sum</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.pressure_msl_mean">
+<span class="sig-name descname"><span class="pre">pressure_msl_mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.pressure_msl_mean" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{pmsl},k}\ [kPa]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mean value of daily mean-sea-level-pressure</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.radiation_sum">
+<span class="sig-name descname"><span class="pre">radiation_sum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.radiation_sum" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{rad},k}\ [\frac{Wh}{m^2\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily radiation sum</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.temperature_max">
+<span class="sig-name descname"><span class="pre">temperature_max</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.temperature_max" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{tmax},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>maximum daily temperature 2 m above surface - <a class="reference internal" href="../../../add/refs.html#r5" id="id7"><span>[R5]</span></a> (fig. 4.7)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.temperature_mean">
+<span class="sig-name descname"><span class="pre">temperature_mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.temperature_mean" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{temp},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mean daily temperature 2 m above surface <a class="reference internal" href="../../../add/refs.html#r5" id="id8"><span>[R5]</span></a> (fig. 4.7)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.temperature_min">
+<span class="sig-name descname"><span class="pre">temperature_min</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.temperature_min" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{tmin},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>minimum daily temperature 2 m above surface - <a class="reference internal" href="../../../add/refs.html#r5" id="id9"><span>[R5]</span></a> (fig. 4.7)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.wind_speed_mean">
+<span class="sig-name descname"><span class="pre">wind_speed_mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.atmosphere.weather.inca_obs.WeatherINCA.wind_speed_mean" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Observation</p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{wsp},k}\ [\frac{m}{s}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mean absolute and directionless value of daily wind speed 10 m above surface <a class="reference internal" href="../../../add/refs.html#r5" id="id10"><span>[R5]</span></a> (fig. 5.2.3)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../radiation/model_swat.html">SWAT - atmosphere.radiation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../../soil/model_swat.html">SWAT - soil</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

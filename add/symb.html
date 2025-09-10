@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Used Symbols &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haiku.css?v=8527a269" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="References" href="refs.html" />
+    <link rel="prev" title="Soil Utilities" href="../models/utils_soil.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../index.html">
+          <img class="logo" src="../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../models/utils_soil.html">Soil Utilities</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="refs.html">References</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="used-symbols">
+<h1>Used Symbols<a class="headerlink" href="#used-symbols" title="Link to this heading">¶</a></h1>
+<p>There are the following main models which consist of multiple submodels</p>
+<ul class="simple">
+<li><p>soil</p></li>
+<li><p>atmosphere</p></li>
+<li><p>crop</p></li>
+<li><p>management</p></li>
+<li><p>observing sensors and platforms</p></li>
+</ul>
+<p>The symbols representing model quantities consist of a character indicating the
+main model. The index of these characters consists of two or three parts which
+are separated by a comma</p>
+<ul class="simple">
+<li><p>the first part equals an identifier of the model quantity</p></li>
+<li><p>the last part corresponds the time or epoch information (a number for a specific epoch and <span class="math notranslate nohighlight">\(k\)</span> for arbitrary epochs)</p></li>
+<li><p>in the case of quantities which belong to soil layers, there is an additional index <span class="math notranslate nohighlight">\(i\)</span> between the quantity id and the time index</p></li>
+<li><p>in the case of quantities which belong to the soil surface, there is an additional index <span class="math notranslate nohighlight">\(s\)</span> between the quantity id and the time index</p></li>
+</ul>
+<p>The index part with the quantity identifier is occasionally further separated by
+minus signs for better readability.
+Capital letters in the beginning indicate a specific domain within the main
+models (e.g. <span class="math notranslate nohighlight">\(s_{\textrm{W-...},...}\)</span> for soil water related quantities).
+The whole identifier part does not exceed five characters (incl. minus signs).</p>
+<p>Some examples</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(s_{\textrm{clay},0}\)</span> … clay content of the soil at epoch 0</p></li>
+<li><p><span class="math notranslate nohighlight">\(a_{\textrm{temp},k}\)</span> … mean temperature at epoch <span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(s_{\textrm{T-t},i,k}\)</span> … temperature of soil layer <span class="math notranslate nohighlight">\(i\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(c_{\textrm{R-bm},k}\)</span> … root biomass at epoch <span class="math notranslate nohighlight">\(k\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(m_{\textrm{F-NO}_{3}^{-},k}\)</span> … applied nitrate through mineral fertilization at epoch <span class="math notranslate nohighlight">\(k\)</span></p></li>
+</ul>
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../models/utils_soil.html">Soil Utilities</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="refs.html">References</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

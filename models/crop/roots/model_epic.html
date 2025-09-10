@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>EPIC - crop.roots &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="EPIC - crop.stress" href="../stress/model_epic.html" />
+    <link rel="prev" title="EPIC - crop.leaves" href="../leaves/model_epic.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../leaves/model_epic.html">EPIC - crop.leaves</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../stress/model_epic.html">EPIC - crop.stress</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="epic-crop-roots">
+<h1>EPIC - crop.roots<a class="headerlink" href="#epic-crop-roots" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.crop.roots.model_epic.</span></span><span class="sig-name descname"><span class="pre">Roots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots" title="Link to this definition">¶</a></dt>
+<dd><p>Model which computes root growth and biomass according to <a class="reference internal" href="../../../add/refs.html#r2" id="id1"><span>[R2]</span></a> .</p>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> <a class="reference internal" href="../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.biomass">
+<span class="sig-name descname"><span class="pre">biomass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.biomass" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - State</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{R-bm},k}\ [\frac{t}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>root biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.biomass_rate">
+<span class="sig-name descname"><span class="pre">biomass_rate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.biomass_rate" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{R-}\Delta\textrm{bm},k}\ [\frac{t}{ha\cdot day}]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id2"><span>[R2]</span></a> (equ. 12)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily increase of root biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.bmt">
+<span class="sig-name descname"><span class="pre">bmt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.bmt" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'biomass'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{bm},k}\ [\frac{t}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>total dry biomass (aboveground + roots)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.bmtr">
+<span class="sig-name descname"><span class="pre">bmtr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.bmtr" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'biomass_rate'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\Delta\textrm{bm},k}\ [\frac{t}{ha\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>increase of total biomass</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.depth">
+<span class="sig-name descname"><span class="pre">depth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.depth" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{R-d},k}\ [m]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id3"><span>[R2]</span></a> (equ. 14)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current rooting depth</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.depth_max">
+<span class="sig-name descname"><span class="pre">depth_max</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.depth_max" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{R-dm},0}\ [m]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id4"><span>[R2]</span></a> (equ. 14, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>max. attainable rooting depth of crop</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.hui">
+<span class="sig-name descname"><span class="pre">hui</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.hui" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'heat_unit_index'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'crop.development'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-hui},k}\ [\ ]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current heat unit index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize <a class="reference internal" href="#mef_agri.models.crop.roots.model_epic.Roots.biomass_rate" title="mef_agri.models.crop.roots.model_epic.Roots.biomass_rate"><code class="xref py py-func docutils literal notranslate"><span class="pre">biomass_rate()</span></code></a> and <a class="reference internal" href="#mef_agri.models.crop.roots.model_epic.Roots.depth" title="mef_agri.models.crop.roots.model_epic.Roots.depth"><code class="xref py py-func docutils literal notranslate"><span class="pre">depth()</span></code></a> with zero vectors and 
+ensure, that initial root biomass <a class="reference internal" href="#mef_agri.models.crop.roots.model_epic.Roots.biomass" title="mef_agri.models.crop.roots.model_epic.Roots.biomass"><code class="xref py py-func docutils literal notranslate"><span class="pre">biomass()</span></code></a> does not exceed the 
+total crop biomass <code class="xref py py-func docutils literal notranslate"><span class="pre">ssc_csm.models.crop.model_epic.Crop.biomass()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.rdmax">
+<span class="sig-name descname"><span class="pre">rdmax</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.rdmax" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'rooting_depth_max'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{rdm},0}\ [m]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>max. possible rooting depth in soil</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.roots.model_epic.Roots.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.roots.model_epic.Roots.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#mef_agri.models.crop.roots.model_epic.Roots.biomass_rate" title="mef_agri.models.crop.roots.model_epic.Roots.biomass_rate"><code class="xref py py-func docutils literal notranslate"><span class="pre">biomass_rate()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.roots.model_epic.Roots.biomass" title="mef_agri.models.crop.roots.model_epic.Roots.biomass"><code class="xref py py-func docutils literal notranslate"><span class="pre">biomass()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.roots.model_epic.Roots.depth" title="mef_agri.models.crop.roots.model_epic.Roots.depth"><code class="xref py py-func docutils literal notranslate"><span class="pre">depth()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../leaves/model_epic.html">EPIC - crop.leaves</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../stress/model_epic.html">EPIC - crop.stress</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

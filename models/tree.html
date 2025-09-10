@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Model-Tree &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haiku.css?v=8527a269" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Model Requirements" href="requ.html" />
+    <link rel="prev" title="Model Base" href="base.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../index.html">
+          <img class="logo" src="../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="base.html">Model Base</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="requ.html">Model Requirements</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="model-tree">
+<h1>Model-Tree<a class="headerlink" href="#model-tree" title="Link to this heading">¶</a></h1>
+<p>mef_agri.models.tree.py</p>
+<p>This module contains the <code class="docutils literal notranslate"><span class="pre">ModelTree</span></code> class, which ensures, that models are
+connected and that all model-quantities are accessible from every location in
+the model-tree.</p>
+<section id="modeltree-class">
+<h2>ModelTree class<a class="headerlink" href="#modeltree-class" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.tree.</span></span><span class="sig-name descname"><span class="pre">ModelTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree" title="Link to this definition">¶</a></dt>
+<dd><p>Crop and soil models are connected and arranged in a tree-representation.
+Thus, there is one root/top-level model (<code class="docutils literal notranslate"><span class="pre">model</span></code> argument in the 
+initialization) and further models are added by decorating attributes of a 
+parent-model (instance of a class inheriting from 
+<a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>)  with the decorator 
+<a class="reference internal" href="base.html#mef_agri.models.base.Model.is_child_model" title="mef_agri.models.base.Model.is_child_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">mef_agri.models.base.Model.is_child_model()</span></code></a>.</p>
+<p>An unique model-id is assigned to each model in the model-tree. This id 
+corresponds to the <code class="docutils literal notranslate"><span class="pre">model_id</span></code> attribute of 
+<a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>. The model-id is designed like an 
+absolute path, where each level corresponds to the name of the model (
+<code class="docutils literal notranslate"><span class="pre">model_name</span></code> attribute of <a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>). The 
+separation character is a point or dot.
+The <a class="reference internal" href="#mef_agri.models.tree.ModelTree.extend_model_tree" title="mef_agri.models.tree.ModelTree.extend_model_tree"><code class="xref py py-func docutils literal notranslate"><span class="pre">extend_model_tree()</span></code></a> method is used to create the appropriate 
+model-id and it extends the dictionary (<code class="docutils literal notranslate"><span class="pre">_tree</span></code> attribute or property
+<a class="reference internal" href="#mef_agri.models.tree.ModelTree.tree_dict" title="mef_agri.models.tree.ModelTree.tree_dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">tree_dict()</span></code></a>) which 
+represents the model tree and holds references to all models.
+An example of <code class="docutils literal notranslate"><span class="pre">_tree</span></code> is shown in the following where the root 
+model name is <em>m1</em> and its two child models <em>m2</em> and <em>m3</em></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">_tree</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;m1&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ref&#39;</span><span class="p">:</span> <span class="n">mdl1</span><span class="p">,</span>  <span class="c1"># object reference</span>
+        <span class="s1">&#39;parent_id&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># no parent for the root model</span>
+        <span class="s1">&#39;child_ids&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;m1.m2&#39;</span><span class="p">,</span> <span class="s1">&#39;m1.m3&#39;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;m1.m2&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ref&#39;</span><span class="p">:</span> <span class="n">mdl2</span><span class="p">,</span>  <span class="c1"># object reference</span>
+        <span class="s1">&#39;parent_id&#39;</span><span class="p">:</span> <span class="s1">&#39;m1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;child_ids: []</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;m1.m3&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ref&#39;</span><span class="p">:</span> <span class="n">mdl3</span><span class="p">,</span>  <span class="c1"># object reference</span>
+        <span class="s1">&#39;parent_id&#39;</span><span class="p">:</span> <span class="s1">&#39;m1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;child_ids: []</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>) – root/top-level model in the tree</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.add_model_reference">
+<span class="sig-name descname"><span class="pre">add_model_reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.add_model_reference" title="Link to this definition">¶</a></dt>
+<dd><p>Add a model-reference to the model tree. 
+This method is used by <code class="xref py py-func docutils literal notranslate"><span class="pre">mef_agri.models.base.Models.is_child_model()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>) – object representing a model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.connnect">
+<span class="sig-name descname"><span class="pre">connnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.connnect" title="Link to this definition">¶</a></dt>
+<dd><p>Connect two model trees. This method does the connection bi-directional, 
+i.e. it sets the provided model-tree object in the <code class="docutils literal notranslate"><span class="pre">_conn</span></code> 
+dictionary of this model-tree object and vice versa. Thus, it is not 
+necessary to call this method a second time from the provided model-tree 
+object.
+The <code class="docutils literal notranslate"><span class="pre">_conn</span></code> dictionary holds the reference to the model-tree object 
+with its key being equal to the model-id of the root/top-level model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tree</strong> (<a class="reference internal" href="#mef_agri.models.tree.ModelTree" title="mef_agri.models.tree.ModelTree"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.tree.ModelTree</span></code></a>) – model-tree object which should be connected to this model-tree object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.disconnect">
+<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.disconnect" title="Link to this definition">¶</a></dt>
+<dd><p>Disconnect model-trees (i.e. remove the corresponding entries in the 
+<code class="docutils literal notranslate"><span class="pre">_conn</span></code> dictionaries of this model-tree and the provided model-tree).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tree</strong> (<a class="reference internal" href="#mef_agri.models.tree.ModelTree" title="mef_agri.models.tree.ModelTree"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.tree.ModelTree</span></code></a>) – model-tree object which should be disconnected from this model-tree object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.extend_model_tree">
+<span class="sig-name descname"><span class="pre">extend_model_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_model_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">child_model_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.extend_model_tree" title="Link to this definition">¶</a></dt>
+<dd><p>Get the desired structure of the model-id in the model-tree. The 
+returned model-id can be seen as an absolute path, where the 
+individual levels correspond to the model names which are separated by 
+points.
+This method is used by <code class="xref py py-func docutils literal notranslate"><span class="pre">mef_agri.models.base.Models.is_child_model()</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent_model_id</strong> (<em>str</em>) – model-id of the parent-model (attribute <code class="docutils literal notranslate"><span class="pre">model_id</span></code> of <a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>)</p></li>
+<li><p><strong>child_model_name</strong> (<em>str</em>) – name of the child-model (attribute <code class="docutils literal notranslate"><span class="pre">model_name</span></code> of <a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>unique model-id in the tree</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.get_model">
+<span class="sig-name descname"><span class="pre">get_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.get_model" title="Link to this definition">¶</a></dt>
+<dd><p>Get model from model-tree or from other connnected model-trees. If 
+return value is <code class="docutils literal notranslate"><span class="pre">None</span></code>, no model with provided <code class="docutils literal notranslate"><span class="pre">model_id</span></code> is found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model_id</strong> (<em>str</em>) – model-id of the required model</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>object representing the requested model</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.get_model_id_from_relative_path">
+<span class="sig-name descname"><span class="pre">get_model_id_from_relative_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relpath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.get_model_id_from_relative_path" title="Link to this definition">¶</a></dt>
+<dd><p>Get the model-id from a given relative path representing the way of 
+“walking” through the model tree. A relative path starts with a dot 
+followed either by</p>
+<ul class="simple">
+<li><p>the model names (attribute <code class="docutils literal notranslate"><span class="pre">model_name</span></code> of <a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>) which means to go “down” in the model-tree</p></li>
+<li><p>or the string <code class="docutils literal notranslate"><span class="pre">__parent__</span></code> indicating to go “up” in the model tree.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_id</strong> (<em>str</em>) – model-id of the model which is the “starting point” of the provided relative path</p></li>
+<li><p><strong>relpath</strong> (<em>str</em>) – the relative path representing the way to the desired model in the model tree</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <code class="docutils literal notranslate"><span class="pre">relpath</span></code> does not start with a dot</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>model-id of the desired model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.get_obs_epoch">
+<span class="sig-name descname"><span class="pre">get_obs_epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.get_obs_epoch" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the epoch of the current observations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obs_name</strong> (<em>str</em>) – name of the observation (i.e. quantity) in the model</p></li>
+<li><p><strong>model_id</strong> (<em>str</em>) – id of the model wich contains the quantity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>epoch of the observation</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime.date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.get_qinfos">
+<span class="sig-name descname"><span class="pre">get_qinfos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.get_qinfos" title="Link to this definition">¶</a></dt>
+<dd><p>Get information about a model-quantity (see arguments of 
+<code class="xref py py-func docutils literal notranslate"><span class="pre">ssc_csm.models.base.Model.is_quantity()</span></code>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qname</strong> (<em>str</em>) – name of the model-quantity</p></li>
+<li><p><strong>model_id</strong> (<em>str</em>) – model-id of the model containing the required quantity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary with quantity information (keys: <code class="docutils literal notranslate"><span class="pre">qtype</span></code>, <code class="docutils literal notranslate"><span class="pre">unit</span></code>, <code class="docutils literal notranslate"><span class="pre">distr_type</span></code>, <code class="docutils literal notranslate"><span class="pre">epoch</span></code> in the case of observations)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.get_quantity">
+<span class="sig-name descname"><span class="pre">get_quantity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.get_quantity" title="Link to this definition">¶</a></dt>
+<dd><p>Get a model-quantity from a model in the model-tree. 
+If it is not found, also the connected trees are screened. 
+If <code class="docutils literal notranslate"><span class="pre">unit</span></code> is provided, the appropriate conversion is applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qname</strong> (<em>str</em>) – name of the quantity in the model</p></li>
+<li><p><strong>model_id</strong> (<em>str</em>) – id of the model which contains the quantity</p></li>
+<li><p><strong>unit</strong> (<em>str</em><em>, </em><em>optional</em>) – desired unit of the requested quantity (see <a class="reference internal" href="utils.html#mef_agri.models.utils.__UNITS__" title="mef_agri.models.utils.__UNITS__"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.utils.__UNITS__</span></code></a>), defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>requested quantity</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.has_model">
+<span class="sig-name descname"><span class="pre">has_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.has_model" title="Link to this definition">¶</a></dt>
+<dd><p>Check if the model-tree contains a model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model_id</strong> (<em>str</em>) – model-id of requested model</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>boolean indicator</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.is_q_discrete">
+<span class="sig-name descname"><span class="pre">is_q_discrete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.is_q_discrete" title="Link to this definition">¶</a></dt>
+<dd><p>Check if quantity exhibits a discrete distribution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qname</strong> (<em>str</em>) – name of the model-quantity</p></li>
+<li><p><strong>model_id</strong> (<em>str</em>) – model-id of the model containing the required quantity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>boolean indicator</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.model_ids">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_ids</span></span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.model_ids" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ids of the models in the tree (also connected trees are considered)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.models">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">models</span></span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.models" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>references to the objects representing the models in the tree (also connected trees are considered)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.n_particles">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_particles</span></span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.n_particles" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>number of particles (i.e. realization or values) representing the distributions of the model quantities</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.set_quantity">
+<span class="sig-name descname"><span class="pre">set_quantity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.set_quantity" title="Link to this definition">¶</a></dt>
+<dd><p>Set the value of a quantity in a model in the tree. 
+If <code class="docutils literal notranslate"><span class="pre">unit</span></code> is provided and <code class="docutils literal notranslate"><span class="pre">value</span></code> is not a dict (i.e. set a 
+<a class="reference internal" href="utils.html#mef_agri.models.utils.HPFunction" title="mef_agri.models.utils.HPFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.utils.HPFunction</span></code></a>), 
+the appropriate conversion is applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qname</strong> (<em>str</em>) – name of the quantity in the model</p></li>
+<li><p><strong>model_id</strong> (<em>str</em>) – id of the model which contains the quantity</p></li>
+<li><p><strong>value</strong> (float or 1D numpy.ndarray, dict for <cite>HPFunction</cite>) – value which should be set for the quantity</p></li>
+<li><p><strong>unit</strong> (<em>str</em><em>, </em><em>optional</em>) – unit of the provided value (see <a class="reference internal" href="utils.html#mef_agri.models.utils.__UNITS__" title="mef_agri.models.utils.__UNITS__"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.utils.__UNITS__</span></code></a>), defaults to None</p></li>
+<li><p><strong>epoch</strong> (<em>datetime.date</em>) – epoch of an observation, which is necessary to indicate new incoming observations</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.text_representation">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">text_representation</span></span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.text_representation" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>text representation of the model tree</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.tree.ModelTree.tree_dict">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tree_dict</span></span><a class="headerlink" href="#mef_agri.models.tree.ModelTree.tree_dict" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>model-tree representation as dictionary</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="base.html">Model Base</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="requ.html">Model Requirements</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>EPIC - crop.development &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="EPIC - crop.leaves" href="../leaves/model_epic.html" />
+    <link rel="prev" title="EPIC - crop.demand" href="../demand/model_epic.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../index.html">
+          <img class="logo" src="../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../demand/model_epic.html">EPIC - crop.demand</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../leaves/model_epic.html">EPIC - crop.leaves</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="epic-crop-development">
+<h1>EPIC - crop.development<a class="headerlink" href="#epic-crop-development" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.crop.development.model_epic.</span></span><span class="sig-name descname"><span class="pre">Development</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development" title="Link to this definition">¶</a></dt>
+<dd><p>Model which computes crop development based on <a class="reference internal" href="../../../add/refs.html#r2" id="id1"><span>[R2]</span></a>. Winter dormancy is 
+not considered (i.e. <code class="docutils literal notranslate"><span class="pre">self.winter_dormancy</span></code> is always set to 
+<code class="docutils literal notranslate"><span class="pre">False</span></code>). If this is required, see <a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development_Dormancy" title="mef_agri.models.crop.development.model_epic.Development_Dormancy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Development_Dormancy</span></code></a>.</p>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> see <a class="reference internal" href="../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.dl">
+<span class="sig-name descname"><span class="pre">dl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.dl" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'daylength'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.daylength'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{dl},k}\ [h]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current daylength at site</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.heat_unit_factor_leaves">
+<span class="sig-name descname"><span class="pre">heat_unit_factor_leaves</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.heat_unit_factor_leaves" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{L-huf},k}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id2"><span>[R2]</span></a> (equ. 9)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>heat unit factor for leaf growth</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.heat_unit_index">
+<span class="sig-name descname"><span class="pre">heat_unit_index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.heat_unit_index" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - State</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-hui},k} = \frac{\sum_k{c_{\textrm{D-dhu},k}}}{c_{\textrm{D-phu},0}}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id3"><span>[R2]</span></a> (equ. 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current heat unit index</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.heat_units_pot">
+<span class="sig-name descname"><span class="pre">heat_units_pot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.heat_units_pot" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-phu},0}\ [^\circ C]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id4"><span>[R2]</span></a> (equ. 2, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>potential heat units for maturity</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.heat_units_rate">
+<span class="sig-name descname"><span class="pre">heat_units_rate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.heat_units_rate" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-dhu},k}\ [^\circ C]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id5"><span>[R2]</span></a> (equ. 1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily increase of heat units</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.hufl_coeff1">
+<span class="sig-name descname"><span class="pre">hufl_coeff1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.hufl_coeff1" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-lc1},0}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id6"><span>[R2]</span></a> (equ. 9, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>regression coefficient for leaves heat-unit-factor</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.hufl_coeff2">
+<span class="sig-name descname"><span class="pre">hufl_coeff2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.hufl_coeff2" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{C-lc2},0}\ [\ ]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id7"><span>[R2]</span></a> (equ. 9, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>regression coefficient for leaves heat-unit-factor</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Initialization of random outputs with zero vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.temperature_base">
+<span class="sig-name descname"><span class="pre">temperature_base</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.temperature_base" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-tb},0}\ [^\circ C]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id8"><span>[R2]</span></a> (equ. 1, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>crop-specific base temperature for heat-unit computation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.temperature_opt">
+<span class="sig-name descname"><span class="pre">temperature_opt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.temperature_opt" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Hyper-Parameter</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-to},0}\ [^\circ C]\)</span> - <a class="reference internal" href="../../../add/refs.html#r2" id="id9"><span>[R2]</span></a> (equ. 46, table 2)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>crop-specific optimum temperature regarding temperature stress</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.tmax">
+<span class="sig-name descname"><span class="pre">tmax</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.tmax" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'temperature_max'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{tmax},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily max. temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.tmin">
+<span class="sig-name descname"><span class="pre">tmin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.tmin" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - <code class="docutils literal notranslate"><span class="pre">'temperature_min'</span></code> from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{tmin},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily min. temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul>
+<li><p>call <a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development.update_dormancy" title="mef_agri.models.crop.development.model_epic.Development.update_dormancy"><code class="xref py py-func docutils literal notranslate"><span class="pre">update_dormancy()</span></code></a></p></li>
+<li><p>if <code class="docutils literal notranslate"><span class="pre">self.winter_dormancy</span> <span class="pre">==</span> <span class="pre">True</span></code></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>set <a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development.heat_units_rate" title="mef_agri.models.crop.development.model_epic.Development.heat_units_rate"><code class="xref py py-func docutils literal notranslate"><span class="pre">heat_units_rate()</span></code></a> to zero vector</p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development.heat_unit_index" title="mef_agri.models.crop.development.model_epic.Development.heat_unit_index"><code class="xref py py-func docutils literal notranslate"><span class="pre">heat_unit_index()</span></code></a> and <a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development.heat_unit_factor_leaves" title="mef_agri.models.crop.development.model_epic.Development.heat_unit_factor_leaves"><code class="xref py py-func docutils literal notranslate"><span class="pre">heat_unit_factor_leaves()</span></code></a> remain unchanged</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>else</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development.heat_units_rate" title="mef_agri.models.crop.development.model_epic.Development.heat_units_rate"><code class="xref py py-func docutils literal notranslate"><span class="pre">heat_units_rate()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development.heat_unit_index" title="mef_agri.models.crop.development.model_epic.Development.heat_unit_index"><code class="xref py py-func docutils literal notranslate"><span class="pre">heat_unit_index()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development.heat_unit_factor_leaves" title="mef_agri.models.crop.development.model_epic.Development.heat_unit_factor_leaves"><code class="xref py py-func docutils literal notranslate"><span class="pre">heat_unit_factor_leaves()</span></code></a></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.update_dormancy">
+<span class="sig-name descname"><span class="pre">update_dormancy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.update_dormancy" title="Link to this definition">¶</a></dt>
+<dd><p>Method which has to be implemented in a child class of 
+<a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development" title="mef_agri.models.crop.development.model_epic.Development"><code class="xref py py-class docutils literal notranslate"><span class="pre">Development</span></code></a>. It is called in <a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development.update" title="mef_agri.models.crop.development.model_epic.Development.update"><code class="xref py py-func docutils literal notranslate"><span class="pre">Development.update()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development.winter_dormancy">
+<span class="sig-name descname"><span class="pre">winter_dormancy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development.winter_dormancy" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Deterministic Output</p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{D-wd},k}\ [\ ]\)</span> (boolean value) - <a class="reference internal" href="../../../add/refs.html#r2" id="id10"><span>[R2]</span></a> (section Model Description &gt; Growth Constraints &gt; Winter Dormancy)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>indicator for winter dormancy period</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development_Dormancy">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.crop.development.model_epic.</span></span><span class="sig-name descname"><span class="pre">Development_Dormancy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development_Dormancy" title="Link to this definition">¶</a></dt>
+<dd><p>This model considers winter dormancy periods. According to <a class="reference internal" href="../../../add/refs.html#r2" id="id11"><span>[R2]</span></a>, it is 
+present, when the current daylength is within <span class="math notranslate nohighlight">\(\pm\)</span> one hour around 
+the minimum possible daylength at the current site.</p>
+<p>Inherits from <a class="reference internal" href="#mef_agri.models.crop.development.model_epic.Development" title="mef_agri.models.crop.development.model_epic.Development"><code class="xref py py-class docutils literal notranslate"><span class="pre">Development</span></code></a></p>
+<p>kwargs <span class="math notranslate nohighlight">\(\rightarrow\)</span> see <a class="reference internal" href="../../base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.crop.development.model_epic.Development_Dormancy.update_dormancy">
+<span class="sig-name descname"><span class="pre">update_dormancy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.crop.development.model_epic.Development_Dormancy.update_dormancy" title="Link to this definition">¶</a></dt>
+<dd><p>Determine winter dormancy periods based on current daylength and 
+minimum possible daylength at current site.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../demand/model_epic.html">EPIC - crop.demand</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../leaves/model_epic.html">EPIC - crop.leaves</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

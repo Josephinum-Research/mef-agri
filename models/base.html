@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Model Base &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haiku.css?v=8527a269" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Model-Tree" href="tree.html" />
+    <link rel="prev" title="Estimation Base" href="../evaluation/estimation/base.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../index.html">
+          <img class="logo" src="../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../evaluation/estimation/base.html">Estimation Base</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="tree.html">Model-Tree</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="model-base">
+<h1>Model Base<a class="headerlink" href="#model-base" title="Link to this heading">¶</a></h1>
+<p>mef_agri.models.base.py</p>
+<section id="model-quantities">
+<h2>Model Quantities<a class="headerlink" href="#model-quantities" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.base.__QS__">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.base.</span></span><span class="sig-name descname"><span class="pre">__QS__</span></span><a class="headerlink" href="#mef_agri.models.base.__QS__" title="Link to this definition">¶</a></dt>
+<dd><p>Helper Class which holds the string values of the model quantities. It is 
+recommended to use/import <code class="docutils literal notranslate"><span class="pre">Quantities</span></code> from this module - being an 
+instance of <code class="docutils literal notranslate"><span class="pre">__QS__</span></code> - which holds the initialized properties.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.__QS__.DOUT">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DOUT</span></span><a class="headerlink" href="#mef_agri.models.base.__QS__.DOUT" title="Link to this definition">¶</a></dt>
+<dd><p>Deterministic outputs are similar to the random outputs except that they 
+do not exhibit a probability distribution.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.__QS__.HPARAM">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HPARAM</span></span><a class="headerlink" href="#mef_agri.models.base.__QS__.HPARAM" title="Link to this definition">¶</a></dt>
+<dd><p>Hyper parameters are quantities which define the model behavior. They 
+exhibit a considerably lower dynamic behavior than the states or can be 
+also treated as stationary random processes.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.__QS__.HPFUNC">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HPFUNC</span></span><a class="headerlink" href="#mef_agri.models.base.__QS__.HPFUNC" title="Link to this definition">¶</a></dt>
+<dd><p>Hyper parametric functions are an extension of the hyper parameters. 
+They combine a number of hyper parameters which should not introduced 
+directly to the models to keep the complexity lower.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.__QS__.OBS">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OBS</span></span><a class="headerlink" href="#mef_agri.models.base.__QS__.OBS" title="Link to this definition">¶</a></dt>
+<dd><p>Observations are the driving variables in the model propagation step as 
+well as the quantities which are used in the state update step.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.__QS__.ROUT">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ROUT</span></span><a class="headerlink" href="#mef_agri.models.base.__QS__.ROUT" title="Link to this definition">¶</a></dt>
+<dd><p>Random outputs are random quantities which are computed by the models 
+and are available for model analysis and to get deeper insights into 
+crop growth.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.__QS__.STATE">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">STATE</span></span><a class="headerlink" href="#mef_agri.models.base.__QS__.STATE" title="Link to this definition">¶</a></dt>
+<dd><p>States are the target quantities which should be determined through 
+model evaluation. They exhibit a dynamic behavior and temporal 
+variability.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="model-base-class">
+<h2>Model Base-Class<a class="headerlink" href="#model-base-class" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.base.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.base.Model" title="Link to this definition">¶</a></dt>
+<dd><p>Base class for all models which should be evaluated for computing crop 
+growth. 
+Each model which should be evaluated and connected with other models has to 
+inherit from this class.</p>
+<p>Only the root/top-level model has to be initialized “manually”.
+In this case, only the <code class="docutils literal notranslate"><span class="pre">model_name</span></code> of the model has to be provided as 
+keyword argument.
+All child models in the model-tree (added with <a class="reference internal" href="#mef_agri.models.base.Model.is_child_model" title="mef_agri.models.base.Model.is_child_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_child_model()</span></code></a>) are 
+initialized and added to the model-tree automatically in the initialization 
+of the root/top-level model.
+The <code class="docutils literal notranslate"><span class="pre">model_name</span></code> of child models equals the name of the decorated method.</p>
+<p>The conversion of decorated methods (quantity, child model or requirement) 
+into attributes happens at the time of model initialization.</p>
+<section id="quantities">
+<h3>Quantities<a class="headerlink" href="#quantities" title="Link to this heading">¶</a></h3>
+<p>There are five main types of quantities (summarized in 
+<a class="reference internal" href="#mef_agri.models.base.__QS__" title="mef_agri.models.base.__QS__"><code class="xref py py-class docutils literal notranslate"><span class="pre">__QS__</span></code></a>).
+In order to add such quantities as attributes to a model, one can use 
+the decorator <a class="reference internal" href="#mef_agri.models.base.Model.is_quantity" title="mef_agri.models.base.Model.is_quantity"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_quantity()</span></code></a>, provided as static method in this class.
+Methods, with this decorator are automatically accessable from outside 
+of the model as attributes (similar to the python built-in <code class="docutils literal notranslate"><span class="pre">property</span></code>
+decorator).</p>
+</section>
+<section id="child-models">
+<h3>Child Models<a class="headerlink" href="#child-models" title="Link to this heading">¶</a></h3>
+<p>Child models are added as methods decorated with <a class="reference internal" href="#mef_agri.models.base.Model.is_child_model" title="mef_agri.models.base.Model.is_child_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_child_model()</span></code></a>. 
+In the decorator, the model-tree will be extended (see 
+<a class="reference internal" href="tree.html#mef_agri.models.tree.ModelTree" title="mef_agri.models.tree.ModelTree"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.tree.ModelTree</span></code></a>) and the child model is implemented 
+as an attribute.</p>
+</section>
+<section id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h3>
+<p>Requirements are quantities contained in other models of the model-tree 
+which are necessary in the computations of the current model.
+The advantage of using <a class="reference internal" href="requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.requ.Requirement</span></code></a> is, that 
+unit conversions are automatically applied.
+Required quantities from child models could be also directly accessed via 
+the corresponding attributes.
+But in these cases unit conversions have to be done manually.
+Another option to access required quantities from other models is, to use 
+the <a class="reference internal" href="#mef_agri.models.base.Model.model_tree" title="mef_agri.models.base.Model.model_tree"><code class="xref py py-func docutils literal notranslate"><span class="pre">model_tree()</span></code></a> property of this class.</p>
+</section>
+<section id="kwargs">
+<h3>kwargs<a class="headerlink" href="#kwargs" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em>) - has to be provided in the initialization of the root/top-level model, otherwise it is automatically passed in the <a class="reference internal" href="#mef_agri.models.base.Model.is_child_model" title="mef_agri.models.base.Model.is_child_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_child_model()</span></code></a> decorator</p></li>
+<li><p><strong>model_id</strong> (<em>str</em>) - is automatically passed in the <a class="reference internal" href="#mef_agri.models.base.Model.is_child_model" title="mef_agri.models.base.Model.is_child_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_child_model()</span></code></a> decorator, when a child model is initialized</p></li>
+<li><p><strong>model_tree</strong> (<a class="reference internal" href="tree.html#mef_agri.models.tree.ModelTree" title="mef_agri.models.tree.ModelTree"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.tree.ModelTree</span></code></a>) - is automatically passed in the <a class="reference internal" href="#mef_agri.models.base.Model.is_child_model" title="mef_agri.models.base.Model.is_child_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_child_model()</span></code></a> decorator, when a child model is initialized</p></li>
+</ul>
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.current_epoch">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_epoch</span></span><a class="headerlink" href="#mef_agri.models.base.Model.current_epoch" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current epoch of the model (i.e. for which epoch, the computations in <code class="docutils literal notranslate"><span class="pre">Model.update()</span></code> have already been performed)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.deterministic_output_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deterministic_output_names</span></span><a class="headerlink" href="#mef_agri.models.base.Model.deterministic_output_names" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>names of the deterministic outputs in the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.get_obs_epoch">
+<span class="sig-name descname"><span class="pre">get_obs_epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.base.Model.get_obs_epoch" title="Link to this definition">¶</a></dt>
+<dd><p>Get the epoch related to the last observations. New observations are set 
+from outside together with the current epoch. Thus, this method can be 
+used to indicate, that new observations are available.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obs_name</strong> (<em>str</em>) – name of the observation in the model</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>epoch related to the last set observations</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>datetime.date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.hp_function_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hp_function_names</span></span><a class="headerlink" href="#mef_agri.models.base.Model.hp_function_names" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>names of the functions acting as hyper-parameters in the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.hyper_parameter_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hyper_parameter_names</span></span><a class="headerlink" href="#mef_agri.models.base.Model.hyper_parameter_names" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>names of hyper parameters contained in the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.base.Model.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Method which performs initial computations within the model before it 
+is being updated regularly with <a class="reference internal" href="#mef_agri.models.base.Model.update" title="mef_agri.models.base.Model.update"><code class="xref py py-func docutils literal notranslate"><span class="pre">update()</span></code></a>.
+This method can be implemented by child classes.
+In this case, the super call <code class="docutils literal notranslate"><span class="pre">super().initialize(epoch)</span></code> is mandatory.</p>
+<p>Here, the <code class="docutils literal notranslate"><span class="pre">is_initialized</span></code> flag as well as the initialization-epoch is 
+set, as well as the random outputs are initialized with nan-arrays (
+length according to <code class="docutils literal notranslate"><span class="pre">self.model_tree.n_particles</span></code>).
+If this is not intended for certain random outputs, this has to be 
+overridden in the child class.</p>
+<p>States, hyper-parameters, hp-functions and observations are not 
+initialized with nan-arrays, because these quantities have to be 
+provided a priori respectively are set from “outside” of this class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – intialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.is_child_model">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_child_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child_class</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.base.Model.is_child_model" title="Link to this definition">¶</a></dt>
+<dd><p>Add another model (class which inherits from <a class="reference internal" href="#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a>) as 
+child-model. The provided <code class="docutils literal notranslate"><span class="pre">child_class</span></code> will be initialized in the 
+decorator and inserted into the model-tree (<a class="reference internal" href="#mef_agri.models.base.Model.model_tree" title="mef_agri.models.base.Model.model_tree"><code class="xref py py-func docutils literal notranslate"><span class="pre">model_tree()</span></code></a> property) 
+appropriately (see 
+<a class="reference internal" href="tree.html#mef_agri.models.tree.ModelTree.extend_model_tree" title="mef_agri.models.tree.ModelTree.extend_model_tree"><code class="xref py py-func docutils literal notranslate"><span class="pre">mef_agri.models.tree.ModelTree.extend_model_tree()</span></code></a> and 
+<a class="reference internal" href="tree.html#mef_agri.models.tree.ModelTree.add_model_reference" title="mef_agri.models.tree.ModelTree.add_model_reference"><code class="xref py py-func docutils literal notranslate"><span class="pre">mef_agri.models.tree.ModelTree.add_model_reference()</span></code></a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>child_class</strong> (<a class="reference internal" href="#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>) – class which represents the child model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.is_initialized">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_initialized</span></span><a class="headerlink" href="#mef_agri.models.base.Model.is_initialized" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>flag if model is initialized (i.e. <code class="docutils literal notranslate"><span class="pre">Model.initialize()</span></code> has been called)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.is_quantity">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_quantity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.base.Model.is_quantity" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator to define model quantities (see <a class="reference internal" href="#mef_agri.models.base.__QS__" title="mef_agri.models.base.__QS__"><code class="xref py py-class docutils literal notranslate"><span class="pre">__QS__</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qd</strong> (<em>str</em>) – type of model quantity (properties of <a class="reference internal" href="#mef_agri.models.base.__QS__" title="mef_agri.models.base.__QS__"><code class="xref py py-class docutils literal notranslate"><span class="pre">__QS__</span></code></a>)</p></li>
+<li><p><strong>unit</strong> (<em>str</em>) – unit of the model quantity (see <a class="reference internal" href="utils.html#mef_agri.models.utils.__UNITS__" title="mef_agri.models.utils.__UNITS__"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.utils.__UNITS__</span></code></a>)</p></li>
+<li><p><strong>discrete</strong> (<em>bool</em><em>, </em><em>optional</em>) – specify if the quantity exhibits a discrete probability distribution (only matters for the TODO evalDB), defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.is_required">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.base.Model.is_required" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator to add required quantities which are part of another model in 
+the model-tree.
+The decorated method is converted to an attribute being an instance of 
+<a class="reference internal" href="requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.requ.Requirement</span></code></a> (i.e. the value of the 
+required quantity has to be accessed via the <code class="docutils literal notranslate"><span class="pre">value</span></code> property of the 
+attribute).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qname</strong> (<em>str</em>) – name of the required quantity in the corresponding model of the model-tree</p></li>
+<li><p><strong>model_id</strong> (<em>str</em>) – id of the model which contains the required quantity</p></li>
+<li><p><strong>unit</strong> (<em>str</em>) – required unit of the quantity</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.model_id">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_id</span></span><a class="headerlink" href="#mef_agri.models.base.Model.model_id" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ID of the model in the <code class="docutils literal notranslate"><span class="pre">model_tree</span></code></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.model_name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_name</span></span><a class="headerlink" href="#mef_agri.models.base.Model.model_name" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>name of the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.model_tree">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_tree</span></span><a class="headerlink" href="#mef_agri.models.base.Model.model_tree" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>reference of the model-tree</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="tree.html#mef_agri.models.tree.ModelTree" title="mef_agri.models.tree.ModelTree">ModelTree</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.observation_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observation_names</span></span><a class="headerlink" href="#mef_agri.models.base.Model.observation_names" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>names of observations contained in the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.output_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">output_names</span></span><a class="headerlink" href="#mef_agri.models.base.Model.output_names" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>names of other output quantities (random and deterministic) contained in the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.quantity_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">quantity_names</span></span><a class="headerlink" href="#mef_agri.models.base.Model.quantity_names" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>names of all quantities contained in the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.random_output_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">random_output_names</span></span><a class="headerlink" href="#mef_agri.models.base.Model.random_output_names" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>names of the random outputs in the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.requirements">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">requirements</span></span><a class="headerlink" href="#mef_agri.models.base.Model.requirements" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary containing the required quantities from other models in the model tree (sorted according to the time of requirement - initialization or update)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.reset_quantities">
+<span class="sig-name descname"><span class="pre">reset_quantities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.base.Model.reset_quantities" title="Link to this definition">¶</a></dt>
+<dd><p>Reset specified quantities to nan-arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>qs</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>str</em>) – model quantities which should be reset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.state_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_names</span></span><a class="headerlink" href="#mef_agri.models.base.Model.state_names" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>names of states contained in the model</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.base.Model.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.base.Model.update" title="Link to this definition">¶</a></dt>
+<dd><p>Method which does the computations on a daily interval.
+This method has to be implemented by child classes.
+The super call <code class="docutils literal notranslate"><span class="pre">super().update(epoch)</span></code> is mandatory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../evaluation/estimation/base.html">Estimation Base</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="tree.html">Model-Tree</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Model Requirements &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haiku.css?v=8527a269" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Model Utilities" href="utils.html" />
+    <link rel="prev" title="Model-Tree" href="tree.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../index.html">
+          <img class="logo" src="../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="tree.html">Model-Tree</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="utils.html">Model Utilities</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="model-requirements">
+<h1>Model Requirements<a class="headerlink" href="#model-requirements" title="Link to this heading">¶</a></h1>
+<p>mef_agri.models.requ.py</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.requ.Requirement">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.requ.</span></span><span class="sig-name descname"><span class="pre">Requirement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qmodel_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requesting_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.requ.Requirement" title="Link to this definition">¶</a></dt>
+<dd><p>This class represents a quantity from a model in the model tree 
+required by another model in the model tree.
+Via the <code class="docutils literal notranslate"><span class="pre">value</span></code> property, it is possible to get the quantity and also a 
+setter is implemented, if one wants to change the value of the quantity 
+in the foreign model of the model tree.
+Unit conversion is considered when the <code class="docutils literal notranslate"><span class="pre">value</span></code> property is called through 
+the usage of the <a class="reference internal" href="tree.html#mef_agri.models.tree.ModelTree.get_quantity" title="mef_agri.models.tree.ModelTree.get_quantity"><code class="xref py py-func docutils literal notranslate"><span class="pre">mef_agri.models.tree.ModelTree.get_quantity()</span></code></a> method.</p>
+<p>An instance of <code class="docutils literal notranslate"><span class="pre">Requirement</span></code> is callable if the underlying quantity is of 
+type <a class="reference internal" href="utils.html#mef_agri.models.utils.HPFunction" title="mef_agri.models.utils.HPFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.utils.HPFunction</span></code></a>.
+In this case the provided value is passed to the <code class="docutils literal notranslate"><span class="pre">__call__()</span></code> method of 
+the HPFunction and the computed value is returned (<code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>qname</strong> (<em>str</em>) – name of the required quantity in the corresponding model of the model tree</p></li>
+<li><p><strong>qmodel_id</strong> (<em>str</em>) – id of the model which contains the required quantity</p></li>
+<li><p><strong>requesting_model</strong> (<a class="reference internal" href="base.html#mef_agri.models.base.Model" title="mef_agri.models.base.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.base.Model</span></code></a>) – object reference of the requesting model</p></li>
+<li><p><strong>required_unit</strong> (<em>str</em><em>, </em><em>optional</em>) – unit of quantity which is required by the requesting model, defaults to None (see <a class="reference internal" href="utils.html#mef_agri.models.utils.__UNITS__" title="mef_agri.models.utils.__UNITS__"><code class="xref py py-class docutils literal notranslate"><span class="pre">mef_agri.models.utils.__UNITS__</span></code></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.requ.Requirement.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#mef_agri.models.requ.Requirement.value" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>get the requested quantity from the model tree (also acts as setter)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="tree.html">Model-Tree</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="utils.html">Model Utilities</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SWAT - soil.surface.temperature &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/haiku.css?v=8527a269" />
+    <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="SWAT - soil.surface.water" href="../water/model_swat.html" />
+    <link rel="prev" title="SWAT - soil.surface" href="../model_swat.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../../../../index.html">
+          <img class="logo" src="../../../../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="../model_swat.html">SWAT - soil.surface</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../water/model_swat.html">SWAT - soil.surface.water</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="swat-soil-surface-temperature">
+<h1>SWAT - soil.surface.temperature<a class="headerlink" href="#swat-soil-surface-temperature" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.soil.surface.temperature.model_swat.</span></span><span class="sig-name descname"><span class="pre">Temperature_V2009</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.albedo">
+<span class="sig-name descname"><span class="pre">albedo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.albedo" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.surface'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{alb},s,k}\ [\ ]\)</span> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id1"><span>[R1]</span></a> (equ. 1:1.2.15)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>albedo at current day (considering crops)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.biomass">
+<span class="sig-name descname"><span class="pre">biomass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.biomass" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'crop'</span></code></p>
+<p><span class="math notranslate nohighlight">\(c_{\textrm{bma},k}\ [\frac{kg}{ha}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>aboveground biomass of crop</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Just the super-call and initialization of generic zero array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – initialization epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.radiation">
+<span class="sig-name descname"><span class="pre">radiation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.radiation" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{rad},k}\ [\frac{MJ}{m^2\cdot day}]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily radiation sum</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.radiation_term">
+<span class="sig-name descname"><span class="pre">radiation_term</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.radiation_term" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{T-rt},s,k}\ [\ ]\)</span> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id2"><span>[R1]</span></a> (equ. 1:1.3.10)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>radiation term</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temp_max">
+<span class="sig-name descname"><span class="pre">temp_max</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temp_max" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{tmax},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily max. temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temp_mean">
+<span class="sig-name descname"><span class="pre">temp_mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temp_mean" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{temp},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily mean temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temp_min">
+<span class="sig-name descname"><span class="pre">temp_min</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temp_min" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.atmosphere.weather'</span></code></p>
+<p><span class="math notranslate nohighlight">\(a_{\textrm{tmin},k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily min. temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temp_soil">
+<span class="sig-name descname"><span class="pre">temp_soil</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temp_soil" title="Link to this definition">¶</a></dt>
+<dd><p>RQ - from model with id <code class="docutils literal notranslate"><span class="pre">'zone.soil.layer01.temperature'</span></code></p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{T-t},1,k}\ [^\circ C]\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>temperatuer of first soil layer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../requ.html#mef_agri.models.requ.Requirement" title="mef_agri.models.requ.Requirement">Requirement</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temperature">
+<span class="sig-name descname"><span class="pre">temperature</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temperature" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{T-t},s,k}\ [^\circ C]\)</span> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id3"><span>[R1]</span></a> (equ. 1:1.3.12)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>soil surface temperature</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temperature_bare">
+<span class="sig-name descname"><span class="pre">temperature_bare</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temperature_bare" title="Link to this definition">¶</a></dt>
+<dd><p>MQ - Random Output</p>
+<p><span class="math notranslate nohighlight">\(s_{\textrm{T-tb},s,k}\ [^\circ C]\)</span> - <a class="reference internal" href="../../../../add/refs.html#r1" id="id4"><span>[R1]</span></a> (equ. 1:1.3.9)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>surface temperature of bare soil at current day</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.update" title="Link to this definition">¶</a></dt>
+<dd><p>The following computations are performed</p>
+<ul class="simple">
+<li><p>compute <a class="reference internal" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.radiation_term" title="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.radiation_term"><code class="xref py py-func docutils literal notranslate"><span class="pre">radiation_term()</span></code></a></p></li>
+<li><p>compute <a class="reference internal" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temperature_bare" title="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temperature_bare"><code class="xref py py-func docutils literal notranslate"><span class="pre">temperature_bare()</span></code></a></p></li>
+<li><p>weighting factor (snow cover not considered) - <a class="reference internal" href="../../../../add/refs.html#r1" id="id5"><span>[R1]</span></a> (equ. 1:1.3.11)</p></li>
+<li><p>compute <a class="reference internal" href="#mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temperature" title="mef_agri.models.soil.surface.temperature.model_swat.Temperature_V2009.temperature"><code class="xref py py-func docutils literal notranslate"><span class="pre">temperature()</span></code></a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current evaluation epoch</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="../model_swat.html">SWAT - soil.surface</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../../../../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="../water/model_swat.html">SWAT - soil.surface.water</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

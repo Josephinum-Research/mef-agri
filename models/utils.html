@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Model Utilities &#8212; mef-agri - a model evaluation framework for agricultural models  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=47202671" />
+    <link rel="stylesheet" type="text/css" href="../_static/haiku.css?v=8527a269" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Soil Utilities" href="utils_soil.html" />
+    <link rel="prev" title="Model Requirements" href="requ.html" /> 
+  </head><body>
+      <div class="header" role="banner">
+        <a href="../index.html">
+          <img class="logo" src="../_static/2014_JR.jpg" alt="Logo of mef-agri - a model evaluation framework for agricultural models"/>
+        </a>
+      </div>
+      <div class="topnav" role="navigation" aria-label="Top">
+      
+        <p>
+        «&#160;&#160;<a href="requ.html">Model Requirements</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="utils_soil.html">Soil Utilities</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content" role="main">
+        
+        
+  <section id="model-utilities">
+<h1>Model Utilities<a class="headerlink" href="#model-utilities" title="Link to this heading">¶</a></h1>
+<p>mef_agri.models.utils.py</p>
+<p>Utility functions and classes used for model evaluation.</p>
+<section id="units-of-model-quantities">
+<h2>Units of model quantities<a class="headerlink" href="#units-of-model-quantities" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.utils.</span></span><span class="sig-name descname"><span class="pre">__UNITS__</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__" title="Link to this definition">¶</a></dt>
+<dd><p>Helper class which holds the string values defining a certain unit. It is 
+recommended to use/import <code class="docutils literal notranslate"><span class="pre">Units</span></code> from this module - being an instance of 
+this class - which holds the initialized properties.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.MJ_kg">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MJ_kg</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.MJ_kg" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mega Joule per kg <span class="math notranslate nohighlight">\(\frac{MJ}{kg}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.MJ_m2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MJ_m2</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.MJ_m2" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mega Joule per square meter <span class="math notranslate nohighlight">\(\frac{MJ}{m^2}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.MJ_m2xday">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MJ_m2xday</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.MJ_m2xday" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mega Joule per square meter <span class="math notranslate nohighlight">\(\frac{MJ}{m^2\cdot day}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.W_m2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">W_m2</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.W_m2" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Watt per square meter <span class="math notranslate nohighlight">\(\frac{W}{m^2}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.Wh_m2xday">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Wh_m2xday</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.Wh_m2xday" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Watt hours per square meter and day <span class="math notranslate nohighlight">\(\frac{Wh}{m^2\cdot day}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.boolean">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boolean</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.boolean" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean value</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.cm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cm</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.cm" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>centimeters <span class="math notranslate nohighlight">\(cm\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.convert" title="Link to this definition">¶</a></dt>
+<dd><p>Method to convert physical units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – value which should be converted</p></li>
+<li><p><strong>u_source</strong> (<em>str</em>) – unit of <code class="docutils literal notranslate"><span class="pre">value</span></code></p></li>
+<li><p><strong>u_target</strong> (<em>str</em>) – target unit, to which the value should be converted</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>converted value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float or numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.day">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">day</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.day" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>days <span class="math notranslate nohighlight">\(day\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.deg">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deg</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.deg" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>angular degrees <span class="math notranslate nohighlight">\(^\circ\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.degC">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">degC</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.degC" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>degree Celsius <span class="math notranslate nohighlight">\(^\circ C\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.degK">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">degK</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.degK" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>degree Kelvin <span class="math notranslate nohighlight">\(^\circ K\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.frac">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frac</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.frac" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>fraction (usally corresponds to percent, in the range [0, 1])</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.g_cm3">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">g_cm3</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.g_cm3" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bulk density <span class="math notranslate nohighlight">\(\frac{g}{cm^3}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.g_ha">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">g_ha</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.g_ha" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gram per hectar <span class="math notranslate nohighlight">\(\frac{g}{ha}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.h">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">h</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.h" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>hours <span class="math notranslate nohighlight">\(h\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.kPa">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kPa</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.kPa" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pressure in kilo Pascal <span class="math notranslate nohighlight">\(kPa\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.kPa_degC">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kPa_degC</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.kPa_degC" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>kilo Pascal per degree Celsius (e.g. psychrometric constant) <span class="math notranslate nohighlight">\(\frac{kPa}{^\circ C}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.kg_ha">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kg_ha</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.kg_ha" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>kilogram per hectar <span class="math notranslate nohighlight">\(\frac{kg}{ha}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.kg_haxday">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kg_haxday</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.kg_haxday" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>kilogram per hectar and day <span class="math notranslate nohighlight">\(\frac{kg}{ha\cdot day}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.kg_m3">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kg_m3</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.kg_m3" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bulk density <span class="math notranslate nohighlight">\(\frac{kg}{m^3}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.kg_t">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kg_t</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.kg_t" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>kg nutrient per ton biomass <span class="math notranslate nohighlight">\(\frac{kg}{t}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.kgxm2_haxMJxday">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kgxm2_haxMJxday</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.kgxm2_haxMJxday" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>unit used for factor to convert energy to biomass <span class="math notranslate nohighlight">\(\frac{kg\cdot m^2}{MJ\cdot ha\cdot day}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.l_ha">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">l_ha</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.l_ha" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>liters per hectar <span class="math notranslate nohighlight">\(\frac{l}{ha}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.m">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.m" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>meters <span class="math notranslate nohighlight">\(m\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.m_s">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m_s</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.m_s" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>velocity in meters per second <span class="math notranslate nohighlight">\(\frac{m}{s}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.mm">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mm</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.mm" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>millimeters <span class="math notranslate nohighlight">\(mm\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.mm_day">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mm_day</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.mm_day" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mm per day (e.g. hydraulic conductivity) <span class="math notranslate nohighlight">\(\frac{mm}{day}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.mm_m2xday">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mm_m2xday</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.mm_m2xday" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mm per square meter and day (e.g. precipitation) <span class="math notranslate nohighlight">\(\frac{mm}{m^2\cdot day}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.n_degC">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_degC</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.n_degC" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>per degree Celsius <span class="math notranslate nohighlight">\(\frac{1}{^\circ C}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.n_ha">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_ha</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.n_ha" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount/number per hectar <span class="math notranslate nohighlight">\(\frac{1}{ha}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.n_m2">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_m2</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.n_m2" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>amount/number per square meter <span class="math notranslate nohighlight">\(\frac{1}{m^2}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.none">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">none</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.none" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>no units, i.e. unitless</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.per_day">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">per_day</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.per_day" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>daily unitless rates <span class="math notranslate nohighlight">\(\frac{1}{day}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.perc">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">perc</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.perc" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>percent</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.rad">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rad</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.rad" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>angular radians <span class="math notranslate nohighlight">\(rad\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.s">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">s</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.s" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>seconds <span class="math notranslate nohighlight">\(s\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.s_m">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">s_m</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.s_m" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>used for resistance term in evapotranspiration <span class="math notranslate nohighlight">\(\frac{s}{m}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.t_ha">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_ha</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.t_ha" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tons per hectar <span class="math notranslate nohighlight">\(\frac{kg}{ha}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.t_haxday">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_haxday</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.t_haxday" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tons per hectar and day <span class="math notranslate nohighlight">\(\frac{t}{ha\cdot day}\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.__UNITS__.undef">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">undef</span></span><a class="headerlink" href="#mef_agri.models.utils.__UNITS__.undef" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>unit not defined</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="hyper-parameter-function">
+<h2>Hyper-Parameter Function<a class="headerlink" href="#hyper-parameter-function" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mef_agri.models.utils.</span></span><span class="sig-name descname"><span class="pre">HPFunction</span></span><a class="headerlink" href="#mef_agri.models.utils.HPFunction" title="Link to this definition">¶</a></dt>
+<dd><p>This class represents a function which acts as hyper-parameter in the 
+models. The object is callable and returns the output value based on the 
+provided input value. The input value can be a numeric value, a 1D 
+numpy.ndarray with length 1 or with length equal to the number of 
+particles representing the distributions.</p>
+<p>The following function types are supported:</p>
+<p><strong>PIECEWISE_LINEAR</strong></p>
+<p>Is defined by a set of x- and y-values (equal length!). 
+The <code class="docutils literal notranslate"><span class="pre">fdef</span></code> dictionary of <a class="reference internal" href="#mef_agri.models.utils.HPFunction.define" title="mef_agri.models.utils.HPFunction.define"><code class="xref py py-func docutils literal notranslate"><span class="pre">define()</span></code></a> contains the 
+following keys</p>
+<ul class="simple">
+<li><p><strong>ftype</strong> - <code class="docutils literal notranslate"><span class="pre">str</span></code> specifying the function type, see <a class="reference internal" href="#mef_agri.models.utils.HPFunction.FTYPE" title="mef_agri.models.utils.HPFunction.FTYPE"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTYPE</span></code></a></p></li>
+<li><p><strong>values-x</strong> - array of values on the x-axis of the function (i.e. the input values), used as mean/mode value for the distribution</p></li>
+<li><p><strong>values-y</strong> - array of values on the y-axis of the function (i.e. the output values), used as mean/mode value for the distribution</p></li>
+<li><p><strong>distr-x</strong> - distribution of the x-values, dict which contains the <cite>distr_id</cite>, and further distribution parameters according to <cite>stats_utils</cite>, the assumption is, that the distribution is equal for all x-values</p></li>
+<li><p><strong>distr-y</strong> - distribution of the y-values, dict which contains the <cite>distr_id</cite>, and further distribution parameters according to <cite>stats_utils</cite>, the assumption is, that the distribution is equal for all y-values</p></li>
+<li><p><strong>sample</strong> - specifies if hp-function should be sampled or not</p></li>
+</ul>
+<p><strong>values-x</strong> and <strong>values-y</strong> are necessary, the other ones are optional</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction.FTYPE">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FTYPE</span></span><a class="headerlink" href="#mef_agri.models.utils.HPFunction.FTYPE" title="Link to this definition">¶</a></dt>
+<dd><p>Helper class which holds the string values (class variables) to define 
+the type of a hyper parametric function</p>
+<ul class="simple">
+<li><p><em>PIECEWISE_LINEAR</em> = <code class="docutils literal notranslate"><span class="pre">'piecewise-linear'</span></code></p></li>
+</ul>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction.PiecewiseLinear">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PiecewiseLinear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fdef</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils.HPFunction.PiecewiseLinear" title="Link to this definition">¶</a></dt>
+<dd><p>Class representing a piecewise linear function. Based on the provided 
+x- and y-values, intervals are defined, in which a linear function is 
+used to interpolate values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fdef</strong> (<em>dict</em>) – dictionary containing information about the function (see <a class="reference internal" href="#mef_agri.models.utils.HPFunction" title="mef_agri.models.utils.HPFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">HPFunction</span></code></a>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction.PiecewiseLinear.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils.HPFunction.PiecewiseLinear.compute" title="Link to this definition">¶</a></dt>
+<dd><p>Compute interpolated values. In the case, that the HP-function is 
+sampled, each value in <code class="docutils literal notranslate"><span class="pre">value</span></code> is used for interpolation together 
+with one sample of supporting points (i.e. one row of the 
+<span class="math notranslate nohighlight">\(nsampels\times n\)</span> arrays representing the x- and y-values).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>numpy.ndarray</em>) – x-values for which y-values should be interpolated - should be a one-dimensional array</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if <code class="docutils literal notranslate"><span class="pre">value</span></code> has more than one dimension</p></li>
+<li><p><strong>ValueError</strong> – if <code class="docutils literal notranslate"><span class="pre">len(value)</span></code> does not match <code class="docutils literal notranslate"><span class="pre">nsamples</span></code> of <a class="reference internal" href="#mef_agri.models.utils.HPFunction.PiecewiseLinear.sample" title="mef_agri.models.utils.HPFunction.PiecewiseLinear.sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">sample()</span></code></a></p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>interpolated values</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction.PiecewiseLinear.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rvs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsamples</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils.HPFunction.PiecewiseLinear.sample" title="Link to this definition">¶</a></dt>
+<dd><p>If the HP-function is sampled, the arrays of x- and y-values with 
+length <span class="math notranslate nohighlight">\(n\)</span> (values in <code class="docutils literal notranslate"><span class="pre">fdef</span></code> provided to <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>) are 
+sampled as often as specified by <code class="docutils literal notranslate"><span class="pre">nsamples</span></code>. 
+Thus, the arrays of x- and y-values (representing the supporting 
+points) exhibit the dimensions <span class="math notranslate nohighlight">\(nsamples\times n\)</span> instead of 
+<span class="math notranslate nohighlight">\(1\times n\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rvs</strong> (<a class="reference internal" href="../evaluation/stats_utils.html#mef_agri.evaluation.stats_utils.RVSampler" title="mef_agri.evaluation.stats_utils.RVSampler"><em>RVSampler</em></a>) – TODO</p></li>
+<li><p><strong>nsamples</strong> (<em>int</em>) – number of samples</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction.current_value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_value</span></span><a class="headerlink" href="#mef_agri.models.utils.HPFunction.current_value" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current values computed with HP-Function definition and input values</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction.define">
+<span class="sig-name descname"><span class="pre">define</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fdef</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils.HPFunction.define" title="Link to this definition">¶</a></dt>
+<dd><p>Define the hyper-parametric function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fdef</strong> (<em>dict</em>) – dictionary containing information about the function</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if <code class="docutils literal notranslate"><span class="pre">'ftype'</span></code> in <code class="docutils literal notranslate"><span class="pre">fdef</span></code> is not supporte by this class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction.is_sampled">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_sampled</span></span><a class="headerlink" href="#mef_agri.models.utils.HPFunction.is_sampled" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>flag if hp-function is sampled</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mef_agri.models.utils.HPFunction.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rvs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsamples</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils.HPFunction.sample" title="Link to this definition">¶</a></dt>
+<dd><p>TODO</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rvs</strong> (<a class="reference internal" href="../evaluation/stats_utils.html#mef_agri.evaluation.stats_utils.RVSampler" title="mef_agri.evaluation.stats_utils.RVSampler"><em>RVSampler</em></a>) – _description_</p></li>
+<li><p><strong>nsamples</strong> (<em>int</em>) – _description_</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="other-stuff">
+<h2>Other stuff<a class="headerlink" href="#other-stuff" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mef_agri.models.utils.day_of_year">
+<span class="sig-prename descclassname"><span class="pre">mef_agri.models.utils.</span></span><span class="sig-name descname"><span class="pre">day_of_year</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">epoch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mef_agri.models.utils.day_of_year" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epoch</strong> (<em>datetime.date</em>) – current epoch</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>n-th day of the year</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="Bottom">
+      
+        <p>
+        «&#160;&#160;<a href="requ.html">Model Requirements</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="utils_soil.html">Soil Utilities</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Josephinum Research.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
