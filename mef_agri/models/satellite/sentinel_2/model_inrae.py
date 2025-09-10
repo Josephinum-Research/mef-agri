@@ -1,6 +1,7 @@
 import numpy as np
 
-from ...base import Quantities as Q, Units as U
+from ...base import Quantities as Q
+from ...utils import Units as U
 from ...nns import Layer, NeuralNetwork
 
 

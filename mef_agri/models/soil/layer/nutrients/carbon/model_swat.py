@@ -1,6 +1,7 @@
 import numpy as np
 
-from .....base import Model, Quantities as Q, Units as U
+from .....base import Model, Quantities as Q
+from .....utils import Units as U
 from .....requ import Requirement
 
 
@@ -13,7 +14,7 @@ class C_Corg_Cres_V2009(Model):
     section 3:5.3, where the analytical solutions are derived and evaluated 
     at time steps of one year.
 
-    kwargs :math:`\rightarrow` :class:`ssc_csm.models.base.Model`
+    kwargs :math:`\rightarrow` :class:`mef_agri.models.base.Model`
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -1,6 +1,7 @@
 import numpy as np
 
-from ....base import Model, Quantities as Q, Units as U
+from ....base import Model, Quantities as Q
+from ....utils import Units as U
 from ....requ import Requirement
 
 
@@ -22,7 +23,7 @@ class Evapotranspiration_V2009(Model):
     * ``SOIL_HEAT_FLUX = 0.0`` - [R1]_ (section 2:2.2.1.1)
     * ``KARMAN_CONST = 0.41`` - [R1]_ (section 2:2.2.1.2)
 
-    kwargs :math:`\rightarrow` :class:`ssc_csm.models.base.Model`
+    kwargs :math:`\rightarrow` :class:`mef_agri.models.base.Model`
     """
     SOIL_HEAT_FLUX = 0.0  # [R1]_ section 2:2.2.1.1
     KARMAN_CONST = 0.41  # [R1]_ section 2:2.2.1.2
@@ -266,7 +267,7 @@ class Evapotranspiration_V2009(Model):
         self.transpiration_pot = self._zv.copy()
 
     def update(self, epoch):
-        """
+        r"""
         The following computations are performed
 
         * :func:`resistance_air`

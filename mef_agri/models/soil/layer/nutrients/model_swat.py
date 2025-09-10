@@ -1,6 +1,7 @@
 import numpy as np
 
-from ....base import Model, Quantities as Q, Units as U
+from ....base import Model, Quantities as Q
+from ....utils import Units as U
 from ....requ import Requirement
 from .nitrogen.model_swat import N_NO3_NH4_V2009, N_NO3_NH4_Norg_V2009
 from .carbon.model_swat import C_Corg_Cres_V2009
@@ -11,7 +12,7 @@ class Nutrients_N_V2009(Model):
     Nutrient model which contains a nitrogen model with a :math:`NO_3^-`,
     a :math:`NH_4^+` pool and nitrification process.
 
-    kwargs :math:`\rightarrow` :class:`ssc_csm.models.base.Model`
+    kwargs :math:`\rightarrow` :class:`mef_agri.models.base.Model`
 
     """
     @Model.is_child_model(N_NO3_NH4_V2009)
@@ -81,7 +82,7 @@ class Nutrients_C_N_V2009(Model):
     @Model.is_required('temperature', '.__parent__.temperature', unit=U.degC)
     def ltemp(self) -> Requirement:
         r"""
-        RQ - from model with id ``'.__parent__.temperature'`` (temperature model of parent layer)
+        RQ - from model with id ``'.__parent__.temperature'`` (temperature model of parent soil layer)
 
         :math:`s_{\textrm{T-t},i,k}\ [^\circ C]`
 
@@ -92,7 +93,7 @@ class Nutrients_C_N_V2009(Model):
     @Model.is_required('amount', '.__parent__.water', unit=U.mm)
     def lwa(self) -> Requirement:
         r"""
-        RQ - from model with id ``'.__parent__.water'`` (water model of parent layer)
+        RQ - from model with id ``'.__parent__.water'`` (water model of parent soil layer)
 
         :math:`s_{\textrm{W-a},i,k}\ [mm]`
 
@@ -103,7 +104,7 @@ class Nutrients_C_N_V2009(Model):
     @Model.is_required('thickness', '.__parent__', unit=U.mm)
     def lt(self) -> Requirement:
         r"""
-        RQ - from model with id ``'.__parent__'`` (parent layer)
+        RQ - from model with id ``'.__parent__'`` (parent soil layer)
 
         :math:`s_{\textrm{lt},i,0}\ [mm]`
 

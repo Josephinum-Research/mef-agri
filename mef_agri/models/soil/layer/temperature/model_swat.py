@@ -1,6 +1,7 @@
 import numpy as np
 
-from ....base import Model, Quantities as Q, Units as U
+from ....base import Model, Quantities as Q
+from ....utils import Units as U
 from ....requ import Requirement
 
 
@@ -35,7 +36,7 @@ class Temperature_V2009(Model):
     @Model.is_required('center_depth', '.__parent__', U.mm)
     def layer_depth_center(self) -> Requirement:
         r"""
-        RQ - from model with id ``'.__parent__'`` (parent layer model)
+        RQ - from model with id ``'.__parent__'`` (parent soil layer model)
 
         :math:`s_{\textrm{lcd},i,0}\ [mm]`
 

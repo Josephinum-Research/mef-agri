@@ -1,8 +1,8 @@
 import numpy as np
 
-from ...base import Model, Quantities as Q, Units as U
+from ...base import Model, Quantities as Q
+from ...utils import Units as U
 from ...requ import Requirement
-from ..stress.model_epic import Stress
 
 
 class Leaves(Model):

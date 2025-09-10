@@ -1,6 +1,7 @@
 import numpy as np
 
-from ...base import Model, Quantities as Q, Units as U
+from ...base import Model, Quantities as Q
+from ...utils import Units as U
 from ...requ import Requirement
 from .temperature.model_swat import Temperature_V2009
 from .water.model_swat import Water_CNM_V2009
@@ -17,7 +18,6 @@ class Surface_V2009(Model):
     Soil surface model following the outlines in [R1]_ .
 
     Snow cover is not considered yet.
-
     """
 
     def __init__(self, **kwargs):
@@ -116,8 +116,8 @@ class Surface_V2009(Model):
         * :func:`albedo`
         * update of child models
 
-        :param epoch: _description_
-        :type epoch: _type_
+        :param epoch: current evaluation epoch
+        :type epoch: datetime.date
         """
         super().update(epoch)
         cpres = self.model_tree.get_model('zone').crop_rotation.crop_present

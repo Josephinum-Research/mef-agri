@@ -1,10 +1,9 @@
 from copy import deepcopy
 import numpy as np
-from datetime import date
 
-from ...base import Model, Quantities as Q, Units as U
+from ...base import Model, Quantities as Q
+from ...utils import Units as U
 from ...requ import Requirement
-from ...utils_soil import distribute_nutrient_amount
 
 
 class Supply(Model):
@@ -12,7 +11,7 @@ class Supply(Model):
     Computation of water and nitrate supply from the soil to the crop according 
     to [R2]_
 
-    kwargs :math:`\rightarrow` :class:`ssc_csm.models.base.Model`
+    kwargs :math:`\rightarrow` :class:`mef_agri.models.base.Model`
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -1,7 +1,6 @@
 from ..base import Model
 from .sowing.model_jr import Sowing
 from .harvest.model_jr import Harvest
-from .growth_regulation.model_jr import GrowthRegulation
 from .fertilization.model_jr import Mineral_N_Fertilization
 
 

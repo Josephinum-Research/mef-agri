@@ -1,6 +1,6 @@
 import numpy as np
 
-from ...base import Model, Quantities as Q, Units as U
+from ...base import Model
 
 
 class Sowing(Model):

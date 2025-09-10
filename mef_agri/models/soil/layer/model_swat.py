@@ -1,6 +1,7 @@
 import numpy as np
 
-from ...base import Model, Quantities as Q, Units as U
+from ...base import Model, Quantities as Q
+from ...utils import Units as U
 from .temperature.model_swat import Temperature_V2009
 from .water.model_swat import Water_V2009
 from .nutrients.model_swat import Nutrients_C_N_V2009

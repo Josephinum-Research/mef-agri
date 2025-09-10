@@ -1,6 +1,7 @@
 import numpy as np
 
-from ..base import Model, Quantities as Q, Units as U
+from ..base import Model, Quantities as Q
+from ..utils import Units as U
 from ..requ import Requirement
 from ..utils_soil import init_layer_dimensions
 from .layer.model_swat import Layer_V2009
@@ -108,7 +109,6 @@ def saturation_from_clay_content(clay_cont):
 
 class Soil_V2009(Model):
     r"""
-
     Herein, soil porosity and water content at saturation are assumed to be 
     equal, which is also stated in [R1]_ section 2:3.1 in the paragraph above 
     table 2:3-1. Thus, this model only contains ``self.porosity`` as soil 

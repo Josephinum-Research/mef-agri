@@ -1,6 +1,7 @@
 import numpy as np
 
-from .....base import Model, Quantities as Q, Units as U
+from .....base import Model, Quantities as Q
+from .....utils import Units as U
 from .....requ import Requirement
 
 
@@ -11,7 +12,7 @@ class N_NO3_NH4_V2009(Model):
     Nitrification is the only process considered herein - no losses such as 
     nitrate leaching, denitrification or ammonia volatilization.
 
-    kwargs :math:`\rightarrow` :class:`ssc_csm.models.base.Model`
+    kwargs :math:`\rightarrow` :class:`mef_agri.models.base.Model`
     """
 
     def __init__(self, **kwargs):
@@ -75,7 +76,7 @@ class N_NO3_NH4_V2009(Model):
     @Model.is_required('temperature', '.__parent__.__parent__.temperature', unit=U.degC)
     def ltemp(self) -> Requirement:
         r"""
-        RQ - from model with id ``'.__parent__.__parent__.temperature'`` (temperature model of parent layer)
+        RQ - from model with id ``'.__parent__.__parent__.temperature'`` (temperature model of parent soil layer)
 
         :math:`s_{\textrm{T-t},i,k}\ [^\circ C]`
 
@@ -86,7 +87,7 @@ class N_NO3_NH4_V2009(Model):
     @Model.is_required('amount', '.__parent__.__parent__.water', unit=U.mm)
     def lwa(self) -> Requirement:
         r"""
-        RQ - from model with id ``'.__parent__.__parent__.water'`` (water model of parent layer)
+        RQ - from model with id ``'.__parent__.__parent__.water'`` (water model of parent soil layer)
 
         :math:`s_{\textrm{W-a},i,k}\ [mm]`
 
@@ -97,7 +98,7 @@ class N_NO3_NH4_V2009(Model):
     @Model.is_required('thickness', '.__parent__.__parent__', unit=U.mm)
     def lt(self) -> Requirement:
         r"""
-        RQ - from model with id ``'.__parent__.__parent__'`` (parent layer)
+        RQ - from model with id ``'.__parent__.__parent__'`` (parent soil layer)
 
         :math:`s_{\textrm{lt},i,0}\ [mm]`
 
@@ -137,7 +138,7 @@ class N_NO3_NH4_V2009(Model):
         super().initialize(epoch)
 
     def update(self, epoch):
-        """
+        r"""
         The following computations are performed
 
         * nitrification temperature factor - [R1]_ (equ. 3:1.3.1)
@@ -178,7 +179,7 @@ class N_NO3_NH4_Norg_V2009(N_NO3_NH4_V2009):
 
     Inherits from :class:`N_NO3_NH4_V2009`
 
-    kwargs :math:`\rightarrow` :class:`ssc_csm.models.base.Model`
+    kwargs :math:`\rightarrow` :class:`mef_agri.models.base.Model`
 
     """
     def __init__(self, **kwargs):
