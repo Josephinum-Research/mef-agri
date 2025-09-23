@@ -50,3 +50,10 @@ References
     INRAE
     2020
     https://hal.inrae.fr/hal-05088193v1
+
+.. [R8]
+    Candy, J.V.
+    Bootstrap particle filtering
+    IEEE Signal Processing Magazine, vol. 73
+    2007
+    https://doi.org/10.1109/MSP.2007.4286566

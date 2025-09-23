@@ -111,7 +111,7 @@ class Estimator(object):
                 self.propagate(epoch)
                 ############################################################
                 # PF-UPDATE / WEIGHT COMPUTATION
-                self.update()
+                self.update(epoch)
 
                 ############################################################
                 # SAVE STATES, OUTPUTS AND EVALUATED HPFUNCTIONS
@@ -167,7 +167,7 @@ class Estimator(object):
     def propagate(self, epoch) -> None:
         pass
 
-    def update(self) -> None:
+    def update(self, epoch) -> None:
         pass
 
     def _set_states(self, zid:int, epoch:date) -> None:
