@@ -136,13 +136,9 @@ class Leaves(Model):
         :type epoch: datetime.date
         """
         super().update(epoch)
-        if self._hufl_prv is None:
-            self._hufl_prv = self.hufl.value.copy()
 
         # potential increase of lai
         dhufl = self.hufl.value - self._hufl_prv  # daily change of leaves heat-unit factor [R1]_ equ. 8
-        dhufl = np.where(dhufl >= 0.0, dhufl, 0.0)
-        self.lai = np.where(self.lai <= self.lai_max, self.lai, self.lai_max)
         self.lai_rate_pot = dhufl * self.lai_max * (
             1. - np.exp(5. * (self.lai - self.lai_max))
         ) * np.sqrt(self.gc.value)
@@ -159,5 +155,25 @@ class Leaves(Model):
         lai2 = self._laild * np.power(aux, self.lai_regr_coeff)
         # computation of lai
         self.lai = np.where(cld, lai2, lai1)
-        if self.lai.min() < 0.:
-            dummy = 0.
+
+    @Model.is_condition
+    def cond_hufl(self) -> None:
+        """
+        Ensures that current value of :func:`hufl` is not lower than the value 
+        of the previous day (otherwise negative values of the difference lead to 
+        problems)
+        """
+        if self._hufl_prv is None:
+            self._hufl_prv = self.hufl.value.copy()
+        self.hufl.value = np.where(
+            self.hufl.value >= self._hufl_prv, self.hufl.value, self._hufl_prv
+        )
+
+    @Model.is_condition
+    def cond_lai(self) -> None:
+        r"""
+        Ensures that :func:`lai` stays in the range 
+        :math:`c_{\textrm{L-lai},k} \in [0.0, c_{\textrm{L-lmx},0}]`
+        """
+        self.lai = np.where(self.lai >= 0.0, self.lai, 0.0)
+        self.lai = np.where(self.lai <= self.lai_max, self.lai, self.lai_max)

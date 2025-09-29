@@ -482,6 +482,10 @@ class Crop_Simple(Model):
             self.biomass_aboveground -= self.biomass_aboveground_reduction
             self.biomass -= self.biomass_aboveground_reduction
 
+    @Model.is_condition
+    def cond_biomass(self) -> None:
+        self.biomass = np.where(self.biomass >= 0.0, self.biomass, 0.)
+
 
 class Crop_Extended(Crop_Simple):
     """

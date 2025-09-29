@@ -69,7 +69,8 @@ Quantities = __QS__()
 
 
 MODEL_DECORATORS = [
-    '@Model.is_child_model', '@Model.is_required', '@Model.is_quantity'
+    '@Model.is_child_model', '@Model.is_required', '@Model.is_quantity',
+    '@Model.is_condition'
 ]
 
 
@@ -145,6 +146,8 @@ class Model(object):
             Quantities.DOUT: [],
         }
         self._requ:dict = {}  # dict containing the required quantities from other models in the model tree
+        self._cs:list = []  # list containing method names which represent conditions
+        self._cinit:bool = False  # flag which is checked in the is_condition-decorator
 
         kwas = list(kwargs.keys())
         # case 1: only `model_name` is specified by the user/developer in the
@@ -185,6 +188,7 @@ class Model(object):
         dms = self._get_decorated_methods()
         for dm in dms:
             getattr(self, dm)()
+        self._cinit = True  # set flag to True such that the condition itself is called in the is_condition-decorator
 
     ############################################################################
     # Properties
@@ -299,6 +303,14 @@ class Model(object):
         :rtype: date
         """
         return self._epoch
+    
+    @property
+    def conditions(self) -> list:
+        """
+        :return: list of method-names which represent conditions on model-quantities
+        :rtype: list
+        """
+        return self._cs
     
     ############################################################################
     # class-private Methods
@@ -500,3 +512,26 @@ class Model(object):
                 setattr(obj, func.__name__, rq)
             return wrapper
         return decorator_requ
+    
+    @staticmethod
+    def is_condition(func):
+        """
+        Decorator to specify conditions which should be kept in the evaluation 
+        of a model.
+
+        The idea is to implement conditions on 
+        quantities (e.g. lower and/or upper bounds) which should be kept, even 
+        when the model is used in an estimation procedure where adding noise or 
+        reseampling steps can "break" conditions on quantities and/or 
+        dependencies between quantities.
+
+        Arguments other than ``self`` are not supported in the decorated 
+        methods.
+        """
+        functools.wraps(func)
+        def wrapper(obj):
+            if not obj._cinit:
+                obj._cs.append(func.__name__)
+            else:
+                func(obj)
+        return wrapper

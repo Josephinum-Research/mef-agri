@@ -6,6 +6,17 @@ from ...requ import Requirement
 
 
 class Uptake(Model):
+    @Model.is_quantity(Q.STATE, U.kg_ha)
+    def nitrogen_sum(self) -> np.ndarray:
+        r"""
+        MQ - Random Output
+
+        :math:`c_{\textrm{N-ups},k}\ [\frac{kg}{ha}]`
+
+        :return: sum of nitrogen uptake of current crop/vegetation period
+        :rtype: numpy.ndarray
+        """
+
     @Model.is_quantity(Q.ROUT, U.mm_day)
     def water(self) -> np.ndarray:
         r"""
@@ -25,17 +36,6 @@ class Uptake(Model):
         :math:`c_{\textrm{N-up},k}\ [\frac{kg}{ha\cdot day}]`
 
         :return: uptake of nitrogen at current day (equal to supplied nitrogen by soil :func:`nsup`)
-        :rtype: numpy.ndarray
-        """
-
-    @Model.is_quantity(Q.STATE, U.kg_ha)
-    def nitrogen_sum(self) -> np.ndarray:
-        r"""
-        MQ - Random Output
-
-        :math:`c_{\textrm{N-ups},k}\ [\frac{kg}{ha}]`
-
-        :return: sum of nitrogen uptake of current crop/vegetation period
         :rtype: numpy.ndarray
         """
 
@@ -91,3 +91,9 @@ class Uptake(Model):
 
         self.nitrogen = self.nsup.value.copy()
         self.nitrogen_sum += self.nitrogen
+
+    @Model.is_condition
+    def cond_nsum(self) -> None:
+        self.nitrogen_sum = np.where(
+            self.nitrogen_sum >= 0.0, self.nitrogen_sum, 0.0
+        )

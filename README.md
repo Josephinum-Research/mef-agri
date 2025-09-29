@@ -22,14 +22,15 @@ https://josephinum-research.github.io/mef-agri/
   - [x] EPIC crop
   - [x] custom management
   - [x] INRAE Sentinel-2
+  - [ ] conditions in SWAT model
 
 - [ ] model evaluation
 
   - [x] statistical utilities for evaluation `mef_agri.evaluation.stats_utils.py`
-  - [ ] database
+  - [x] database
   - [ ] model input
   - [x] base-class for estimators
-  - [ ] estimators (model propagation, bootstrap particle filter)
+  - [x] estimators (model propagation, bootstrap particle filter)
 
 - [ ] utils
 

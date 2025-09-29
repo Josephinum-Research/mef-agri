@@ -363,6 +363,16 @@ class ModelTree(object):
         utrg = qmdl._qs[qname]['unit']
         setattr(qmdl, qname, Units.convert(value, unit, utrg))
 
+    def check_conditions(self) -> None:
+        """
+        Iterates all models in the tree (also models in connected trees) and 
+        calls all methods which represent a condition (see 
+        :func:`mef_agri.models.base.Model.is_condition`)
+        """
+        for mdl in self.models:
+            for cname in mdl._cs:
+                getattr(mdl, cname)()
+
     def connnect(self, tree) -> None:
         """
         Connect two model trees. This method does the connection bi-directional, 

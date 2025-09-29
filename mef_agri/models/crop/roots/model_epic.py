@@ -134,7 +134,11 @@ class Roots(Model):
 
         self.biomass_rate = self.bmtr.value * (0.4 - 0.2 * self.hui.value)
         self.biomass += self.biomass_rate
-        dtemp = 2.5 * self.depth_max * self.hui.value
+        self.depth = 2.5 * self.depth_max * self.hui.value
         self.depth = np.where(
-            dtemp <= self.rdmax.value, dtemp, self.rdmax.value
+            self.depth <= self.rdmax.value, self.depth, self.rdmax.value
         )
+
+    @Model.is_condition
+    def cond_biomass(self) -> None:
+        self.biomass = np.where(self.biomass >= 0., self.biomass, 0.0)

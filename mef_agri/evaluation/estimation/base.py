@@ -16,27 +16,28 @@ TMPFOLDER = 'tmp_est'
 
 
 class Estimator(object):
-    def __init__(self, edb:EvalDB_Quantiles, **kwargs) -> None:
+    def __init__(self, nps:int, edb:EvalDB_Quantiles) -> None:
         """
         Class which does the overall setup of an evaluation based on sequential
         Monte-Carlo simulation.
 
-        attributes which can be set with `kwargs`
-
-        * **n_particles** - number of particles which represent the distribution of the states - int, defaults to 1
-
+        :param nps: number of particles
+        :type nps: int
         :param edb: instance of evaluation database
-        :type edb: sitespecificcultivation.evaluation.estimation.db.EvalDB_Quantiles
+        :type edb: mef_agri.evaluation.db.EvalDB_Quantiles
 
         """
-        self.n_particles:int = 1  # number of particles representing distribution of state vector
-        self.collect_out = True
-        self.collect_obs_eval = True
-        self.collect_hps_eval = True
-        self.collect_hpf_eval = True
-        set_attributes(self, kwargs)
+        self._nps:int = nps  # number of particles representing distribution of state vector
         self._db:EvalDB_Quantiles = edb
         self._rvs = RVSampler()  # sampler object to get RVs
+
+    @property
+    def n_particles(self) -> int:
+        """
+        :return: number of particles
+        :rtype: int
+        """
+        return self._nps
 
     @property
     def database(self) -> EvalDB_Quantiles:
@@ -82,7 +83,7 @@ class Estimator(object):
             self._zmdl.gcs = zone_gcs
             self._zmdl.latitude = zone_data['latitude'].values[0]
             self._zmdl.height = zone_data['height'].values[0]
-            self._zmdl.model_tree.n_particles = self.n_particles
+            self._zmdl.model_tree.n_particles = self._nps
 
             ####################################################################
             # CROP ROTATION
@@ -125,9 +126,7 @@ class Estimator(object):
                             )
                         )
                     for oname in model.random_output_names:
-                        if not self.collect_out:
-                            break
-                        if oname == 'finished':
+                        if oname == 'finished':  # TODO check if this is still necessary
                             pass
                         self._db.add_out_eval(
                             zid, epoch, oname, model.model_id,
@@ -137,8 +136,6 @@ class Estimator(object):
                             )
                         )
                     for fname in model.hp_function_names:
-                        if not self.collect_hpf_eval:
-                            break
                         hpf = getattr(model, fname)
                         if hpf.is_sampled:
                             self._db.add_hpfuncs_eval(
@@ -173,9 +170,7 @@ class Estimator(object):
     def _set_states(self, zid:int, epoch:date) -> None:
         for tpl in self._db.get_states_def(zid, epoch).itertuples():
             dinfo = json.loads(tpl.distr)
-            val = self._rvs.get_sampled_values(
-                tpl.value, dinfo, self.n_particles
-            )
+            val = self._rvs.get_sampled_values(tpl.value, dinfo, self._nps)
             self._zmdl.model_tree.set_quantity(tpl.name, tpl.model, val)
             self._db.add_states_eval(
                 zid, epoch, tpl.name, tpl.model, val,
@@ -189,18 +184,15 @@ class Estimator(object):
         for tpl in self._db.get_hparams_def(zid, epoch).itertuples():
             dinfo = json.loads(tpl.distr)
             if dinfo['sample']:
-                val = self._rvs.get_sampled_values(
-                    tpl.value, dinfo, self.n_particles
-                )
-                if self.collect_hps_eval:
-                    self._db.add_hparams_eval(
-                        zid, epoch, tpl.name, tpl.model, val,
-                        discrete=self._zmdl.model_tree.is_q_discrete(
-                            tpl.name, tpl.model
-                        )
+                val = self._rvs.get_sampled_values(tpl.value, dinfo, self._nps)
+                self._db.add_hparams_eval(
+                    zid, epoch, tpl.name, tpl.model, val,
+                    discrete=self._zmdl.model_tree.is_q_discrete(
+                        tpl.name, tpl.model
                     )
+                )
             else:
-                val = tpl.value * np.ones((self.n_particles,))
+                val = tpl.value * np.ones((self._nps,))
             self._zmdl.model_tree.set_quantity(tpl.name, tpl.model, val)
         self._db.add_cmd_to_script(self._db.insert_hparams_eval_cmd())
 
@@ -210,25 +202,22 @@ class Estimator(object):
             self._zmdl.model_tree.set_quantity(tpl.name, tpl.model, fdef)
             if fdef['sample']:
                 self._zmdl.model_tree.get_quantity(tpl.name, tpl.model).sample(
-                    self._rvs, self.n_particles
+                    self._rvs, self._nps
                 )
 
     def _set_obs(self, zid:str, epoch:date) -> None:
         for tpl in self._db.get_obs_def(zid, epoch).itertuples():
             dinfo = json.loads(tpl.distr)
             if dinfo['sample']:
-                val = self._rvs.get_sampled_values(
-                    tpl.value, dinfo, self.n_particles
-                )
-                if self.collect_obs_eval:
-                    self._db.add_obs_eval(
-                        zid, epoch, tpl.name, tpl.model, val,
-                        discrete=self._zmdl.model_tree.is_q_discrete(
-                            tpl.name, tpl.model
-                        )
+                val = self._rvs.get_sampled_values(tpl.value, dinfo, self._nps)
+                self._db.add_obs_eval(
+                    zid, epoch, tpl.name, tpl.model, val,
+                    discrete=self._zmdl.model_tree.is_q_discrete(
+                        tpl.name, tpl.model
                     )
+                )
             else:
-                val = tpl.value * np.ones((self.n_particles,))
+                val = tpl.value * np.ones((self._nps,))
             self._zmdl.model_tree.set_quantity(
                 tpl.name, tpl.model, val, epoch=epoch
             )

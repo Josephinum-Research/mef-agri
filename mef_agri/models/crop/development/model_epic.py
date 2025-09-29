@@ -198,20 +198,13 @@ class Development(Model):
             self.heat_unit_index < 1.0, self.heat_units_rate, 0.0
         )
         self.heat_unit_index += self.heat_units_rate / self.heat_units_pot
-        self.heat_unit_index = np.where(
-            self.heat_unit_index <= 1.0, self.heat_unit_index, 1.0
-        )
+        self.cond_hui()
         # heat unit factor for leaves
         self.heat_unit_factor_leaves = (
             self.heat_unit_index / (self.heat_unit_index + np.exp(
                 self.hufl_coeff1 - self.hufl_coeff2 * self.heat_unit_index
             ))
-        )
-        self.heat_unit_factor_leaves = np.where(
-            self.heat_unit_factor_leaves >= 0.0, 
-            self.heat_unit_factor_leaves, 
-            0.0
-        )
+        )        
 
     def update_dormancy(self) -> None:
         """
@@ -219,6 +212,19 @@ class Development(Model):
         :class:`Development`. It is called in :func:`Development.update`.
         """
         pass
+
+    @Model.is_condition
+    def cond_hui(self) -> None:
+        r"""
+        Ensures that :func:`heat_unit_index` stays in the range of 
+        :math:`c_{\textrm{D-hui},k} \in [0.0, 1.0]`
+        """
+        self.heat_unit_index = np.where(
+            self.heat_unit_index >= 0.0, self.heat_unit_index, 0.0
+        )
+        self.heat_unit_index = np.where(
+            self.heat_unit_index <= 1.0, self.heat_unit_index, 1.0
+        )
 
 
 class Development_Dormancy(Development):

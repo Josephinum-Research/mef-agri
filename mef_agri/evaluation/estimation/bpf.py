@@ -1,39 +1,27 @@
 import numpy as np
-from datetime import date, timedelta
 
-from .base import Estimator
+from .pf import ParticleFilter
 from ...models.utils import Units as U
+from .pf_utils import effective_sample_size_choice
 
 
-def effective_sample_size_choice(wi:np.ndarray, nthresh:float=None) -> bool:
-    if nthresh is None:
-        # default threshold wil be half the number of particles
-        nthresh = 0.5 * wi.shape[0]
-    neff = 1. / np.sum(np.power(wi, 2.))
-    if neff <= nthresh:
-        return True
-    else:
-        return False
-
-
-class BPF_EPIC_Obs_LAI(Estimator):
-    def __init__(self, edb, **kwargs):
-        super().__init__(edb, **kwargs)
-        # initialize weights of particles
-        self._wi = np.ones((self.n_particles,)) / self.n_particles
+class BPF_EPIC_Obs_LAI(ParticleFilter):
+    def __init__(self, nps, edb):
+        super().__init__(nps, edb)
         # standard deviation of measurement noise (LAI from Sentinel-2)
         self._std = 0.3
 
     @property
     def std_lai_obs(self) -> float:
+        """
+        :return: standard deviation of observation noise
+        :rtype: float
+        """
         return self._std
     
     @std_lai_obs.setter
     def std_lai_obs(self, val):
         self._std = val
-
-    def propagate(self, epoch):
-        self._zmdl.update(epoch)
 
     def update(self, epoch):
         # get observed lai and check if it is up to date
@@ -58,5 +46,9 @@ class BPF_EPIC_Obs_LAI(Estimator):
         # resampling if necessary
         if not effective_sample_size_choice(self._wi):
             return
-        
-        # TODO
+        rix = self._rm(self._wi)  # get indices of resampled values
+        self._wi = np.ones((self._nps,)) / self._nps  # resetting the weights
+        for mdl in self._zmdl.model_tree.models:
+            for stn in mdl.state_names:
+                setattr(mdl, stn, getattr(mdl, stn)[rix])
+        self._zmdl.model_tree.check_conditions()
