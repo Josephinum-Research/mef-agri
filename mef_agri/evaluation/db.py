@@ -48,18 +48,18 @@ class EvaluationDB(object):
     CREATE_DSTATES += 'UNIQUE (zid, name, model, epoch)'
     CREATE_DSTATES += ');'
 
-    CREATE_DHPARAMS =  'CREATE TABLE hparams_def ('
-    CREATE_DHPARAMS += 'zid INT, name TEXT, model TEXT, '
-    CREATE_DHPARAMS += 'epoch TEXT, value REAL, distr TEXT, '
-    CREATE_DHPARAMS += 'FOREIGN KEY (zid) REFERENCES zones(zid), '
-    CREATE_DHPARAMS += 'UNIQUE (zid, name, model, epoch)'
-    CREATE_DHPARAMS += ');'
+    CREATE_DPARAMS =  'CREATE TABLE params_def ('
+    CREATE_DPARAMS += 'zid INT, name TEXT, model TEXT, '
+    CREATE_DPARAMS += 'epoch TEXT, value REAL, distr TEXT, '
+    CREATE_DPARAMS += 'FOREIGN KEY (zid) REFERENCES zones(zid), '
+    CREATE_DPARAMS += 'UNIQUE (zid, name, model, epoch)'
+    CREATE_DPARAMS += ');'
 
-    CREATE_DHPFUNCS =  'CREATE TABLE hpfuncs_def ('
-    CREATE_DHPFUNCS += 'zid INT, name TEXT, model TEXT, epoch TEXT, fdef TEXT, '
-    CREATE_DHPFUNCS += 'FOREIGN KEY (zid) REFERENCES zones(zid), '
-    CREATE_DHPFUNCS += 'UNIQUE (zid, name, model, epoch)'
-    CREATE_DHPFUNCS += ');'
+    CREATE_DPFUNCS =  'CREATE TABLE pfuncs_def ('
+    CREATE_DPFUNCS += 'zid INT, name TEXT, model TEXT, epoch TEXT, fdef TEXT, '
+    CREATE_DPFUNCS += 'FOREIGN KEY (zid) REFERENCES zones(zid), '
+    CREATE_DPFUNCS += 'UNIQUE (zid, name, model, epoch)'
+    CREATE_DPFUNCS += ');'
 
     CREATE_CROPROT =  'CREATE TABLE crop_rotation('
     CREATE_CROPROT += 'zid INT, cmodel TEXT, cmodel_module TEXT, '
@@ -75,10 +75,10 @@ class EvaluationDB(object):
     GET_ZGCS = 'SELECT x, y FROM zone_geo_coordinates WHERE zid={};'
     GET_STATES_DEF = 'SELECT name, model, value, epoch, distr FROM states_def '
     GET_STATES_DEF += 'WHERE zid={} AND epoch=\'{}\';'
-    GET_HPARAMS_DEF = 'SELECT name, model, value, epoch, distr FROM hparams_def'
-    GET_HPARAMS_DEF += ' WHERE zid={} AND epoch=\'{}\';'
-    GET_HPFUNCS_DEF = 'SELECT name, model, epoch, fdef FROM hpfuncs_def '
-    GET_HPFUNCS_DEF += 'WHERE zid={} AND epoch=\'{}\';'
+    GET_PARAMS_DEF = 'SELECT name, model, value, epoch, distr FROM params_def'
+    GET_PARAMS_DEF += ' WHERE zid={} AND epoch=\'{}\';'
+    GET_PFUNCS_DEF = 'SELECT name, model, epoch, fdef FROM pfuncs_def '
+    GET_PFUNCS_DEF += 'WHERE zid={} AND epoch=\'{}\';'
     GET_OBS_DEF = 'SELECT name, model, value, epoch, distr FROM obs_def '
     GET_OBS_DEF += 'WHERE zid={} AND epoch=\'{}\';'
     GET_CROPROT =  'SELECT cmodel, cmodel_module, epoch_start, epoch_end FROM '
@@ -88,15 +88,15 @@ class EvaluationDB(object):
     EVAL_TABLE_NAMES = {
         Quantities.STATE: 'states_eval',
         Quantities.OBS: 'obs_eval',
-        Quantities.HPARAM: 'hparams_eval',
-        Quantities.HPFUNC: 'hpfuncs_eval',
+        Quantities.PARAM: 'params_eval',
+        Quantities.PFUNC: 'pfuncs_eval',
         Quantities.ROUT: 'out_eval',
         Quantities.DOUT: 'out_eval'
     }
     DEF_TABLE_NAMES = {
         Quantities.STATE: 'states_def',
-        Quantities.HPARAM: 'hparams_def',
-        Quantities.HPFUNC: 'hpfuncs_def',
+        Quantities.PARAM: 'params_def',
+        Quantities.PFUNC: 'pfuncs_def',
         Quantities.OBS: 'obs_def'
     }
 
@@ -119,10 +119,10 @@ class EvaluationDB(object):
         visualization of the results.
 
         The *_def-tables contain information about the quantities of inference 
-        the observations, states, hyper-parameters and hp-functions. Each of 
+        the observations, states, parameters and pfunctions. Each of 
         these quantities belongs to a specific model (see 
         `sitespecificcultivation.inference.models`) and its name has to be 
-        unique (only) within this model. For the states, hparams, hp-functions 
+        unique (only) within this model. For the states, params, pfunctions 
         the epoch will usually be the initial epoch. For all of this quantities, 
         it is necessary to provide a value and the distribution information 
         (see`sitespecificcultivation.inference.stats_utils` for more details).
@@ -148,26 +148,26 @@ class EvaluationDB(object):
             self._curs.execute(self.CREATE_GCS)
             self._curs.execute(self.CREATE_DOBS)
             self._curs.execute(self.CREATE_DSTATES)
-            self._curs.execute(self.CREATE_DHPARAMS)
+            self._curs.execute(self.CREATE_DPARAMS)
             self._curs.execute(self.CREATE_EOBS)
             self._curs.execute(self.CREATE_ESTATES)
-            self._curs.execute(self.CREATE_EHPARAMS)
+            self._curs.execute(self.CREATE_EPARAMS)
             self._curs.execute(self.CREATE_EOUT)
-            self._curs.execute(self.CREATE_DHPFUNCS)
-            self._curs.execute(self.CREATE_EHPFUNCS)
+            self._curs.execute(self.CREATE_DPFUNCS)
+            self._curs.execute(self.CREATE_EPFUNCS)
             self._curs.execute(self.CREATE_CROPROT)
             self._curs.fetchall()
             self._conn.commit()
 
         self._reset_insert_dobs()
         self._reset_insert_dstates()
-        self._reset_insert_dhparams()
+        self._reset_insert_dparams()
         self._reset_insert_eobs()
         self._reset_insert_estates()
-        self._reset_insert_ehparams()
+        self._reset_insert_eparams()
         self._reset_insert_eout()
-        self._reset_insert_dhpfuncs()
-        self._reset_insert_ehpfuncs()
+        self._reset_insert_dpfuncs()
+        self._reset_insert_epfuncs()
         self._reset_insert_cropr()
 
         self._last_exc:str = 'No exception occurred.'  # temporary variable for last raised exception
@@ -343,9 +343,9 @@ class EvaluationDB(object):
 
         :param zone_name: name of zone
         :type zone_name: str
-        :param latitude: mean latitude of the zone
+        :param latitude: mean latitude of the zone [rad]
         :type latitude: float
-        :param height: mean height of the zone
+        :param height: mean height of the zone [m]
         :type height: float
         :param gcs: geo-coordinates representing the zone
         :type gcs: (2, n) np.ndarray
@@ -512,59 +512,59 @@ class EvaluationDB(object):
             zid, sname, smodel, epoch.isoformat(), value, json.dumps(distr)
         )
 
-    def add_hparam_def(
+    def add_param_def(
             self, zid:int, hname:str, hmodel:str, epoch:date, value:float, 
             distr:dict
         ) -> None:
         """
-        Adds a tuple with an hyper-parameter definition to the sql-string which 
-        is used in the `insert_hparams_def()`-method.
+        Adds a tuple with an parameter definition to the sql-string which 
+        is used in the `insert_params_def()`-method.
 
         :param zid: zone id
         :type zid: int
-        :param hname: name of the hyper-parameter within the `model`
+        :param hname: name of the parameter within the `model`
         :type hname: str
-        :param hmodel: `Model.model_id` of the model which the hyper-parameter belongs to
+        :param hmodel: `Model.model_id` of the model which the parameter belongs to
         :type hmodel: str
-        :param epoch: epoch which the hyper-parameter belongs to
+        :param epoch: epoch which the parameter belongs to
         :type epoch: date
-        :param value: value of the hyper-parameter
+        :param value: value of the parameter
         :type value: float
         :param distr: dictionary containing information about distribution
         :type distr: dict
         """
-        self._idhps += \
+        self._idps += \
             '({}, \'{}\', \'{}\', \'{}\', {}, \'{}\'),'.format(
             zid, hname, hmodel, epoch.isoformat(), value, json.dumps(distr)
         )
 
-    def add_hpfunc_def(
+    def add_pfunc_def(
             self, zid:int, fname:str, fmodel:str, epoch:date, fdef:dict
         ) -> None:
         """
-        Adds a tuple with an hp-function definition to the sql-string which 
-        is used in the `insert_hpfuncs_def()`-method.
+        Adds a tuple with an pfunction definition to the sql-string which 
+        is used in the `insert_pfuncs_def()`-method.
 
         :param zid: zone id
         :type zid: int
-        :param fname: name of the hp-function within the `model`
+        :param fname: name of the pfunction within the `model`
         :type fname: str
-        :param fmodel: `Model.model_id` of the model which the hp-function belongs to
+        :param fmodel: `Model.model_id` of the model which the pfunction belongs to
         :type fmodel: str
-        :param epoch: epoch which the hp-function belongs to
+        :param epoch: epoch which the pfunction belongs to
         :type epoch: date
-        :param fdef: dictionary containing information about the hp-function
+        :param fdef: dictionary containing information about the pfunction
         :type fdef: dict
         """
-        self._idhpf += \
+        self._idpf += \
             '({}, \'{}\', \'{}\', \'{}\', \'{}\'),'.format(
             zid, fname, fmodel, epoch.isoformat(), json.dumps(fdef)
         )
         
-    def insert_hpfuncs_def(self) -> bool:
+    def insert_pfuncs_def(self) -> bool:
         try:
-            self.execute_sql_command(self._idhpf[:-1] + ';')
-            self._reset_insert_dhpfuncs()
+            self.execute_sql_command(self._idpf[:-1] + ';')
+            self._reset_insert_dpfuncs()
             return True
         except Exception as exc:
             self._last_exc = str(exc)
@@ -611,17 +611,17 @@ class EvaluationDB(object):
             self._last_exc = str(exc)
             return False
     
-    def insert_hparams_def(self) -> bool:
+    def insert_params_def(self) -> bool:
         """
-        Insert added hyper-parameter definitions with `add_hparams_def()` into 
+        Insert added parameter definitions with `add_params_def()` into 
         the DB and reset the corresponding sql-string.
 
         :return: flag if sql-execution has been successfull
         :rtype: bool
         """
         try:
-            self.execute_sql_command(self._idhps[:-1] + ';')
-            self._reset_insert_dhparams()
+            self.execute_sql_command(self._idps[:-1] + ';')
+            self._reset_insert_dparams()
             return True
         except Exception as exc:
             self._last_exc = str(exc)
@@ -654,36 +654,36 @@ class EvaluationDB(object):
             self.GET_STATES_DEF.format(zid, epoch.isoformat())
         )
     
-    def get_hparams_def(self, zid:int, epoch:date) -> pd.DataFrame:
+    def get_params_def(self, zid:int, epoch:date) -> pd.DataFrame:
         """
-        Get hyper-parameter definitions for the provided zone-id, 
-        and epoch as DataFrame (all columns of the hparams_def-table).
+        Get parameter definitions for the provided zone-id, 
+        and epoch as DataFrame (all columns of the params_def-table).
 
         :param zid: id of the zone
         :type zid: int
-        :param epoch: epoch of hyper-parameter definition
+        :param epoch: epoch of parameter definition
         :type epoch: date
-        :return: hyper-parameter definitions
+        :return: parameter definitions
         :rtype: pd.DataFrame
         """
         return self.get_data_frame(
-            self.GET_HPARAMS_DEF.format(zid, epoch.isoformat())
+            self.GET_PARAMS_DEF.format(zid, epoch.isoformat())
         )
     
-    def get_hpfuncs_def(self, zid:int, epoch:date) -> pd.DataFrame:
+    def get_pfuncs_def(self, zid:int, epoch:date) -> pd.DataFrame:
         """
-        Get hp-function definitions for the provided zone-id, 
-        and epoch as DataFrame (all columns of the hparams_def-table).
+        Get pfunction definitions for the provided zone-id, 
+        and epoch as DataFrame (all columns of the params_def-table).
 
         :param zid: id of the zone
         :type zid: int
-        :param epoch: epoch of hp-function definition
+        :param epoch: epoch of pfunction definition
         :type epoch: date
-        :return: hp-function definitions
+        :return: pfunction definitions
         :rtype: pd.DataFrame
         """
         return self.get_data_frame(
-            self.GET_HPFUNCS_DEF.format(zid, epoch.isoformat())
+            self.GET_PFUNCS_DEF.format(zid, epoch.isoformat())
         )
     
     def get_obs_def(self, zid:int, epoch:date) -> pd.DataFrame:
@@ -738,50 +738,50 @@ class EvaluationDB(object):
             self._iests, zid, epoch, sname, smodel, value, discrete=discrete
         )
         
-    def add_hparams_eval(
+    def add_params_eval(
             self, zid:int, epoch:date, hname:str, hmodel:str, value:np.ndarray, 
             discrete:bool=False
         ) -> None:
         """
-        Add evaluated hyper-parameter for specific epoch to the corresponding 
+        Add evaluated parameter for specific epoch to the corresponding 
         INSERT-command
 
         :param zid: id of the zone
         :type zid: str
         :param epoch: evaluation epoch
         :type epoch: date
-        :param hname: name of the hyper-parameter within `model`
+        :param hname: name of the parameter within `model`
         :type hname: str
         :param hmodel: `Model.model_id` of the model which contains the `hname`
         :type hmodel: str
-        :param value: evaluated value of the hyper-parameter
+        :param value: evaluated value of the parameter
         :type value: numpy.ndarray
         """
-        self._iehps = self._add_eval(
-            self._iehps, zid, epoch, hname, hmodel, value, discrete=discrete
+        self._ieps = self._add_eval(
+            self._ieps, zid, epoch, hname, hmodel, value, discrete=discrete
         )
 
-    def add_hpfuncs_eval(
+    def add_pfuncs_eval(
             self, zid:int, epoch:date, fname:str, fmodel:str, value:np.ndarray, 
             discrete:bool=False
         ) -> None:
         """
-        Add evaluated hp-function for specific epoch to the corresponding 
+        Add evaluated pfunction for specific epoch to the corresponding 
         INSERT-command
 
         :param zid: id of the zone
         :type zid: int
         :param epoch: evaluation epoch
         :type epoch: date
-        :param fname: name of the hyper-parameter within `model`
+        :param fname: name of the parameter within `model`
         :type fname: str
         :param hmodel: `Model.model_id` of the model which contains the `fname`
         :type hmodel: str
-        :param value: evaluated value of the hp-function
+        :param value: evaluated value of the pfunction
         :type value: numpy.ndarray
         """
-        self._iehpf = self._add_eval(
-            self._iehpf, zid, epoch, fname, fmodel, value, discrete=discrete
+        self._iepf = self._add_eval(
+            self._iepf, zid, epoch, fname, fmodel, value, discrete=discrete
         )
         
     def add_obs_eval(
@@ -847,13 +847,13 @@ class EvaluationDB(object):
         self._reset_insert_estates()
         return ret
         
-    def insert_hparams_eval_cmd(self) -> str:
+    def insert_params_eval_cmd(self) -> str:
         """
-        :return: sql-command to insert evaluated hyper parameters (i.e. sampled)
+        :return: sql-command to insert evaluated parameters (i.e. sampled)
         :rtype: str
         """
-        ret = self._iehps[:-1] + ';'
-        self._reset_insert_ehparams()
+        ret = self._ieps[:-1] + ';'
+        self._reset_insert_eparams()
         return ret
 
     def insert_obs_eval_cmd(self) -> str:
@@ -874,9 +874,9 @@ class EvaluationDB(object):
         self._reset_insert_eout()
         return ret
     
-    def insert_hpfuncs_eval_cmd(self) -> str:
-        ret = self._iehpf[:-1] + ';'
-        self._reset_insert_ehpfuncs()
+    def insert_pfuncs_eval_cmd(self) -> str:
+        ret = self._iepf[:-1] + ';'
+        self._reset_insert_epfuncs()
         return ret
     
     def get_quantity_eval(
@@ -991,17 +991,17 @@ class EvaluationDB(object):
         self._idsts:str = 'INSERT INTO states_def '
         self._idsts += '(zid, name, model, epoch, value, distr) VALUES'
 
-    def _reset_insert_dhparams(self) -> None:
-        self._idhps:str = 'INSERT INTO hparams_def '
-        self._idhps += '(zid, name, model, epoch, value, distr) VALUES'
+    def _reset_insert_dparams(self) -> None:
+        self._idps:str = 'INSERT INTO params_def '
+        self._idps += '(zid, name, model, epoch, value, distr) VALUES'
 
-    def _reset_insert_dhpfuncs(self) -> None:
-        self._idhpf:str = 'INSERT INTO hpfuncs_def '
-        self._idhpf += '(zid, name, model, epoch, fdef) VALUES '
+    def _reset_insert_dpfuncs(self) -> None:
+        self._idpf = 'INSERT INTO pfuncs_def '
+        self._idpf += '(zid, name, model, epoch, fdef) VALUES '
 
-    def _reset_insert_ehpfuncs(self) -> None:
-        self._iehpf:str = 'INSERT INTO hpfuncs_eval '
-        self._iehpf += '(zid, name, model, epoch, value) VALUES '
+    def _reset_insert_epfuncs(self) -> None:
+        self._iepf:str = 'INSERT INTO pfuncs_eval '
+        self._iepf += '(zid, name, model, epoch, value) VALUES '
 
     def _reset_insert_eobs(self) -> None:
         self._ieobs:str = 'INSERT INTO obs_eval '
@@ -1011,9 +1011,9 @@ class EvaluationDB(object):
         self._iests:str = 'INSERT INTO states_eval '
         self._iests += '(zid, name, model, epoch, value) VALUES '
 
-    def _reset_insert_ehparams(self) -> None:
-        self._iehps:str = 'INSERT INTO hparams_eval '
-        self._iehps += '(zid, name, model, epoch, value) VALUES '
+    def _reset_insert_eparams(self) -> None:
+        self._ieps:str = 'INSERT INTO params_eval '
+        self._ieps += '(zid, name, model, epoch, value) VALUES '
 
     def _reset_insert_eout(self) -> None:
         self._ieout:str = 'INSERT INTO out_eval '
@@ -1034,9 +1034,9 @@ class EvaluationDB(object):
             ) -> EvaluationDB:
             for qmodel, qinfos in defs.items():
                 for qname, qinfo in qinfos.items():
-                    if qtype == Quantities.HPFUNC:
+                    if qtype == Quantities.PFUNC:
                         epoch = date.fromisoformat(qinfo['epoch'])
-                        edb.add_hpfunc_def(
+                        edb.add_pfunc_def(
                             zid, qname, qmodel, epoch, qinfo['fdef']
                         )
                     elif qtype == Quantities.STATE:
@@ -1045,9 +1045,9 @@ class EvaluationDB(object):
                             zid, qname, qmodel, epoch, qinfo['value'], 
                             qinfo['distr']
                         )
-                    elif qtype == Quantities.HPARAM:
+                    elif qtype == Quantities.PARAM:
                         epoch = date.fromisoformat(qinfo['epoch'])
-                        edb.add_hparam_def(
+                        edb.add_param_def(
                             zid, qname, qmodel, epoch, qinfo['value'], 
                             qinfo['distr']
                         )
@@ -1061,18 +1061,20 @@ class EvaluationDB(object):
 
         from ..models.base import Quantities
         qtypes = [
-            Quantities.STATE, Quantities.OBS, Quantities.HPARAM,
-            Quantities.HPFUNC
+            Quantities.STATE, Quantities.OBS, Quantities.PARAM,
+            Quantities.PFUNC
         ]
 
         edb = cls(dbdir, dbname)
-        zmodel = getattr(import_module(edefs['zmodel_module']), edefs['zmodel'])
+        zmodel = getattr(
+            import_module(edefs['zmodel_module']), edefs['zmodel_name']
+        )
         edb.insert_eval_data(
             edefs['epoch_start'], zmodel, edefs['add_info']['crs'], 
             epoch_end=edefs['epoch_end'], eval_info=edefs['eval_info']
         )
 
-        for zone_name, qinfos in edefs[edefs['zmodel']].items():
+        for zone_name, qinfos in edefs['zone_models'].items():
             lat = edefs['add_info']['zones'][zone_name]['latitude']
             gcs = np.array(edefs['add_info']['zones'][zone_name]['gcs'])
             edb.insert_zone(
@@ -1085,7 +1087,8 @@ class EvaluationDB(object):
 
             for crinfo in edefs['crop_rotation']:
                 cmodel = getattr(
-                    import_module(crinfo['cmodel_module']), crinfo['cmodel']
+                    import_module(crinfo['cmodel_module']), 
+                    crinfo['cmodel_name']
                 )
                 estart = date.fromisoformat(crinfo['epoch_start'])
                 estop = date.fromisoformat(crinfo['epoch_end'])
@@ -1094,14 +1097,14 @@ class EvaluationDB(object):
                 )
                 for qtype in qtypes:
                     edb = loop_quantities(
-                        zid, edb, qtype, edefs[crinfo['cmodel']][qtype]
+                        zid, edb, qtype, crinfo['crop_model'][qtype]
                     )
 
         edb.insert_crop_rotation()
         edb.insert_states_def()
-        edb.insert_hparams_def()
+        edb.insert_params_def()
         edb.insert_obs_def()
-        edb.insert_hpfuncs_def()
+        edb.insert_pfuncs_def()
         edb.connection.commit()
         return edb
     
@@ -1117,15 +1120,15 @@ class EvalDB_AllParticles(EvaluationDB):
     CREATE_ESTATES += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
     CREATE_ESTATES += ');'
 
-    CREATE_EHPARAMS =  'CREATE TABLE hparams_eval ('
-    CREATE_EHPARAMS += 'zid INT, name TEXT, model TEXT,epoch TEXT, value REAL,'
-    CREATE_EHPARAMS += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
-    CREATE_EHPARAMS += ');'
+    CREATE_EPARAMS =  'CREATE TABLE params_eval ('
+    CREATE_EPARAMS += 'zid INT, name TEXT, model TEXT,epoch TEXT, value REAL,'
+    CREATE_EPARAMS += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
+    CREATE_EPARAMS += ');'
 
-    CREATE_EHPFUNCS =  'CREATE TABLE hpfuncs_eval ('
-    CREATE_EHPFUNCS += 'zid INT, name TEXT, model TEXT, epoch TEXT,value REAL,'
-    CREATE_EHPFUNCS += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
-    CREATE_EHPFUNCS += ');'
+    CREATE_EPFUNCS =  'CREATE TABLE pfuncs_eval ('
+    CREATE_EPFUNCS += 'zid INT, name TEXT, model TEXT, epoch TEXT,value REAL,'
+    CREATE_EPFUNCS += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
+    CREATE_EPFUNCS += ');'
 
     CREATE_EOUT =  'CREATE TABLE out_eval ('
     CREATE_EOUT += 'zid INT, name TEXT, model TEXT, epoch TEXT, value REAL, '
@@ -1163,15 +1166,15 @@ class EvalDB_Quantiles(EvaluationDB):
     CREATE_ESTATES += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
     CREATE_ESTATES += ');'
 
-    CREATE_EHPARAMS =  'CREATE TABLE hparams_eval ('
-    CREATE_EHPARAMS += 'zid INT, name TEXT, model TEXT,epoch TEXT, value TEXT,'
-    CREATE_EHPARAMS += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
-    CREATE_EHPARAMS += ');'
+    CREATE_EPARAMS =  'CREATE TABLE params_eval ('
+    CREATE_EPARAMS += 'zid INT, name TEXT, model TEXT,epoch TEXT, value TEXT,'
+    CREATE_EPARAMS += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
+    CREATE_EPARAMS += ');'
 
-    CREATE_EHPFUNCS =  'CREATE TABLE hpfuncs_eval ('
-    CREATE_EHPFUNCS += 'zid INT, name TEXT, model TEXT, epoch TEXT,value TEXT,'
-    CREATE_EHPFUNCS += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
-    CREATE_EHPFUNCS += ');'
+    CREATE_EPFUNCS =  'CREATE TABLE pfuncs_eval ('
+    CREATE_EPFUNCS += 'zid INT, name TEXT, model TEXT, epoch TEXT,value TEXT,'
+    CREATE_EPFUNCS += 'FOREIGN KEY (zid) REFERENCES zones(zid)'
+    CREATE_EPFUNCS += ');'
 
     CREATE_EOUT =  'CREATE TABLE out_eval ('
     CREATE_EOUT += 'zid INT, name TEXT, model TEXT, epoch TEXT, value TEXT, '

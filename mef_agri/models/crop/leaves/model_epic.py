@@ -37,10 +37,10 @@ class Leaves(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def lai_max(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{L-lmx},0}\ [\ ]` - [R2]_ (equ. 8, table 2)
 
@@ -48,10 +48,10 @@ class Leaves(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def hui_leaf_decline(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{L-hld},0}\ [\ ]` - [R2]_ (equ. 10, table 2)
 
@@ -59,10 +59,10 @@ class Leaves(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def lai_regr_coeff(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{L-lc},0}\ [\ ]` - [R2]_ (equ. 10, table 2)
 
@@ -138,6 +138,7 @@ class Leaves(Model):
         super().update(epoch)
 
         # potential increase of lai
+        self.cond_hufl()
         dhufl = self.hufl.value - self._hufl_prv  # daily change of leaves heat-unit factor [R1]_ equ. 8
         self.lai_rate_pot = dhufl * self.lai_max * (
             1. - np.exp(5. * (self.lai - self.lai_max))

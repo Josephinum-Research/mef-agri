@@ -6,7 +6,8 @@ def effective_sample_size_choice(wi:np.ndarray, nthresh:float=None) -> bool:
     if nthresh is None:
         # default threshold wil be half the number of particles
         nthresh = 0.5 * wi.shape[0]
-    neff = 1. / np.sum(np.power(wi, 2.))
+    winorm = wi / np.sum(wi)
+    neff = 1. / np.sum(np.power(winorm, 2.))
     if neff <= nthresh:
         return True
     else:

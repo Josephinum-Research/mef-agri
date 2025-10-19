@@ -47,10 +47,10 @@ class Roots(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.m)
+    @Model.is_quantity(Q.PARAM, U.m)
     def depth_max(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{R-dm},0}\ [m]` - [R2]_ (equ. 14, table 2)
 

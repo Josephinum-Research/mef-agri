@@ -58,10 +58,10 @@ class Yield(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.frac)
+    @Model.is_quantity(Q.PARAM, U.frac)
     def harvest_index_max(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`y_{\textrm{hi-max},0}\ [\ ]` - [1] (equ. 16, table 2)
 
@@ -176,10 +176,10 @@ class Yield_Stressed(Yield):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def water_stress_influence(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{Y-ws},0}\ [\ ]` - [R2]_ (equ. 62, table 2)
 

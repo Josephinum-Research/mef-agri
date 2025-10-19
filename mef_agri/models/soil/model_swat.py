@@ -113,7 +113,7 @@ class Soil_V2009(Model):
     equal, which is also stated in [R1]_ section 2:3.1 in the paragraph above 
     table 2:3-1. Thus, this model only contains ``self.porosity`` as soil 
     property (random output) which is computed with ``self.clay_content`` 
-    (hyper parameter) using ``saturation_from_clay_content()`` function (i.e. 
+    (parameter) using ``saturation_from_clay_content()`` function (i.e. 
     values from table 2:3-1 [R1]_). Equ. 2:3.1.3 from [R1]_ is not used in this 
     model. 
     
@@ -136,12 +136,12 @@ class Soil_V2009(Model):
         self._zv:np.ndarray = None
 
     ############################################################################
-    # HYPER PARAMETERS (derived from external datasources, e.g. ebod or set by 
+    # PARAMETERS (derived from external datasources, e.g. ebod or set by 
     # the user)
-    @Model.is_quantity(Q.HPARAM, U.frac)
+    @Model.is_quantity(Q.PARAM, U.frac)
     def clay_content(self) -> np.ndarray:
         r"""
-        MQ - Hyper Parameter
+        MQ - Parameter
 
         :math:`s_{\textrm{clay},0}\ [\ ]`
 
@@ -149,10 +149,10 @@ class Soil_V2009(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.frac)
+    @Model.is_quantity(Q.PARAM, U.frac)
     def sand_content(self) -> np.ndarray:
         r"""
-        MQ - Hyper Parameter
+        MQ - Parameter
 
         :math:`s_{\textrm{sand},0}\ [\ ]`
 
@@ -160,10 +160,10 @@ class Soil_V2009(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.mm_day)
+    @Model.is_quantity(Q.PARAM, U.mm_day)
     def hydraulic_conductivity_sat(self) -> np.ndarray:
         r"""
-        MQ - Hyper Parameter
+        MQ - Parameter
 
         :math:`s_{\textrm{W-hcs},0}\ [\frac{mm}{day}]`
 
@@ -171,10 +171,10 @@ class Soil_V2009(Model):
         :rtype: numpy.ndarray
         """
     
-    @Model.is_quantity(Q.HPARAM, U.m)
+    @Model.is_quantity(Q.PARAM, U.m)
     def rooting_depth_max(self) -> np.ndarray:
         r"""
-        MQ - Hyper Parameter
+        MQ - Parameter
 
         :math:`s_{\textrm{rdm},0}\ [m]`
 
@@ -182,10 +182,10 @@ class Soil_V2009(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.g_cm3)
+    @Model.is_quantity(Q.PARAM, U.g_cm3)
     def bulk_density(self) -> np.ndarray:
         r"""
-        MQ - Hyper Parameter
+        MQ - Parameter
 
         :math:`s_{\textrm{bd},0}\ [\frac{g}{cm^3}]`
 
@@ -193,10 +193,10 @@ class Soil_V2009(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.per_day)
+    @Model.is_quantity(Q.PARAM, U.per_day)
     def decomposition_res_opt(self) -> np.ndarray:
         r"""
-        MQ - Hyper Parameter
+        MQ - Parameter
 
         :math:`s_{\textrm{C-rdo},0}\ [\frac{1}{day}]`
 
@@ -204,10 +204,10 @@ class Soil_V2009(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.per_day)
+    @Model.is_quantity(Q.PARAM, U.per_day)
     def mineralization_opt(self) -> np.ndarray:
         r"""
-        MQ - Hyper Parameter
+        MQ - Parameter
 
         :math:`s_{\textrm{C-omo},0}\ [\frac{1}{day}]`
 
@@ -216,7 +216,7 @@ class Soil_V2009(Model):
         """
 
     ############################################################################
-    # HYPER PARAMETERS which are internally computed
+    # PARAMETERS which are internally computed
     @Model.is_quantity(Q.ROUT, U.none)
     def curve_number_bare(self) -> np.ndarray:
         r"""
@@ -262,7 +262,7 @@ class Soil_V2009(Model):
         """
 
     ############################################################################
-    # RANDOM OUTPUTS DERIVED FROM HYPER PARAMETERS
+    # RANDOM OUTPUTS DERIVED FROM PARAMETERS
     @Model.is_quantity(Q.ROUT, U.none)
     def albedo(self) -> np.ndarray:
         r"""
@@ -308,7 +308,7 @@ class Soil_V2009(Model):
         r"""
         MQ - Random Output
 
-        :math:`s_{\textrm{T-dd},k}\ [m]`
+        :math:`s_{\textrm{T-dd},k}\ [mm]`
 
         :return: current damping depth of the soil - [R1]_ equ. 1:1.3.8
         :rtype: numpy.ndarray
@@ -553,7 +553,7 @@ class Soil_V2009(Model):
     def initialize(self, epoch):
         """
         Initialization of quantities and child models.
-        The following random outputs act as hyper-parameters and are also 
+        The following random outputs act as parameters and are also 
         initialized within this method
 
         * :func:`albedo`
@@ -580,7 +580,7 @@ class Soil_V2009(Model):
             loc=0.0, scale=3.0, size=self.model_tree.n_particles
         )
 
-        # initialize outputs derived from hyper-parameters
+        # initialize outputs derived from parameters
         self.wilting_point = wilting_point_from_clay_content(self.clay_content)
         self.field_capacity = field_capacity_from_clay_content(self.clay_content)
         self.porosity = saturation_from_clay_content(self.clay_content)
@@ -660,7 +660,7 @@ class Soil_V2009(Model):
         )
 
         ########################################################################
-        # update quantities derived from hyper parameters
+        # update quantities derived from parameters
         # the curve number of bare soil is reduced by 10 if a crop is present
         # the value 10 is an approximation derived from [1] table 2:1-1
         if cp:
@@ -809,10 +809,10 @@ class Soil_V2009_EPIC(Soil_V2009):
     """
     WUDF_DEF = 2.0
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def water_use_distribution_factor(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`s_{\textrm{W-udf},0}\ [\ ]` [R2]_ equ. 19 - 22
 

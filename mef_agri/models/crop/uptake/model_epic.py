@@ -61,6 +61,17 @@ class Uptake(Model):
         :rtype: Requirement
         """
 
+    @Model.is_required('n_amount_opt', 'crop.demand', U.kg_ha)
+    def nao(self) -> Requirement:
+        r"""
+        RQ - ``'n_amount_opt'`` from model with id ``'crop.demand'``
+
+        :math:`c_{\textrm{N-ao},k}\ [\frac{kg}{ha}]`
+
+        :return: optimal N-amount in crop biomass
+        :rtype: Requirement
+        """
+
     def initialize(self, epoch):
         """
         Initialization of :func:`nitrogen_sum` with zero vector.

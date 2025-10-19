@@ -31,10 +31,10 @@ class Weather_V2009(WeatherINCA):
         super().__init__(**kwargs)
         self._h:float = None  # site elevation [m]
 
-    @Model.is_quantity(Q.HPARAM, U.degC)
+    @Model.is_quantity(Q.PARAM, U.degC)
     def temperature_mean_annual(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`a_{\bar{\textrm{t}}}\ [^\circ C]`
 

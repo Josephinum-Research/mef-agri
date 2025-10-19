@@ -32,6 +32,6 @@ https://josephinum-research.github.io/mef-agri/
   - [x] base-class for estimators
   - [x] estimators (model propagation, bootstrap particle filter)
 
-- [ ] utils
+- [x] utils
 
 - [x] sphinx documentation

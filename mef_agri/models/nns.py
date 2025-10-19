@@ -2,7 +2,8 @@ import functools
 import inspect
 import numpy as np
 
-from .base import Model, Quantities as Q, Units as U, MODEL_DECORATORS
+from .base import Model, Quantities as Q, MODEL_DECORATORS
+from .utils import Units as U
 from ..evaluation.stats_utils import DISTRIBUTION_TYPE
 
 
@@ -56,14 +57,26 @@ class Layer(object):
 
     @property
     def n_nodes(self) -> int:
+        """
+        :return: number of nodes in the layer
+        :rtype: int
+        """
         return self._nnds
     
     @property
     def n_inputs(self) -> int:
+        """
+        :return: number of inputs of the layer
+        :rtype: int
+        """
         return self._ninp
 
     @property
     def affine_transform(self) -> np.ndarray:
+        r"""
+        :return: matrix :math:`\mathbf{W}\in\mathbb{R}^{n_n \times n_i}` representing affine transformation of the inputs
+        :rtype: numpy.ndarray
+        """
         return self._w
     
     @affine_transform.setter
@@ -91,6 +104,10 @@ class Layer(object):
 
     @property
     def bias(self) -> np.ndarray:
+        r"""
+        :return: vector :math:`\mathbf{b}\in\mathbb{R}^{n_n \times 1}` representing the bias/offset of transformed inputs
+        :rtype: np.ndarray
+        """
         return self._b
     
     @bias.setter
@@ -124,6 +141,10 @@ class Layer(object):
 
     @property
     def parent_nn(self):
+        """
+        :return: reference to the parent neural network
+        :rtype: mef_agri.models.nns.NeuralNetwork
+        """
         return self._nn
     
     @parent_nn.setter
@@ -131,14 +152,52 @@ class Layer(object):
         self._nn = value
 
     def compute(self, inp:np.ndarray) -> np.ndarray:
+        """
+        Processing of the layer.
+
+        :param inp: input quantities
+        :type inp: numpy.ndarray
+        :return: layer output
+        :rtype: numpy.ndarray
+        """
         return self.transfer_function(self._w @ inp + self._b)
     
     def transfer_function(self, inp:np.ndarray) -> np.ndarray:
+        r"""
+        Transfer function :math:`f()\in\mathbb{R}^{n_n \times 1}` 
+        which should process each element of ``inp`` individually.
+        Has to be implemented in the child class
+
+        :param inp: input to the transfer function :math:`\mathbf{W}\cdot\mathbf{i} + \mathbf{b}\in\mathbb{R}^{n_n \times 1}`
+        :type inp: numpy.ndarray
+        :return: output vector with dimension :math:`n_n \times 1`
+        :rtype: numpy.ndarray
+        """
         msg = 'transfer_function not implemented in Layer-child-class!'
         raise NotImplementedError(msg)
     
 
 class NeuralNetwork(Model):
+    r"""
+    This class represents a neural network which is composed of layers as 
+    described in :class:`Layer`. Layers are added via the :func:`is_layer` 
+    decorator. This class inherits from :class:`mef_agri.models.base.Models` and 
+    holds all network parameters (elements of affine transform matrices and 
+    bias vectors from the layers) as model parameters. The naming is as follows 
+    
+    * name of attributes representing layers correspond to the provided names of methods decorated with :func:`is_layer`
+    * name of attributes representing elements of affine transformation matrices :math:`\rightarrow` ``l'o'_w'i'_'j'`` (automatically created in :func:`is_layer`)
+    * name of attributes representing elements of the bias vectors :math:`\rightarrow` ``l'o'_b'i'`` (automatically created in :func:`is_layer`)
+
+    where ``'o'`` is the order of the layer within the neural network, ``'i'`` 
+    is the row within the affine transformation matrix and the bias vector and 
+    ``'j'`` is the column within the affine transformation matrix. The orderings 
+    of ``'o'``, ``'i'`` and ``'j'`` start from 1!
+
+    This class is only responsible for setting up the neural network. All 
+    computations are done within the layer objects.
+
+    """
     def __init__(self, **kwargs):
         self.decorators = NNMODEL_DECORATORS
         self._layers:list = []
@@ -171,6 +230,13 @@ class NeuralNetwork(Model):
         return decos
 
     def initialize(self, epoch):
+        """
+        Setting the provided parameter values (i.e. the elements of affine 
+        transformation matrices and bias vectors) in the layer objects.
+
+        :param epoch: initialization epoch
+        :type epoch: datetime.date
+        """
         super().initialize(epoch)
 
         # initialize the weights and biases of the network with provided values
@@ -189,6 +255,16 @@ class NeuralNetwork(Model):
             layer.affine_transform = atm
 
     def compute(self, inp:np.ndarray) -> np.ndarray:
+        """
+        Processing the neural network, i.e. calling 
+        :func:`mef_agri.models.nns.Layer.compute` of the layers in the 
+        appropriate order.
+
+        :param inp: input quantities to the first layer of the neural network
+        :type inp: numpy.ndarray
+        :return: output vector of the last layer of the neural network
+        :rtype: numpy.ndarray
+        """
         li = inp.copy()
         for layer in self._layers:
             li = layer.compute(li)
@@ -217,27 +293,27 @@ class NeuralNetwork(Model):
                 # object
                 layer.parent_nn = obj
 
-                # set the layer parameters (weights and biases) as hyper 
+                # set the layer parameters (weights and biases) as 
                 # parameters in the neural network
                 lname = 'l{}_'.format(order)
                 for i in range(layer.n_nodes):
                     # define the biases
                     bname = lname + 'b{}'.format(i + 1)
                     obj._qs[bname] = {
-                        'qtype': Q.HPARAM, 'unit': U.none, 
+                        'qtype': Q.PARAM, 'unit': U.none, 
                         'distr_type': DISTRIBUTION_TYPE.CONTINUOUS
                     }
-                    obj._qnames[Q.HPARAM].append(bname)
+                    obj._qnames[Q.PARAM].append(bname)
                     setattr(obj, bname, None)
 
                     # define the weights
                     for j in range(layer.n_inputs):
                         wname = lname + 'w{}_{}'.format(i + 1, j + 1)
                         obj._qs[wname] = {
-                            'qtype': Q.HPARAM, 'unit': U.none,
+                            'qtype': Q.PARAM, 'unit': U.none,
                             'distr_type': DISTRIBUTION_TYPE.CONTINUOUS
                         }
-                        obj._qnames[Q.HPARAM].append(wname)
+                        obj._qnames[Q.PARAM].append(wname)
                         setattr(obj, wname, None)
             return wrapper
         return decorator

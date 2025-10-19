@@ -7,18 +7,10 @@ from ..satellite.sentinel_2.model_inrae import Sentinel2_LAI10m
 
 
 class ZoneJR_V1(ZBase):
+    """
+    Variant of a zone model.
+    """
     def __init__(self):
-        """
-        The "model computation chain" is done as follows
-
-        * update of the atmosphere model components
-        * update of the soil model components 
-          * considering soil crop-cover (e.g. for evapotranspiration and temperature)
-          * compute soil supply based on crop demand and soil state
-        * update of the crop model components (including demands)
-          * compute and set the actual crop uptake
-
-        """
         super().__init__()
 
     @Model.is_child_model(Atmosphere_V2009)
@@ -49,7 +41,13 @@ class ZoneJR_V1(ZBase):
         :rtype: Sentinel2_LAI
         """
 
-    def initialize(self, epoch=None):
+    def initialize(self, epoch):
+        """
+        Initialization of child models
+
+        :param epoch: initialization epoch
+        :type epoch: datetime.date
+        """
         super().initialize(epoch)
         self.management.initialize(epoch)
         self.atmosphere.initialize(epoch)
@@ -57,6 +55,19 @@ class ZoneJR_V1(ZBase):
         self.sentinel2_lai.initialize(epoch)
 
     def update(self, epoch):
+        """
+        The following steps are performed
+
+        * update of the atmosphere model components
+        * update of the soil model components 
+          * considering soil crop-cover (e.g. for evapotranspiration and temperature)
+          * compute soil supply based on crop demand and soil state
+        * update of the crop model components (including demands)
+          * compute and set the actual crop uptake
+
+        :param epoch: current evaluation epoch
+        :type epoch: datetime.date
+        """
         self.management.update(epoch)
         super().update(epoch)
         self.atmosphere.update(epoch)

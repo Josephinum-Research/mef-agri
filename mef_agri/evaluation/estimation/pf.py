@@ -13,6 +13,8 @@ class ParticleFilter(Estimator):
         self._rm = resampling_systematic
         # propagation noise definitions
         self._pn = {}
+        # default system noise as fraction of corresponding value
+        self._dsn = 0.001
 
     @property
     def resampling_method(self):
@@ -28,6 +30,14 @@ class ParticleFilter(Estimator):
             raise ValueError(msg)
         self._rm = func
 
+    @property
+    def default_system_noise(self) -> float:
+        return self._dsn
+    
+    @default_system_noise.setter
+    def default_system_noise(self, val):
+        self._dsn = val
+
     def set_propagation_noise(
             self, state_name:str, model_id:str, value:float
         ) -> None:
@@ -42,10 +52,23 @@ class ParticleFilter(Estimator):
         )
         for mdl, mid in zipped:
             for stn in mdl.state_names:
+                q = getattr(mdl, stn)
+                if q is None:
+                    # this is the case for crop-model states at the day of 
+                    # sowing > model-trees of the zone model and the crop model 
+                    # are already connected but values are not set in the models
+                    # > does not need to be changed because adding noise at the 
+                    # day of sowing would not make sense (initial states are 
+                    # already sampled)
+                    continue
+
                 if (mid in self._pn.keys()) and (stn in self._pn[mid].keys()):
                     std = self._pn[mid][stn] * np.ones((self._nps,))
                 else:
-                    std = getattr(mdl, stn) * 0.05
-                sv = getattr(mdl, stn) + np.random.normal(loc=0.0, scale=std)
+                    std = np.abs(q) * self._dsn
+                sv = q + np.random.normal(loc=0.0, scale=std)
                 setattr(mdl, stn, sv)
-        self._zmdl.model_tree.check_conditions()
+        if self._zmdl.crop_rotation.crop_sown:
+            self._zmdl.model_tree.check_conditions(ignore_connected=True)
+        else:
+            self._zmdl.model_tree.check_conditions()

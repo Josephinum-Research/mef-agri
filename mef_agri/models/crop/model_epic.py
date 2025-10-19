@@ -125,10 +125,10 @@ class Crop_Simple(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.mm)
+    @Model.is_quantity(Q.PARAM, U.mm)
     def water_storage_max(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{W-csm},0}\ [mm]` - [R1]_ (equ. 2:2.1.1)
 
@@ -136,10 +136,10 @@ class Crop_Simple(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.kgxm2_haxMJxday)
+    @Model.is_quantity(Q.PARAM, U.kgxm2_haxMJxday)
     def energy_conversion(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{e2bm},0}\ [\frac{kg\cdot m^2}{MJ\cdot hat\cdot day}]` - [R2]_ (table 2)
 
@@ -147,10 +147,10 @@ class Crop_Simple(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def critical_aeration_factor(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{caf},0}\ [\ ]` - [R2]_ (table 2)
 
@@ -158,10 +158,10 @@ class Crop_Simple(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.m)
+    @Model.is_quantity(Q.PARAM, U.m)
     def height_max(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{hmax},0}]\ [\ ]` - [R2]_ (table 2)
 
@@ -169,10 +169,10 @@ class Crop_Simple(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def frost_coeff1(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{frc1},0}\ [\ ]` - [R2]_ (equ. 65, table 2)
 
@@ -180,10 +180,10 @@ class Crop_Simple(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.n_degC)
+    @Model.is_quantity(Q.PARAM, U.n_degC)
     def frost_coeff2(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{frc2},0}\ [\frac{1}{^\circ C}]` - [R2]_ (equ. 65, table 2)
 
@@ -472,6 +472,7 @@ class Crop_Simple(Model):
         self.stress.update(epoch)
         self.leaves.update(epoch)
         self.roots.update(epoch)
+        self.cond_root_biomass()
         self.cyield.update(epoch)
         self.demand.update(epoch)
 
@@ -485,6 +486,12 @@ class Crop_Simple(Model):
     @Model.is_condition
     def cond_biomass(self) -> None:
         self.biomass = np.where(self.biomass >= 0.0, self.biomass, 0.)
+
+    @Model.is_condition
+    def cond_root_biomass(self) -> None:
+        self.rbm.value = np.where(
+            self.rbm.value <= self.biomass, self.rbm.value, self.biomass
+        )
 
 
 class Crop_Extended(Crop_Simple):

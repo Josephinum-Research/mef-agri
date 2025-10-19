@@ -39,9 +39,8 @@ class BPF_EPIC_Obs_LAI(ParticleFilter):
         )
 
         # compute weights
-        const = 1. / (self._std * np.sqrt(2. * np.pi))
-        exparg = np.power((lai_obs - lai_mdl) / self._std, 2.0)
-        self._wi *= const * np.exp(exparg)
+        exparg = -0.5 * np.power((lai_obs - lai_mdl) / self._std, 2.0)
+        self._wi *= np.exp(exparg)
 
         # resampling if necessary
         if not effective_sample_size_choice(self._wi):

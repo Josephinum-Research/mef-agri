@@ -1,6 +1,6 @@
 import numpy as np
 
-from .utils import HPFunction, Units
+from .utils import PFunction, Units
 
 
 class Requirement(object):
@@ -64,15 +64,15 @@ class Requirement(object):
     def __call__(self, value) -> np.ndarray:
         """
         A required quantity is callable if the underlying quantity is of type 
-        `HPFunction`. In this case, `value` is directly passed to the 
-        `__call__` of the `HPFunction`.
+        `PFunction`. In this case, `value` is directly passed to the 
+        `__call__` of the `PFunction`.
 
-        :param value: value which is passed to `__call__` of `HPFunction`
+        :param value: value which is passed to `__call__` of `PFunction`
         :type value: numpy.ndarray
-        :return: computed value from underlying `HPFunction`
+        :return: computed value from underlying `PFunction`
         :rtype: numpy.ndarray
         """
-        if not isinstance(self.value, HPFunction):
+        if not isinstance(self.value, PFunction):
             msg = 'Only required quantities of type `HPFunction` are callable!'
             raise ValueError(msg)
         self.value(value)

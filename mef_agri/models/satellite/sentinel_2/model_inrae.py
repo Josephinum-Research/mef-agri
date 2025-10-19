@@ -24,7 +24,7 @@ class Sentinel2_LAI10m(NeuralNetwork):
 
     The input values are defined as observations and are derived from the 
     measurements (i.e. bands and angles) from Sentinel-2. The neural network 
-    affine transforms and biases are defined as hyper-parameters and the 
+    affine transforms and biases are defined as parameters and the 
     normalization, denormalizationa and min/max values of the cosines of angles 
     are set as fixed float values within this class.
 

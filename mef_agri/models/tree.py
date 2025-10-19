@@ -106,6 +106,17 @@ class ModelTree(object):
         return ret
     
     @property
+    def models_intern(self) -> list:
+        """
+        :return: references to the objects which are in the own tree (models in connected trees are ignored)
+        :rtype: list
+        """
+        ret = []
+        for entry in self._tree.values():
+            ret.append(entry['ref'])
+        return ret
+    
+    @property
     def text_representation(self) -> str:
         """
         :return: text representation of the model tree
@@ -121,8 +132,12 @@ class ModelTree(object):
             outstr += ws1 + '|' + us + '|\n'
 
             qs = [
-                'state', 'observation', 'hyper_parameter', 'output', 
-                'hp_function'
+                'state', 'observation', 'parameter', 'output', 
+                'pfunction'
+            ]
+            qs = [
+                Quantities.STATE, Quantities.PARAM, Quantities.PFUNC,
+                Quantities.OBS, 'output'
             ]
             for dtype in qs:
                 if len(getattr(model, dtype + '_names')) > 0:
@@ -331,7 +346,7 @@ class ModelTree(object):
         """
         Set the value of a quantity in a model in the tree. 
         If ``unit`` is provided and ``value`` is not a dict (i.e. set a 
-        :class:`mef_agri.models.utils.HPFunction`), 
+        :class:`mef_agri.models.utils.PFunction`), 
         the appropriate conversion is applied.
 
         :param qname: name of the quantity in the model
@@ -339,7 +354,7 @@ class ModelTree(object):
         :param model_id: id of the model which contains the quantity
         :type model_id: str
         :param value: value which should be set for the quantity
-        :type value: float or 1D numpy.ndarray, dict for `HPFunction`
+        :type value: float or 1D numpy.ndarray, dict for `PFunction`
         :param unit: unit of the provided value (see :class:`mef_agri.models.utils.__UNITS__`), defaults to None
         :type unit: str, optional
         :param epoch: epoch of an observation, which is necessary to indicate new incoming observations
@@ -347,10 +362,10 @@ class ModelTree(object):
         """
         qmdl = self._get_model_check_qname(qname, model_id)
         if isinstance(value, dict):
-            from .utils import HPFunction
-            hpf = HPFunction()
-            hpf.define(value)
-            setattr(qmdl, qname, hpf)
+            from .utils import PFunction
+            pf = PFunction()
+            pf.define(value)
+            setattr(qmdl, qname, pf)
             return
         if qname in qmdl.observation_names:
             if epoch is None:
@@ -363,13 +378,17 @@ class ModelTree(object):
         utrg = qmdl._qs[qname]['unit']
         setattr(qmdl, qname, Units.convert(value, unit, utrg))
 
-    def check_conditions(self) -> None:
+    def check_conditions(self, ignore_connected:bool=False) -> None:
         """
         Iterates all models in the tree (also models in connected trees) and 
         calls all methods which represent a condition (see 
         :func:`mef_agri.models.base.Model.is_condition`)
+
+        :param ignore_connected: indicator if models from connected trees should be ignored
+        :type ignore_connected: bool
         """
-        for mdl in self.models:
+        mdls = self.models_intern if ignore_connected else self.models
+        for mdl in mdls:
             for cname in mdl._cs:
                 getattr(mdl, cname)()
 

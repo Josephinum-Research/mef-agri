@@ -9,7 +9,7 @@ class Water_CNM_V2009(Model):
     r"""
     This surface water model corresponds to the SCS curve number procedure 
     outlined in [R1]_. In its current version, the curve number is roughly 
-    approximated by introducing it as a hyper-parameter and considering 
+    approximated by introducing it as a parameter and considering 
     crop cover (i.e. an approximation of [R1]_ table 2:1-1). The retention 
     parameter is computed by considering only the water content in the soil 
     profile ([R1]_ equ. 2:1.1.6), i.e. no evapotranspiration and frozen top 

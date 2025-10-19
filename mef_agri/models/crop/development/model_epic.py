@@ -62,10 +62,10 @@ class Development(Model):
         :rtype: bool
         """
     
-    @Model.is_quantity(Q.HPARAM, U.degC)
+    @Model.is_quantity(Q.PARAM, U.degC)
     def temperature_base(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{D-tb},0}\ [^\circ C]` - [R2]_ (equ. 1, table 2)
 
@@ -73,10 +73,10 @@ class Development(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.degC)
+    @Model.is_quantity(Q.PARAM, U.degC)
     def temperature_opt(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{D-to},0}\ [^\circ C]` - [R2]_ (equ. 46, table 2)
 
@@ -84,10 +84,10 @@ class Development(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.degC)
+    @Model.is_quantity(Q.PARAM, U.degC)
     def heat_units_pot(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{D-phu},0}\ [^\circ C]` - [R2]_ (equ. 2, table 2)
 
@@ -95,10 +95,10 @@ class Development(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def hufl_coeff1(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{D-lc1},0}\ [\ ]` - [R2]_ (equ. 9, table 2)
 
@@ -106,10 +106,10 @@ class Development(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def hufl_coeff2(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{C-lc2},0}\ [\ ]` - [R2]_ (equ. 9, table 2)
         

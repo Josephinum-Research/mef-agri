@@ -441,9 +441,9 @@ class __UNITS__:
 Units = __UNITS__()
 ################################################################################
 
-class HPFunction(object):
+class PFunction(object):
     """
-    This class represents a function which acts as hyper-parameter in the 
+    This class represents a function which acts as parameter in the 
     models. The object is callable and returns the output value based on the 
     provided input value. The input value can be a numeric value, a 1D 
     numpy.ndarray with length 1 or with length equal to the number of 
@@ -462,7 +462,7 @@ class HPFunction(object):
     - **values-y** - array of values on the y-axis of the function (i.e. the output values), used as mean/mode value for the distribution
     - **distr-x** - distribution of the x-values, dict which contains the `distr_id`, and further distribution parameters according to `stats_utils`, the assumption is, that the distribution is equal for all x-values
     - **distr-y** - distribution of the y-values, dict which contains the `distr_id`, and further distribution parameters according to `stats_utils`, the assumption is, that the distribution is equal for all y-values
-    - **sample** - specifies if hp-function should be sampled or not
+    - **sample** - specifies if pfunction should be sampled or not
 
     **values-x** and **values-y** are necessary, the other ones are optional 
 
@@ -483,12 +483,12 @@ class HPFunction(object):
         x- and y-values, intervals are defined, in which a linear function is 
         used to interpolate values.
 
-        :param fdef: dictionary containing information about the function (see :class:`HPFunction`)
+        :param fdef: dictionary containing information about the function (see :class:`PFunction`)
         :type fdef: dict
         """
         def __init__(self, fdef:dict) -> None:
             if not 'values-x' in fdef.keys() or not 'values-y' in fdef.keys():
-                msg = 'HPFunction.PiecewiseLinear: '
+                msg = 'PFunction.PiecewiseLinear: '
                 msg += '`values-x` and `values-y` have to be provided in the '
                 msg += '`fdef`-dictionary!'
                 raise ValueError(msg)
@@ -501,7 +501,7 @@ class HPFunction(object):
 
         def sample(self, rvs:RVSampler, nsamples:int) -> None:
             r"""
-            If the HP-function is sampled, the arrays of x- and y-values with 
+            If the pfunction is sampled, the arrays of x- and y-values with 
             length :math:`n` (values in ``fdef`` provided to ``__init__()``) are 
             sampled as often as specified by ``nsamples``. 
             Thus, the arrays of x- and y-values (representing the supporting 
@@ -528,7 +528,7 @@ class HPFunction(object):
 
         def compute(self, value:np.ndarray) -> np.ndarray:
             r"""
-            Compute interpolated values. In the case, that the HP-function is 
+            Compute interpolated values. In the case, that the pfunction is 
             sampled, each value in ``value`` is used for interpolation together 
             with one sample of supporting points (i.e. one row of the 
             :math:`nsampels\times n` arrays representing the x- and y-values).
@@ -541,12 +541,12 @@ class HPFunction(object):
             :rtype: numpy.ndarray
             """
             if len(value.shape) > 1:
-                msg = 'Input value to hp-function should be a 1D numpy.ndarray!'
+                msg = 'Input value to pfunction should be a 1D numpy.ndarray!'
                 raise ValueError(msg)
             
             if self._sampled:
                 if self._x.shape[0] != value.shape[0]:
-                    msg = 'Number of samples of hp-function does not match the '
+                    msg = 'Number of samples of pfunction does not match the '
                     msg += 'number of samples in the provided array of values!'
                     raise ValueError(msg)
 
@@ -565,7 +565,7 @@ class HPFunction(object):
     @property
     def current_value(self) -> np.ndarray:
         """
-        :return: current values computed with HP-Function definition and input values
+        :return: current values computed with PFunction definition and input values
         :rtype: numpy.ndarray
         """
         return self._val
@@ -573,7 +573,7 @@ class HPFunction(object):
     @property
     def is_sampled(self) -> bool:
         """
-        :return: flag if hp-function is sampled
+        :return: flag if pfunction is sampled
         :rtype: bool
         """
         return self._sampled
@@ -589,7 +589,7 @@ class HPFunction(object):
         if fdef['ftype'] == self.FTYPE.PIECEWISE_LINEAR:
             self._func = self.PiecewiseLinear(fdef)
         else:
-            msg = 'HPFunction: provided function-type not supported!'
+            msg = 'PFunction: provided function-type not supported!'
             raise ValueError(msg)
     
     def sample(self, rvs:RVSampler, nsamples:int) -> None:

@@ -50,10 +50,10 @@ class Demand(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def ncoeff1(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{N-c1},0}\ [\frac{kg}{t}]` - [R2]_ (equ 26, table 2)
 
@@ -61,10 +61,10 @@ class Demand(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def ncoeff2(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{N-c2},0}\ [\frac{kg}{t}]` - [R2]_ (equ 26, table 2)
 
@@ -72,10 +72,10 @@ class Demand(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.HPARAM, U.none)
+    @Model.is_quantity(Q.PARAM, U.none)
     def ncoeff3(self) -> np.ndarray:
         r"""
-        MQ - Hyper-Parameter
+        MQ - Parameter
 
         :math:`c_{\textrm{N-c3},0}\ [\ ]` - [R2]_ (equ 26, table 2)
 

@@ -226,6 +226,10 @@ class Stress(Model):
             self.nitrogen_stress = self._ov.copy()
         else:
             ratio1 = self.nsum.value / self.nao.value
+            # TODO the following line is a quick-and-dirty approach to suppress 
+            # TODO warnings > need to be tested if it is better to check  
+            # TODO the nitrogen uptake and adjust the uptake rates accordingly
+            ratio1 = np.where(ratio1 <= 1.0, ratio1, 1.0)
             nscl = 2.0 * (1.0 - ratio1)
             add1 = np.exp(3.39 - 10.93 * nscl)
             denom = nscl + add1

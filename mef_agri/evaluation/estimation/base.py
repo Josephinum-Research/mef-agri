@@ -73,7 +73,7 @@ class Estimator(object):
             ####################################################################
             # GET AND SETUP ZONE DATA
             zone_gcs = self._db.get_zone_gcs(zid).values
-            # initial values of states and hyper parameters
+            # initial values of states and parameters
             # epoch has to be one day before start of the evaluation
             epoch_init = epoch_start - timedelta(days=1)
 
@@ -92,10 +92,10 @@ class Estimator(object):
             )
 
             ################################################################
-            # SET INITIAL STATES, HPARAMS, HPFUNCS
+            # SET INITIAL STATES, PARAMS, PFUNCS
             self._set_states(zid, epoch_init)
-            self._set_hparams(zid, epoch_init)
-            self._set_hpfuncs(zid, epoch_init)
+            self._set_params(zid, epoch_init)
+            self._set_pfuncs(zid, epoch_init)
 
             ################################################################
             # INITIALIZE ZONE MODEL AND START PROCESSING FOR EACH DAY
@@ -115,7 +115,7 @@ class Estimator(object):
                 self.update(epoch)
 
                 ############################################################
-                # SAVE STATES, OUTPUTS AND EVALUATED HPFUNCTIONS
+                # SAVE STATES, OUTPUTS AND EVALUATED PFUNCTIONS
                 for model in self._zmdl.model_tree.models:
                     for sname in model.state_names:
                         self._db.add_states_eval(
@@ -135,28 +135,28 @@ class Estimator(object):
                                 oname, model.model_id
                             )
                         )
-                    for fname in model.hp_function_names:
-                        hpf = getattr(model, fname)
-                        if hpf.is_sampled:
-                            self._db.add_hpfuncs_eval(
+                    for fname in model.pfunction_names:
+                        pf = getattr(model, fname)
+                        if pf.is_sampled:
+                            self._db.add_pfuncs_eval(
                                 zid, epoch, fname, model.model_id,
-                                hpf.current_value,
+                                pf.current_value,
                                 discrete=self._zmdl.model_tree.is_q_discrete(
                                     fname, model.model_id
                                 )
                             )
 
-                # Trigger setting of initial states, hparams and hpfuncs in the 
+                # Trigger setting of initial states, params and pfuncs in the 
                 # currently sown crop 
                 if self._zmdl.crop_rotation.crop_sown:
                     self._set_states(zid, epoch)
-                    self._set_hparams(zid, epoch)
-                    self._set_hpfuncs(zid, epoch)
+                    self._set_params(zid, epoch)
+                    self._set_pfuncs(zid, epoch)
                     self._zmdl.crop_rotation.current_crop.initialize(epoch)
                 
                 self._db.add_cmd_to_script(self._db.insert_states_eval_cmd())
                 self._db.add_cmd_to_script(self._db.insert_out_eval_cmd())
-                self._db.add_cmd_to_script(self._db.insert_hpfuncs_eval_cmd())
+                self._db.add_cmd_to_script(self._db.insert_pfuncs_eval_cmd())
 
         self._db.close_script()
         self._db.execute_script()
@@ -180,12 +180,12 @@ class Estimator(object):
             )
         self._db.add_cmd_to_script(self._db.insert_states_eval_cmd())
 
-    def _set_hparams(self, zid:int, epoch:date) -> None:
-        for tpl in self._db.get_hparams_def(zid, epoch).itertuples():
+    def _set_params(self, zid:int, epoch:date) -> None:
+        for tpl in self._db.get_params_def(zid, epoch).itertuples():
             dinfo = json.loads(tpl.distr)
             if dinfo['sample']:
                 val = self._rvs.get_sampled_values(tpl.value, dinfo, self._nps)
-                self._db.add_hparams_eval(
+                self._db.add_params_eval(
                     zid, epoch, tpl.name, tpl.model, val,
                     discrete=self._zmdl.model_tree.is_q_discrete(
                         tpl.name, tpl.model
@@ -194,10 +194,10 @@ class Estimator(object):
             else:
                 val = tpl.value * np.ones((self._nps,))
             self._zmdl.model_tree.set_quantity(tpl.name, tpl.model, val)
-        self._db.add_cmd_to_script(self._db.insert_hparams_eval_cmd())
+        self._db.add_cmd_to_script(self._db.insert_params_eval_cmd())
 
-    def _set_hpfuncs(self, zid:int, epoch:date) -> None:
-        for tpl in self._db.get_hpfuncs_def(zid, epoch).itertuples():
+    def _set_pfuncs(self, zid:int, epoch:date) -> None:
+        for tpl in self._db.get_pfuncs_def(zid, epoch).itertuples():
             fdef = json.loads(tpl.fdef)
             self._zmdl.model_tree.set_quantity(tpl.name, tpl.model, fdef)
             if fdef['sample']:

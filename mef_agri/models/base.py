@@ -23,22 +23,22 @@ class __QS__(object):
         return 'state'
     
     @property
-    def HPARAM(self) -> str:
+    def PARAM(self) -> str:
         """
-        Hyper parameters are quantities which define the model behavior. They 
+        Parameters are quantities which define the model behavior. They 
         exhibit a considerably lower dynamic behavior than the states or can be 
         also treated as stationary random processes.
         """
-        return 'hyper_parameter'
+        return 'parameter'
 
     @property
-    def HPFUNC(self) -> str:
+    def PFUNC(self) -> str:
         """
-        Hyper parametric functions are an extension of the hyper parameters. 
-        They combine a number of hyper parameters which should not introduced 
+        Parametric functions are an extension of the parameters. 
+        They combine a number of parameters which should not introduced 
         directly to the models to keep the complexity lower.
         """
-        return 'hp_function'
+        return 'pfunction'
 
     @property
     def OBS(self) -> str:
@@ -139,8 +139,8 @@ class Model(object):
         self._qs:dict = {}  # dict containing quantities with further information
         self._qnames:dict = {
             Quantities.STATE: [],
-            Quantities.HPARAM: [],
-            Quantities.HPFUNC: [],
+            Quantities.PARAM: [],
+            Quantities.PFUNC: [],
             Quantities.OBS: [],
             Quantities.ROUT: [],
             Quantities.DOUT: [],
@@ -217,12 +217,12 @@ class Model(object):
         return self._qnames[Quantities.OBS]
     
     @property
-    def hyper_parameter_names(self) -> list[str]:
+    def parameter_names(self) -> list[str]:
         """
-        :return: names of hyper parameters contained in the model
+        :return: names of parameters contained in the model
         :rtype: list[str]
         """
-        return self._qnames[Quantities.HPARAM]
+        return self._qnames[Quantities.PARAM]
     
     @property
     def state_names(self) -> list[str]:
@@ -257,12 +257,12 @@ class Model(object):
         return self._qnames[Quantities.ROUT] + self._qnames[Quantities.DOUT]
     
     @property
-    def hp_function_names(self) -> list[str]:
+    def pfunction_names(self) -> list[str]:
         """
-        :return: names of the functions acting as hyper-parameters in the model
+        :return: names of the functions acting as parameters in the model
         :rtype: list[str]
         """
-        return self._qnames[Quantities.HPFUNC]
+        return self._qnames[Quantities.PFUNC]
     
     @property
     def model_name(self) -> str:
@@ -357,7 +357,7 @@ class Model(object):
         If this is not intended for certain random outputs, this has to be 
         overridden in the child class.
 
-        States, hyper-parameters, hp-functions and observations are not 
+        States, hyper-parameters, pfunctions and observations are not 
         initialized with nan-arrays, because these quantities have to be 
         provided a priori respectively are set from "outside" of this class 
 
