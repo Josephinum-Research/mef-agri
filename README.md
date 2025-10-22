@@ -10,19 +10,20 @@ https://josephinum-research.github.io/mef-agri/
 
 - [ ] data sources
 
-  - [ ] custom project-class for data access and 
-  - [ ] INCA weather
-  - [ ] eBod soil
-  - [ ] Sentinel-2 planetary computer
+  - [x] custom project-class for data access and 
+  - [x] INCA weather
+  - [x] eBod soil
+  - [x] Sentinel-2 planetary computer
+  - [ ] management data
 
-- [ ] model definitions `mef_agri.models`
+- [x] model definitions `mef_agri.models`
 
   - [x] SWAT atmosphere
   - [x] SWAT soil
   - [x] EPIC crop
   - [x] custom management
   - [x] INRAE Sentinel-2
-  - [ ] conditions in SWAT model
+  - [x] conditions in SWAT model
 
 - [ ] model evaluation
 
