@@ -96,11 +96,11 @@ class Task(GeoRaster):
 
         :param appl_val: application value - if it is a numeric value, uniform treatment will be assumed - otherwise it has to be a 3-dim `numpy.ndarray` (even when there is only one treatment - see `mef_agri.utils.raster.GeoRaster`)
         :type appl_val: float | numpy.ndarray
-        :param appl_name: name
+        :param appl_name: name of the application value(s)
         :type appl_name: str | list[str]
-        :param appl_unit: _description_
+        :param appl_unit: unit of the application value(s)
         :type appl_unit: str | list[str]
-        :param appl_ix: _description_, defaults to None
+        :param appl_ix: index specifying the dimension of the channels of the application values (if numpy.ndarray), defaults to None
         :type appl_ix: int, optional
         """
         if isinstance(appl_val, float) or isinstance(appl_val, int):

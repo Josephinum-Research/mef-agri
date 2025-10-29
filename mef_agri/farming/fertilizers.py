@@ -7,7 +7,6 @@ class Fertilizer(object):
     fractions (i.e. range of possible values is [0, 1]).
     """
     def __init__(self):
-        self._fid = None
         self._no3 = 0.0
         self._nh4 = 0.0
         self._cao = 0.0
@@ -17,18 +16,6 @@ class Fertilizer(object):
         self._k2o_sol = 0.0
         self._so3_sol = 0.0
         self._zn = 0.0
-
-    @property
-    def fertilizer_name(self) -> str:
-        """
-        :return: name/id of the fertilizer
-        :rtype: str
-        """
-        return self._fid
-    
-    @fertilizer_name.setter
-    def fertilizer_name(self, value:str):
-        self._fid = value
 
     @property
     def N_total(self) -> float:
@@ -159,7 +146,6 @@ class Fertilizer(object):
 
     
 NAC = Fertilizer()
-NAC.fertilizer_name = 'NAC'
 NAC.NO3 = 0.135
 NAC.NH4 = 0.135
 NAC.CaO = 0.115
@@ -167,7 +153,6 @@ NAC.CaO_sol = 0.065
 
 
 Complex_15_15_15_8S_Zn = Fertilizer()
-Complex_15_15_15_8S_Zn.fertilizer_name = 'Complex_15_15_15_8S_Zn'
 Complex_15_15_15_8S_Zn.NO3 = 0.06
 Complex_15_15_15_8S_Zn.NH4 = 0.09
 Complex_15_15_15_8S_Zn.P2O5 = 0.15
@@ -178,7 +163,6 @@ Complex_15_15_15_8S_Zn.Zn = 1e-4
 
 
 Petiso = Fertilizer()
-Petiso.fertilizer_name = 'Petiso plus S 24 N + 12 SO3'
 Petiso.NH4 = 0.12
 Petiso.NO3 = 0.12
 Petiso.SO3 = 0.12
@@ -188,7 +172,6 @@ Petiso.CaO_sol = 0.09
 
 
 Ensin = Fertilizer()
-Ensin.fertilizer_name = 'Ensin Plus'
 Ensin.NO3 = 0.075
 Ensin.NH4 = 0.185
 Ensin.SO3 = 0.325
@@ -196,7 +179,6 @@ Ensin.SO3_sol = 0.325
 
 
 DusLAS = Fertilizer()
-DusLAS.fertilizer_name = 'DusLAS'
 DusLAS.NO3 = 0.12
 DusLAS.NH4 = 0.12
 DusLAS.SO3 = 0.15
@@ -204,6 +186,5 @@ DusLAS.CaO = 0.11
 
 
 Cultan_17N = Fertilizer
-Cultan_17N.fertilizer_name = 'Cultan 17N'
 Cultan_17N.NH4 = 0.17
 Cultan_17N.NO3 = 0.0
