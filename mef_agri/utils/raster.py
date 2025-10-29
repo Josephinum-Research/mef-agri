@@ -104,7 +104,7 @@ class GeoRaster(object):
     
     def __init__(self) -> None:
         """
-        Base class for all raster data in `sitespecificcultivtation` package.
+        Base class for all raster data in `mef_agri` package.
         """
         self._rstr:np.ndarray = None
         self._rstr_el:RasterElement = None
@@ -119,9 +119,7 @@ class GeoRaster(object):
         self._reset_iteration()
 
     ############################################################################
-    # ATTRIBUTES with property decorator 
-    ############################################################################
-    # ITERATOR ATTRIBUTES > no implementation in child class
+    # ITERATOR ATTRIBUTES
     @property
     def current_row(self) -> int:
         if self._crst is None:
@@ -183,14 +181,14 @@ class GeoRaster(object):
         return ret
     
     ############################################################################
-    # ATTRIBUTES which implementation in child class is very probably necessary
+    # ATTRIBUTES with raster and data infos
     @property
     def raster(self) -> np.ndarray:
         """
         Returns the array representing the raster data.
 
         :return: raster data (settable)
-        :rtype: np.ndarray
+        :rtype: numpy.ndarray
         """
         return self._rstr
     
@@ -292,7 +290,7 @@ class GeoRaster(object):
         The units of the pixels.
 
         :return: pixel units (settable)
-        :rtype: PixelUnits
+        :rtype: mef_agri.utils.misc.PixelUnits
         """
         return self._units
     
@@ -305,7 +303,7 @@ class GeoRaster(object):
         """
         Additional metadata about the raster.
 
-        :return: dictionary containing additional metadata (settable)
+        :return: dictionary containing additional metadata 
         :rtype: dict
         """
         if self._meta is None:
@@ -318,7 +316,7 @@ class GeoRaster(object):
         3x3 transformation-matrix for georeferencing the image/raster containing 
         scale, offset and rotation.
 
-        :return: 3x3 matrix describing georeference (image -> object)
+        :return: 3x3 matrix describing georeference, i.e. transformation from image to object space (settable)
         :rtype: np.ndarray
         """
         return self._trf
@@ -335,7 +333,7 @@ class GeoRaster(object):
         """
         The nodata-value for geotiff raster
 
-        :return: nodata value
+        :return: nodata value (settable)
         :rtype: any
         """
         return self._nodata
@@ -351,7 +349,7 @@ class GeoRaster(object):
         by the user and is not derived from the data array, because the shape is 
         a tag in the metadata of the GeoTIFF specification.
 
-        :return: rster shape
+        :return: rster shape (settable)
         :rtype: tuple
         """
         return self._shp
@@ -377,7 +375,7 @@ class GeoRaster(object):
         convention is that the first dimension (i.e. 0) of the raster 
         corresponds to the channels. Can be also the third dimension (i.e. 2).
 
-        :return: channel index
+        :return: channel index (settable)
         :rtype: int
         """
         if not self.META_LAYERIX_KEY in self._meta.keys():
@@ -396,7 +394,7 @@ class GeoRaster(object):
         """
         Identfiers/names of the individual layers of the GeoRaster.
 
-        :return: list containing layer ids/names
+        :return: list containing layer ids/names (settable)
         :rtype: list[str]
         """
         if not self.META_LAYERID_KEY in self._meta.keys():

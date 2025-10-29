@@ -76,15 +76,31 @@ class __UNITS__:
         :rtype: str
         """
         return '[ mm ]'
-
+    
     @property
-    def mm_day(self) -> str:
-        r"""
-        :return: mm per day (e.g. hydraulic conductivity) :math:`\frac{mm}{day}`
+    def g(self) -> str:
+        """
+        :return: gram (mass) :math:`g`
         :rtype: str
         """
-        return '[ ( mm ) / ( day ) ]'
+        return '[ g ]'
     
+    @property
+    def kg(self) -> str:
+        """
+        :return: kilogram (mass) :math:`kg`
+        :rtype: str
+        """
+        return '[ kg ]'
+    
+    @property
+    def t(self) -> str:
+        """
+        :return: ton (mass) :math:`t`
+        :rtype: str
+        """
+        return '[ t ]'
+
     @property
     def rad(self) -> str:
         r"""
@@ -124,6 +140,14 @@ class __UNITS__:
         :rtype: str
         """
         return '[ ( 1 ) / ( degC ) ]'
+    
+    @property
+    def mm_day(self) -> str:
+        r"""
+        :return: mm per day (e.g. hydraulic conductivity) :math:`\frac{mm}{day}`
+        :rtype: str
+        """
+        return '[ ( mm ) / ( day ) ]'
 
     @property
     def g_cm3(self) -> str:
@@ -253,6 +277,22 @@ class __UNITS__:
         return '[ ( t ) / ( ha ) ]'
     
     @property
+    def g_m2(self) -> str:
+        r"""
+        :return: gram per square meter :math:`\frac{g}{m^2}`
+        :rtype: str
+        """
+        return '[ ( g ) / ( m2 ) ]'
+    
+    @property
+    def kg_m2(self) -> str:
+        r"""
+        :return: kilogram per square meter :math:`\frac{g}{m^2}`
+        :rtype: str
+        """
+        return '[ ( kg ) / ( m2 ) ]'
+    
+    @property
     def kg_t(self) -> str:
         r"""
         :return: kg nutrient per ton biomass :math:`\frac{kg}{t}`
@@ -375,6 +415,60 @@ class __UNITS__:
             return value * 1e4
         elif u_source == self.n_ha and u_target == self.n_m2:
             return value / 1e4
+        ########################################################################
+        # MASS CONVERSIONS
+        elif u_source == self.g and u_target == self.kg:
+            return value * 1e-3
+        elif u_source == self.g and u_target == self.t:
+            return value * 1e-6
+        elif u_source == self.kg and u_target == self.g:
+            return value * 1e3
+        elif u_source == self.kg and u_target == self.t:
+            return value * 1e-3
+        elif u_source == self.t and u_target == self.g:
+            return value * 1e6
+        elif u_source == self.t and u_target == self.kg:
+            return value * 1e3
+        elif u_source == self.g_ha and u_target == self.kg_ha:
+            return value * 1e-3
+        elif u_source == self.g_ha and u_target == self.t_ha:
+            return value * 1e-6
+        elif u_source == self.kg_ha and u_target == self.g_ha:
+            return value * 1e3
+        elif u_source == self.kg_ha and u_target == self.t_ha:
+            return value * 1e-3
+        elif u_source == self.t_ha and u_target == self.g_ha:
+            return value * 1e6
+        elif u_source == self.t_ha and u_target == self.kg_ha:
+            return value * 1e3
+        elif u_source == self.g_m2 and u_target == self.kg_m2:
+            return value * 1e-3
+        elif u_source == self.kg_m2 and u_target == self.g_m2:
+            return value * 1e3
+        elif u_source == self.g_m2 and u_target == self.g_ha:
+            return value * 1e4
+        elif u_source == self.g_m2 and u_target == self.kg_ha:
+            return value * 1e4 * 1e-3
+        elif u_source == self.g_m2 and u_target == self.t_ha:
+            return value * 1e4 * 1e-6
+        elif u_source == self.kg_m2 and u_target == self.g_ha:
+            return value * 1e4 * 1e3
+        elif u_source == self.kg_m2 and u_target == self.kg_ha:
+            return value * 1e4
+        elif u_source == self.kg_m2 and u_target == self.t_ha:
+            return value * 1e4 * 1e-3
+        elif u_source == self.g_ha and u_target == self.g_m2:
+            return value * 1e-4
+        elif u_source == self.g_ha and u_target == self.kg_m2:
+            return value * 1e-4 * 1e-3
+        elif u_source == self.kg_ha and u_target == self.g_m2:
+            return value * 1e-4 * 1e3
+        elif u_source == self.kg_ha and u_target == self.kg_m2:
+            return value * 1e-4
+        elif u_source == self.t_ha and u_target == self.g_m2:
+            return value * 1e-4 * 1e6
+        elif u_source == self.t_ha and u_target == self.kg_m2:
+            return value * 1e-4 * 1e3
         ########################################################################
         # TIME CONVERSIONS
         elif u_source == self.s and u_target == self.h:
