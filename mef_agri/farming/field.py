@@ -196,7 +196,7 @@ class Field_OneZone(Field):
     ZONE_NAME = 'zone'
 
     def __init__(self, name:str, height:float, **kwargs) -> None:
-        super().__init__(name, height, **kwargs)
+        super().__init__(name, height)
         self.n_zones = 1
 
     def determine_zones(self) -> None:

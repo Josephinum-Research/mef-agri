@@ -120,6 +120,7 @@ class Project(object):
         for tpl in dis.itertuples():
             di = getattr(import_module(tpl.intf_module), tpl.intf_name)()
             di.project_directory = self._pp
+            di.project_ref = self
             self._dis[di.DATA_SOURCE_ID] = di
 
     @property
@@ -177,6 +178,7 @@ class Project(object):
         if isclass(data_intf):
             data_intf = data_intf()
         data_intf.project_directory = self._pp
+        data_intf.project_ref = self
         # add data interface to the dict containing all interfaces of the prj
         self._dis[data_intf.DATA_SOURCE_ID] = data_intf
         # insert data interface information to the project database
@@ -221,6 +223,7 @@ class Project(object):
                     self._flds[self._db.field_name_column] == field
                 ]
                 di.save_directory = fpath
+                di.current_field = field
                 trngs_requ, trngs = self._db.get_date_ranges(
                     did, field, tstart, tstop
                 )
@@ -276,6 +279,7 @@ class Project(object):
             ret[field] = {}
             for did in dids:
                 di = self._dis[did]
+                di.current_field = field
                 di.save_directory = os.path.join(
                     self.DATA_DIRECTORY, di.DATA_SOURCE_ID, field
                 )

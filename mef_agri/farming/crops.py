@@ -64,9 +64,3 @@ class maize(Crop):
 class soybean(Crop):
     def __init__(self):
         super().__init__()
-
-
-if __name__ == '__main__':
-    ww = winter_wheat()
-    ww.generic()['a'] = 100
-    print(ww.test.__qualname__)

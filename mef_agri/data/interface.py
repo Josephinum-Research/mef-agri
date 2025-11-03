@@ -3,6 +3,7 @@ from geopandas import GeoDataFrame
 from datetime import date
 
 from ..utils.raster import GeoRaster
+from .project import Project
 
 
 class DataInterface(object):
@@ -23,6 +24,38 @@ class DataInterface(object):
         self._sd:str = None
         self._ores:float = obj_res
         self.add_prj_data_error:bool = False
+        self._cf:str = None  # name of the currently active field
+        self._prj:Project = None
+
+    @property
+    def project_ref(self) -> Project:
+        """
+        :return: reference to the project-object
+        :rtype: Project
+        """
+        return self._prj
+    
+    @project_ref.setter
+    def project_ref(self, val):
+        if not isinstance(val, Project):
+            msg = '`project_ref` has to be an instance of '
+            msg += '`mef_agri.data.project.Project`!'
+            raise ValueError(msg)
+        self._prj = val
+    
+    @property
+    def current_field(self) -> str:
+        """
+        :return: field currently active/processed in :func:`mef_agri.data.project.Project.add_data` or :func:`mef_agri.data.project.Project.get_data`
+        :rtype: str
+        """
+        return self._cf
+    
+    @current_field.setter
+    def current_field(self, val): 
+        if not isinstance(val, str):
+            raise ValueError('`current_field` has to be a valid field name!')
+        self._cf = val
 
     @property
     def object_resolution(self) -> float:

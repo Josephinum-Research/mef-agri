@@ -114,7 +114,8 @@ def bbox2polygon(xmin:float, ymin:float, xmax:float, ymax:float) -> Polygon:
 
 def bbox_from_gdf(gdf:GeoDataFrame) -> tuple[float, float, float, float]:
     """
-    Derive bounding box from given `geopandas.GeoDataFrame`.
+    Derive bounding box from given `geopandas.GeoDataFrame`. 
+    Order: x_min, y_min, x_max, y_max
 
     :param gdf: GeoDataFrame containing the individual geometries
     :type gdf: GeoDataFrame

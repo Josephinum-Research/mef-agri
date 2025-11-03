@@ -7,11 +7,12 @@ import rasterio.warp as riowrp
 
 from copy import deepcopy
 from shapely.geometry import Polygon
+from geopandas import GeoDataFrame
 
 from .misc import PixelUnits
 from .gis import (
     affine_from_trafo, trafo_from_affine, get_epsg_from_rio_crs, 
-    imgshape_to_rasterio
+    imgshape_to_rasterio, bbox_from_gdf
 )
 
 
@@ -817,3 +818,35 @@ class GeoRaster(object):
         i4 = i3 + 1
         return i2, i3, i4
     
+    @classmethod
+    def from_gdf_and_objres(
+        cls, gdf:GeoDataFrame, objres:float, nlayers:int=1, 
+        rtype=PixelUnits.FLOAT32, nodataval=np.nan, lix:int=0
+    ):
+        # preliminary computations to get raster bounds which exactly fit the 
+        # rows and columns in object space
+        bb1 = bbox_from_gdf(gdf)
+        dx, dy = bb1[2] - bb1[0], bb1[3] - bb1[1]
+        rr, rc = dy // objres + 2, dx // objres + 2
+
+        # initializing GeoRaster class
+        rstr = cls()
+        rstr.crs = gdf.crs.to_epsg()
+        rstr.bounds = (
+            bb1[0] - objres, 
+            bb1[1] - objres, 
+            bb1[0] - objres + rc * objres,
+            bb1[1] - objres + rr * objres
+        )
+        rstr.transformation = np.array([
+            [objres, 0., rstr.bounds[0]],
+            [0., -objres, rstr.bounds[-1]],
+            [0., 0., 1.]
+        ])
+        rstr.layer_index = lix
+        rstr.raster_shape = (nlayers, int(rr), int(rc))
+        rstr.units = rtype
+        rstr.raster = np.zeros(rstr.raster_shape, dtype=rtype)
+        rstr.raster[:] = nodataval
+
+        return rstr
