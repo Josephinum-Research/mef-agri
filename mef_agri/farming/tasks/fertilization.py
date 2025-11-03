@@ -65,7 +65,7 @@ class MineralFertilization(Task):
             msg = 'At least one application needs to be `fertilizer_amount`!'
             raise ValueError(msg)
         validu = (Units.kg_ha, Units.t_ha, Units.kg_m2, Units.g_m2)
-        au = self.layer_infos[self.avname_fertilizer_amount]['unit']
+        au = self.layer_infos['units'][self.avname_fertilizer_amount]
         if not au in validu:
             msg = 'Non valid unit for `fertilizer_amount` - has to be mass per '
             msg += 'unit area (see `mef_agri.models.utils.Units`)!'

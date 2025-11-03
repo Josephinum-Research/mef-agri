@@ -10,6 +10,7 @@ from ...farming.tasks.fertilization import MineralFertilization
 from ...farming.tasks.harvest import Harvest
 from ...farming.tasks.zoning import Zoning
 from ...farming import crops
+from ...farming import fertilizers
 from ...utils.raster import GeoRaster
 from ...utils.rv_manipulation import RasterVectorIntersection
 from ...models.utils import Units
@@ -40,7 +41,7 @@ columns_harvest = {
     'harvest_date': 'Datum',
     'plength': 'Parzellenlaenge',  # length of the harvest plot [m]
     'pwidth': 'Parzellenbreite',  # width of the harvest plot [m]
-    'yield_fm': 'FMKornErtrag',  # fresh mass of yield [g]
+    'yield_fm_pp': 'FMKornErtrag',  # fresh mass of yield per harvest plot [g]
     'moisture': 'Feuchte',  # [%]
 }
 
@@ -77,6 +78,7 @@ class ManagementInterface(DataInterface):
         self._dfs:pd.DataFrame = None
         self._dff:pd.DataFrame = None
         self._dfh:pd.DataFrame = None
+        self._fr:GeoRaster = None
 
     def add_prj_data(self, aoi, tstart, tstop):
         if self._dfs is None:
@@ -87,7 +89,13 @@ class ManagementInterface(DataInterface):
         ch = (self._dfh['epoch'] >= tstart) & (self._dfh['epoch'] <= tstop)
         dfs, dff, dfh = self._dfs[cs], self._dff[cf], self._dfh[ch]
 
-        # TODO create task-rasters
+        self._fr = GeoRaster.from_gdf_and_objres(
+            aoi, self.object_resolution, lix=0, nlayers=1
+        )
+        self._create_zoning_tasks(tstart, tstop)
+        self._create_sowing_tasks(dfs)
+        self._create_minfert_tasks(dff)
+        self._create_harvest_tasks(dfh)
 
         allepochs = pd.concat([dfs['epoch'], dff['epoch'], dfh['epoch']])
         return allepochs.min(), allepochs.max()
@@ -109,8 +117,8 @@ class ManagementInterface(DataInterface):
             df2 = read_sheet(fpath, sheet_fertilization, columns_fertilization)
             df3 = read_sheet(fpath, sheet_harvest, columns_harvest)
             # add field name to df2 and df3
-            df2.join(df1[['field_name', 'pid']].set_index('pid'), on='pid')
-            df3.join(df1[['field_name', 'pid']].set_index('pid'), on='pid')
+            df2 = df2.join(df1[['field_name', 'pid']].set_index('pid'), on='pid')
+            df3 = df3.join(df1[['field_name', 'pid']].set_index('pid'), on='pid')
             # add columns containing date objects
             df1['epoch'] = [
                 date.fromisoformat(d) for d in df1['sowing_date'].values
@@ -133,42 +141,59 @@ class ManagementInterface(DataInterface):
             )
 
     def _create_zoning_tasks(self, tstart:date, tstop:date) -> None:
-        # determine zones from parcels in the project-gpkg-database
+        # load parcel information from geopackage
         zones = gpd.read_file(
             self.project_ref.database.file_path, 
             layer=self.GPKG_PTABLE_NAME
         )
-        plgn, epsg = self.project_ref.get_field_geodata(self.current_field)
-        fldr = GeoRaster.from_gdf_and_objres(
-            gpd.GeoDataFrame({'geom': [plgn,]}, geometry='geom', crs=epsg), 
-            self.object_resolution, lix=0, nlayers=1
-        )
-        for dbeg in zones[self.GPKG_PTABLE_DBEGCOL].unique():
-            zt = Zoning()
-            zt.crs = fldr.crs
-            zt.bounds = fldr.bounds
-            zt.transformation = fldr.transformation
-            # TODO set task specific properties
+        zones['epoch'] = [
+            date.fromisoformat(d) for d in zones['date_begin'].values
+        ]
+        zones = zones[(zones['epoch'] >= tstart) & (zones['epoch'] <= tstop)]
 
+        # determine zones from parcels in the project-gpkg-database
+        spath = os.path.join(self.project_directory, self.save_directory)
+        zts = {'date_begin': [], 'valid_until': [], 'zoning': []}
+        for dbeg in zones[self.GPKG_PTABLE_DBEGCOL].unique():
             zi = zones[zones[self.GPKG_PTABLE_DBEGCOL] == dbeg]
-            zr = np.zeros((len(zi), fldr.raster_shape[1], fldr.raster_shape[2]))
-            lids = []
-            i = 0
+
+            zt = Zoning()
+            zt.crs = self._fr.crs
+            zt.bounds = self._fr.bounds
+            zt.transformation = self._fr.transformation
+            zt.date_begin = dbeg
+            zt.valid_until = zi[self.GPKG_PTALBE_DVUCOL].values[0]
+
+            rshp = (len(zi), self._fr.raster_shape[1], self._fr.raster_shape[2])
+            zr = np.zeros(rshp)
+            lids, i = [], 0
             for pid in zi[self.GPKG_PTABLE_PIDCOL].values:
                 lids.append(str(pid))
                 zrow = zi[zi[self.GPKG_PTABLE_PIDCOL] == pid]
-                rvi = RasterVectorIntersection(zrow, fldr)
+                rvi = RasterVectorIntersection(zrow, self._fr)
                 rvi.fraction = self.ZONING_INTERSECTION
                 rvi.compute()
                 zr[i, :, :] = rvi.assignment[0, :, :]
+                i += 1
             
             zt.specify_application(zr, lids, Units.undef, appl_ix=0)
-            # TODO save zoning task to disk
-            # TODO keep zt in memory for the other tasks
-
+            zts['date_begin'].append(zt.date_begin)
+            zts['valid_until'].append(zt.valid_until)
+            zts['zoning'].append(zt)
+            fpath = os.path.join(spath, dbeg)
+            if not os.path.exists(fpath):
+                os.mkdir(fpath)
+            fpath = os.path.join(fpath, 'zoning')
+            if not os.path.exists(fpath):
+                os.mkdir(fpath)
+            zt.save_geotiff(
+                fpath, overwrite=True, compress=True, filename='task'
+            )
+        self._zts = pd.DataFrame(zts)
 
     def _create_sowing_tasks(self, df:pd.DataFrame) -> None:
         feps = self._find_task_dates(df)
+        spath = os.path.join(self.project_directory, self.save_directory)
         for tpl in feps.itertuples():
             cond1 = df['field_name'] == tpl.field_name
             cond2 = df['epoch'] >= tpl.date_begin
@@ -180,21 +205,21 @@ class ManagementInterface(DataInterface):
             if len(aux1) > 1:
                 msg = 'Different crops on the same field are not supported yet!'
                 raise ValueError(msg)
-            if np.isnan(aux1[0]):
-                msg = 'Crop has to be specified for sowing task!'
+            if aux1.dtype != object and np.isnan(aux1[0]):
+                msg = 'Name of sown crop has to be provided!'
                 raise ValueError(msg)
             cname = aux1[0].strip()
             if not cname in crop_mapper.keys():
                 msg = 'Provided crop abbreviation {} not supported!'
                 raise ValueError(msg.format(cname))
-            crop = getattr(crops, cname)()
+            crop = getattr(crops, crop_mapper[cname])()
 
             # determine cultivar
             aux2 = dfsow['cultivar'].unique()
             if len(aux2) > 1:
                 msg = 'Different cultivars on the same field are not supported '
                 msg += 'yet!'
-            if np.isnan(aux2[0]):
+            if aux2.dtype != object and np.isnan(aux2[0]):
                 cult = 'generic'
             else:
                 cult = aux2[0].strip()
@@ -204,16 +229,149 @@ class ManagementInterface(DataInterface):
             
             # define sowing task
             sow = Sowing()
+            sow.crs = self._fr.crs
+            sow.bounds = self._fr.bounds
+            sow.transformation = self._fr.transformation
             sow.cultivar = getattr(crop, cult)
             sow.date_begin = tpl.date_begin
             sow.date_end = tpl.date_end
-            # TODO specify application map according to parcels/zones
+            
+            # create application map for sowing amount
+            caux1 = self._zts['date_begin'] <= tpl.date_begin
+            caux2 = self._zts['valid_until'] >= tpl.date_begin
+            zoning = self._zts[caux1 & caux2]
+            if len(zoning) > 1:
+                msg = 'Found multiple zonings for sowing-task done at {}!'
+                raise ValueError(msg.format(tpl.date_begin))
+            ztask:Zoning = zoning['zoning'].values[0]
+            sarr = np.zeros(self._fr.raster_shape)
+            sarr[:] = np.nan
+            for ptpl in dfsow.itertuples():
+                sarr[np.where(ztask[str(ptpl.pid)])] = ptpl.sowing_amount
+            sow.specify_application(
+                sarr, sow.avname_sowing_amount, Units.kg_ha, appl_ix=0
+            )
+
+            # save sowing task to disk
+            fpath = os.path.join(spath, tpl.date_begin.isoformat())
+            if not os.path.exists(fpath):
+                os.mkdir(fpath)
+            fpath = os.path.join(fpath, 'sowing')
+            if not os.path.exists(fpath):
+                os.mkdir(fpath)
+            sow.save_geotiff(
+                fpath, overwrite=True, compress=True, filename='task'
+            )
             
     def _create_minfert_tasks(self, df:pd.DataFrame) -> None:
-        pass
+        feps = self._find_task_dates(df)
+        spath = os.path.join(self.project_directory, self.save_directory)
+        for tpl in feps.itertuples():
+            cond1 = df['field_name'] == tpl.field_name
+            cond2 = df['epoch'] >= tpl.date_begin
+            cond3 = df['epoch'] <= tpl.date_end
+            dffer = df[cond1 & cond2 & cond3]
+
+            aux = dffer['fertilizer'].unique()
+            if len(aux) > 1:
+                msg = 'Only one type of fertilizer is supported per date of '
+                msg += 'application!'
+                raise ValueError(msg)
+            if aux.dtype != object and np.isnan(aux[0]):
+                msg = 'Fertilizer name has to be provided!'
+                raise ValueError(msg)
+            fname = aux[0].strip()
+
+            # define fertilizer task
+            fer = MineralFertilization()
+            fer.crs = self._fr.crs
+            fer.bounds = self._fr.bounds
+            fer.transformation = self._fr.transformation
+            fer.fertilizer = fname
+            fer.date_begin = tpl.date_begin
+            fer.date_end = tpl.date_end
+
+            # create application map for fertilizer amount
+            caux1 = self._zts['date_begin'] <= tpl.date_begin
+            caux2 = self._zts['valid_until'] >= tpl.date_begin
+            zoning = self._zts[caux1 & caux2]
+            if len(zoning) > 1:
+                msg = 'Found multiple zonings for sowing-task done at {}!'
+                raise ValueError(msg.format(tpl.date_begin))
+            ztask:Zoning = zoning['zoning'].values[0]
+            farr = np.zeros(self._fr.raster_shape)
+            farr[:] = np.nan
+            for ptpl in dffer.itertuples():
+                farr[np.where(ztask[str(ptpl.pid)])] = ptpl.fertilizer_amount
+            fer.specify_application(
+                farr, fer.avname_fertilizer_amount, Units.kg_ha, appl_ix=0
+            )
+
+            # save mineral fertilization task to disk
+            fpath = os.path.join(spath, tpl.date_begin.isoformat())
+            if not os.path.exists(fpath):
+                os.mkdir(fpath)
+            fpath = os.path.join(fpath, 'minfert')
+            if not os.path.exists(fpath):
+                os.mkdir(fpath)
+            fer.save_geotiff(
+                fpath, overwrite=True, compress=True, filename='task'
+            )
 
     def _create_harvest_tasks(self, df:pd.DataFrame) -> None:
-        pass
+        feps = self._find_task_dates(df)
+        spath = os.path.join(self.project_directory, self.save_directory)
+        # computing yield of fresh mass in kg/ha
+        df['yield_fm'] = df['yield_fm_pp'] / (df['plength'] * df['pwidth'])  # yield per square meter
+        df['yield_fm'] *= 1e4 * 1e-3  # yield kg per hectar
+        for tpl in feps.itertuples():
+            cond1 = df['field_name'] == tpl.field_name
+            cond2 = df['epoch'] >= tpl.date_begin
+            cond3 = df['epoch'] <= tpl.date_end
+            dfhrv = df[cond1 & cond2 & cond3]
+
+            # define harvest Task
+            hrv = Harvest()
+            hrv.crs = self._fr.crs
+            hrv.bounds = self._fr.bounds
+            hrv.transformation = self._fr.transformation
+            hrv.date_begin = tpl.date_begin
+            hrv.date_end = tpl.date_end
+
+            # create application map for fresh mass yield and moisture
+            caux1 = self._zts['date_begin'] <= tpl.date_begin
+            caux2 = self._zts['valid_until'] >= tpl.date_begin
+            zoning = self._zts[caux1 & caux2]
+            if len(zoning) > 1:
+                msg = 'Found multiple zonings for sowing-task done at {}!'
+                raise ValueError(msg.format(tpl.date_begin))
+            ztask:Zoning = zoning['zoning'].values[0]
+            hyarr = np.zeros(self._fr.raster_shape)
+            hyarr[:] = np.nan
+            hmarr = np.zeros(self._fr.raster_shape)
+            hmarr[:] = np.nan
+            for pid in dfhrv['pid'].unique():
+                dfi = dfhrv[dfhrv['pid'] == pid]
+                mask = np.where(ztask[str(pid)])
+                hyarr[mask] = np.median(dfi['yield_fm'].values)
+                hmarr[mask] = np.median(dfi['moisture'].values * 1e-2)  # conversion from percent to fraction
+            hrv.specify_application(
+                np.concatenate((hyarr, hmarr), axis=0),
+                ['yield_fm', 'moisture'],
+                [Units.kg_ha, Units.frac],
+                appl_ix=0
+            )
+
+            # save harvest task to disk
+            fpath = os.path.join(spath, tpl.date_begin.isoformat())
+            if not os.path.exists(fpath):
+                os.mkdir(fpath)
+            fpath = os.path.join(fpath, 'harvest')
+            if not os.path.exists(fpath):
+                os.mkdir(fpath)
+            hrv.save_geotiff(
+                fpath, overwrite=True, compress=True, filename='task'
+            )
 
     def _find_task_dates(self, df:pd.DataFrame) -> pd.DataFrame:
         feps_raw = df[['field_name', 'epoch']].drop_duplicates()
@@ -233,4 +391,6 @@ class ManagementInterface(DataInterface):
                 de = tpl.epoch + timedelta(days=maxd)
                 feps['date_begin'].append(db)
                 feps['date_end'].append(de)
-        return pd.DataFrame(feps).drop_duplicates(inplace=True)
+        ret = pd.DataFrame(feps)
+        ret.drop_duplicates(inplace=True)
+        return ret
