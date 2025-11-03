@@ -823,6 +823,24 @@ class GeoRaster(object):
         cls, gdf:GeoDataFrame, objres:float, nlayers:int=1, 
         rtype=PixelUnits.FLOAT32, nodataval=np.nan, lix:int=0
     ):
+        """
+        Create instance of :class:`GeoRaster` from given input.
+
+        :param gdf: GeoDataFrame specifying the areo of interest
+        :type gdf: geopandas.GeoDataFrame
+        :param objres: object resolution of resulting :class:`GeoRaster` instance
+        :type objres: float
+        :param nlayers: number of layers, defaults to 1
+        :type nlayers: int, optional
+        :param rtype: data type of raster, defaults to PixelUnits.FLOAT32
+        :type rtype: str, optional
+        :param nodataval: no-data-value (GeoTIFF), defaults to np.nan
+        :type nodataval: any, optional
+        :param lix: index which spedifies the axis/dimension which contains the layers/channels of the raster, defaults to 0
+        :type lix: int, optional
+        :return: instance of :class:`GeoRaster`
+        :rtype: mef_agri.utils.raster.GeoRaster
+        """
         # preliminary computations to get raster bounds which exactly fit the 
         # rows and columns in object space
         bb1 = bbox_from_gdf(gdf)

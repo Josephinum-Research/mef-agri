@@ -86,6 +86,7 @@ class ProjectDatabase(object):
     def __init__(
             self, dbpath:str, field_table:str=None, field_name_column:str=None
         ):
+        self._dbp:str = dbpath
         self._conn = sqlite3.connect(dbpath)
         self._curs = self._conn.cursor()
 
@@ -132,6 +133,14 @@ class ProjectDatabase(object):
         :rtype: str
         """
         return self._fld_nc
+    
+    @property
+    def file_path(self) -> str:
+        """
+        :return: absolute path of geopackage db-file
+        :rtype: str
+        """
+        return self._dbp
     
     def check_data_source(self, did:str) -> bool:
         """

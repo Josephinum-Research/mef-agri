@@ -29,6 +29,10 @@ def check_gpkg():
     rvi = RasterVectorIntersection(zns, frstr)
     rvi.fraction = 1e-4
     rvi.compute()
+
+    tr = np.zeros(frstr.raster_shape[1:], dtype='int')
+    tr[np.where(rvi.assignment[0, :, :])] = 99
+    print(tr)
     
     f1, a1 = plt.subplots(1, 1)
     a1.imshow(rvi.processed_raster[0, :, :], extent=frstr.extent)
@@ -43,11 +47,13 @@ def check_gpkg():
 if __name__ == '__main__':
     wdir = os.path.split(__file__)[0]
 
+    #check_gpkg()
+
     fpath = os.path.join(wdir, 'management', 'testdata.xlsx')
     df1 = read_sheet(fpath, sheet_fielddata, columns_fielddata)
     df2 = read_sheet(fpath, sheet_fertilization, columns_fertilization)
     df3 = read_sheet(fpath, sheet_harvest, columns_harvest)
-
-    print(np.isnan(df1['cultivar'].unique()[0]))
+    for tpl in df1.itertuples():
+        print(getattr(tpl, 'pid'))
 
     plt.show()

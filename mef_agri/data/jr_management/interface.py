@@ -1,13 +1,18 @@
 import os
 import pandas as pd
 import numpy as np
+import geopandas as gpd
 from datetime import date, timedelta
 
 from ..interface import DataInterface
 from ...farming.tasks.sowing import Sowing
 from ...farming.tasks.fertilization import MineralFertilization
 from ...farming.tasks.harvest import Harvest
+from ...farming.tasks.zoning import Zoning
 from ...farming import crops
+from ...utils.raster import GeoRaster
+from ...utils.rv_manipulation import RasterVectorIntersection
+from ...models.utils import Units
 
 
 sheet_fielddata = 'fielddata'
@@ -59,7 +64,12 @@ def read_sheet(fpath:str, sheet_name:str, columns:dict) -> pd.DataFrame:
 class ManagementInterface(DataInterface):
     DATA_SOURCE_ID = 'management_jr'
     DATA_FOLDER = 'management'
-    GPKG_PARCEL_TABLE = 'parcels'
+    GPKG_PTABLE_NAME = 'parcels'
+    GPKG_PTABLE_FIELDCOL = 'fname'
+    GPKG_PTABLE_PIDCOL = 'pid'
+    GPKG_PTABLE_DBEGCOL = 'date_begin'
+    GPKG_PTALBE_DVUCOL = 'valid_until'
+    ZONING_INTERSECTION = 2. / 3.  # amount of intersecting area of pixel and zone-geometry which needs to be exceeded to assign a pixel to a zone
     DELTADAYS_SAME_TASK = 7  # if same task types differ by less than these days, they will be combined into one task
     
     def __init__(self, obj_res=10):
@@ -122,6 +132,41 @@ class ManagementInterface(DataInterface):
                 [self._dfh, df3]
             )
 
+    def _create_zoning_tasks(self, tstart:date, tstop:date) -> None:
+        # determine zones from parcels in the project-gpkg-database
+        zones = gpd.read_file(
+            self.project_ref.database.file_path, 
+            layer=self.GPKG_PTABLE_NAME
+        )
+        plgn, epsg = self.project_ref.get_field_geodata(self.current_field)
+        fldr = GeoRaster.from_gdf_and_objres(
+            gpd.GeoDataFrame({'geom': [plgn,]}, geometry='geom', crs=epsg), 
+            self.object_resolution, lix=0, nlayers=1
+        )
+        for dbeg in zones[self.GPKG_PTABLE_DBEGCOL].unique():
+            zt = Zoning()
+            zt.crs = fldr.crs
+            zt.bounds = fldr.bounds
+            zt.transformation = fldr.transformation
+            # TODO set task specific properties
+
+            zi = zones[zones[self.GPKG_PTABLE_DBEGCOL] == dbeg]
+            zr = np.zeros((len(zi), fldr.raster_shape[1], fldr.raster_shape[2]))
+            lids = []
+            i = 0
+            for pid in zi[self.GPKG_PTABLE_PIDCOL].values:
+                lids.append(str(pid))
+                zrow = zi[zi[self.GPKG_PTABLE_PIDCOL] == pid]
+                rvi = RasterVectorIntersection(zrow, fldr)
+                rvi.fraction = self.ZONING_INTERSECTION
+                rvi.compute()
+                zr[i, :, :] = rvi.assignment[0, :, :]
+            
+            zt.specify_application(zr, lids, Units.undef, appl_ix=0)
+            # TODO save zoning task to disk
+            # TODO keep zt in memory for the other tasks
+
+
     def _create_sowing_tasks(self, df:pd.DataFrame) -> None:
         feps = self._find_task_dates(df)
         for tpl in feps.itertuples():
@@ -160,10 +205,10 @@ class ManagementInterface(DataInterface):
             # define sowing task
             sow = Sowing()
             sow.cultivar = getattr(crop, cult)
-
-            # TODO get polygons from pids
+            sow.date_begin = tpl.date_begin
+            sow.date_end = tpl.date_end
+            # TODO specify application map according to parcels/zones
             
-
     def _create_minfert_tasks(self, df:pd.DataFrame) -> None:
         pass
 
