@@ -1,8 +1,10 @@
 import os
+import json
 import pandas as pd
 import numpy as np
 import geopandas as gpd
 from datetime import date, timedelta
+from importlib import import_module
 
 from ..interface import DataInterface
 from ...farming.tasks.sowing import Sowing
@@ -63,6 +65,24 @@ def read_sheet(fpath:str, sheet_name:str, columns:dict) -> pd.DataFrame:
 
 
 class ManagementInterface(DataInterface):
+    """
+    Interface for field trial and management data which are collected in excel 
+    files with a specific format. These excel files should be provided in a 
+    subfolder within the overall project folder (name of this subfolder has to 
+    be the the same as ``ManagementInterface.DATA_FOLDER``).
+
+    An important note on the excel files: 
+    the parcel ids of plots within a field have to be unique, especially over 
+    several years (e.g. a parcel with id ``1`` can only appear one time, if it 
+    appears year by year, the corresponding plots will not be correctly treated 
+    in this interface).
+
+    In the geopackage there has to be one table wich contains the geometries of 
+    the plots together with the name of the field, the parcel id and date
+    columns (see ``ManagementInterface.GPKG_PTABLE_*`` class variables). From 
+    these parcels, the zoning for the vegetation periods will be deduced. Thus, 
+    each parcel within a field corresponds to one zone afterwards.
+    """
     DATA_SOURCE_ID = 'management_jr'
     DATA_FOLDER = 'management'
     GPKG_PTABLE_NAME = 'parcels'
@@ -81,6 +101,28 @@ class ManagementInterface(DataInterface):
         self._fr:GeoRaster = None
 
     def add_prj_data(self, aoi, tstart, tstop):
+        """
+        Save 
+        
+        * :class:`mef_agri.farming.tasks.zoning.Zoning`
+        * :class:`mef_agri.farming.tasks.sowing.Sowing`
+        * :class:`mef_agri.farming.tasks.harvest.Harvest`
+        * :class:`mef_agri.farming.tasks.fertilization.MineralFertilization`
+        
+        tasks to disk which are between ``tstart`` and ```tstop`.
+        For zoning tasks only the attribute ``date_begin`` will be considered (
+        i.e. if the attribute ``valid_until`` is outside of the provided date 
+        range, it will have no effect).
+
+        :param aoi: area of interest representing currently active field (:func:`current_field`)
+        :type aoi: geopandas.GeoDataFrame
+        :param tstart: first epoch which should be considered
+        :type tstart: datetime.date
+        :param tstop: last epoch which should be considered
+        :type tstop: datetime.date
+        :return: adjusted date range according to first and last task found in the excel-files
+        :rtype: tuple
+        """
         if self._dfs is None:
             self.load_excel_files()
 
@@ -101,7 +143,33 @@ class ManagementInterface(DataInterface):
         return allepochs.min(), allepochs.max()
         
     def get_prj_data(self, epoch):
-        pass
+        """
+        Get management/task data for the provided epoch. The returned 
+        dictionary contains keys which correspond to the class-names of the 
+        available tasks.
+
+        :param epoch: epoch to look for available tasks
+        :type epoch: datetime.date
+        :return: dictionary with available tasks
+        :rtype: dict
+        """
+        fpath = os.path.join(
+            self.project_directory, self.save_directory, epoch.isoformat()
+        )
+        if not os.path.exists(fpath):
+            return
+        
+        ret = {}
+        for folder in os.listdir(fpath):
+            tpath = os.path.join(fpath, folder)
+            fio = open(os.path.join(tpath, 'metadata.json'), 'r')
+            md = json.load(fio)
+            fio.close()
+            task = getattr(import_module(md['task_module']), md['task_name'])()
+            task.load_geotiff(tpath)
+            ret[task.task_name] = task
+
+        return ret
 
     def load_excel_files(self) -> None:
         mddir = os.path.join(self.project_directory, self.DATA_FOLDER)

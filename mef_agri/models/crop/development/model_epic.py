@@ -3,6 +3,8 @@ import numpy as np
 from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
+from ....evaluation.stats_utils import DISTRIBUTIONS
+from ....farming import crops
 
 
 class Development(Model):
@@ -13,6 +15,46 @@ class Development(Model):
 
     kwargs :math:`\rightarrow` see :class:`mef_agri.models.base.Model`
     """
+    DEFAULT_PARAM_VALUES = {
+        crops.winter_wheat.__name__: {
+            'temperature_base': {
+                'value': 0.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'temperature_opt': {
+                'value': 15.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'heat_units_pot': {
+                'value': 1800.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 50.0
+                }
+            },
+            'hufl_coeff1': {
+                'value': 3.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.5
+                }
+            },
+            'hufl_coeff2': {
+                'value': 10.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.0
+                }
+            }
+        }
+    }
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._zv:np.ndarray = None

@@ -17,6 +17,24 @@ class Task(GeoRaster):
         self._meta['date_end'] = None
         self._meta['time_begin'] = None
         self._meta['time_end'] = None
+        self._meta['task_name'] = self.__class__.__name__
+        self._meta['task_module'] = self.__module__
+
+    @property
+    def task_name(self) -> str:
+        """
+        :return: name of the class representing the task
+        :rtype: str
+        """
+        return self._meta['task_name']
+    
+    @property
+    def task_module(self) -> str:
+        """
+        :return: module containing class representing the task
+        :rtype: str
+        """
+        return self._meta['task_module']
 
     @property
     def date_begin(self) -> datetime.date:
@@ -190,3 +208,4 @@ class Task(GeoRaster):
         else:
             msg = 'Provided value cannot be converted to datetime.time!'
             raise ValueError(msg)
+        

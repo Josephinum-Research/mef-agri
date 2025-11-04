@@ -303,6 +303,10 @@ class Project(object):
         plgn = self._flds[ix]['geometry'].values[0]
         return plgn, crs
     
+    def get_field_height(self, field_name:str, hcol:str) -> float:
+        ix = self._flds[self._db.field_name_column] == field_name
+        return self._flds[ix][hcol].values[0]
+    
     def _get_dis_flds(self, dids, fields) -> tuple[list, list]:
         # if no specific data source is specified, data from all data sources 
         # will be added for specified fields

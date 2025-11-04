@@ -43,11 +43,10 @@ class Field(GeoRaster):
     """
     EPSG_WGS84 = 4326
 
-    def __init__(self, name:str, height:float, **kwargs) -> None:
+    def __init__(self, name:str, height:float) -> None:
         super().__init__()
         self.n_zones:int = 1  # NOTE 0 means, that each zoning element will be treated as a separate zone
         self.intersection_percentage:float = 1.0  # this value is used in RasterVectorIntersection for the `fraction` attribute
-        set_attributes(self, kwargs)
         
         self._height:float = height
         self._name:str = name
@@ -202,3 +201,12 @@ class Field_OneZone(Field):
         self._zones = [zentry,]
         self._zids = [self.name + '.' + self.ZONE_NAME,]
         self._rstr = np.zeros(self.raster_shape, dtype=int)
+
+
+class Field_FromZoningTask(Field):
+    def __init__(self, name, height):
+        super().__init__(name, height)
+
+    def determine_zones(self):
+        # TODO
+        pass

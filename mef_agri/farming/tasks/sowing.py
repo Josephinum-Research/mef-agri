@@ -33,6 +33,7 @@ class Sowing(Task):
         self._meta['crop'] = None
         self._meta['cultivar'] = None
         self._meta['cultivar_info'] = None
+        self._meta['crop_module'] = None
         self._meta['tgw'] = None
         self._meta['tgw_unit'] = None
 
@@ -54,6 +55,14 @@ class Sowing(Task):
         :rtype: str
         """
         return self._av_sa
+    
+    @property
+    def crop_module(self) -> str:
+        """
+        :return: module containing the class representing :func:`crop`
+        :rtype: str
+        """
+        return self._meta['crop_module']
 
     @property
     def crop(self) -> str:
@@ -81,6 +90,7 @@ class Sowing(Task):
             msg = 'Use crop definitions from `mef_agri.farming.crops` for '
             msg += 'setting information in `Sowing`-Task!'
             raise ValueError(msg)
+        self._meta['crop_module'] = val.__module__
         self._meta['crop'] = cn
 
     @property

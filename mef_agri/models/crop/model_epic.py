@@ -15,7 +15,8 @@ from .roots.model_epic import Roots as RootsEPIC
 from .cyield.model_epic import (
     Yield as YieldEPIC, Yield_Stressed as YieldStrEPIC
 )
-
+from ...farming import crops
+from ...evaluation.stats_utils import DISTRIBUTIONS
 
 class Crop_Simple(Model):
     """
@@ -29,6 +30,57 @@ class Crop_Simple(Model):
     * :class:`mef_agri.models.crop.cyield.model_epic.Yield` as crop-yield-model
 
     """
+    DEFAULT_PARAM_VALUES = {
+        crops.winter_wheat.__name__: {
+            'water_storage_max': {
+                'value': 1.2,  # [ mm ] - approx. max. values from [2] figures 4 and 5
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'energy_conversion': {
+                'value': 35.0,  # [( kg x m2 ) / (ha x MJ x day)]
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.0
+                }
+            },
+            'critical_aeration_factor': {
+                'value': 0.85,  # []
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.002,
+                    'lb': 0.0,
+                    'ub': 1.0
+                }
+            },
+            'height_max': {
+                'value': 1.2,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.1,
+                    'lb': 1.15,
+                    'ub': 1.5
+                }
+            },
+            'frost_coeff1': {
+                'value': 5.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'frost_coeff2': {
+                'value': 15.05,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.3
+                }
+            }
+        }
+    }
+
     def __init__(self):
         super().__init__(model_name='crop')
         self._dlprv = None  # daylength difference

@@ -35,12 +35,20 @@ def check_gpkg():
     a1.axis('equal')
 
 
-if __name__ == '__main__':
-    wdir = os.path.join('/', 'home', 'andreas', 'Downloads', 'eval_from_excel')
-
+def setup_project():
     prj = Project(wdir, 'fields', 'fname')
     prj.add_data_interface(ManagementInterface)
-    prj.add_data(dt.date(2024, 1, 1), dt.date(2025, 12, 31))
+    prj.quit_project()
+
+
+if __name__ == '__main__':
+    wdir = os.path.join('/', 'home', 'aet', 'Downloads', 'eval_from_excel')
+
+    d1, d2 = dt.date(2024, 10, 1), dt.date(2025, 8, 30)
+    setup_project()
+    prj = Project(wdir)
+    prj.add_data(d1, d2)
+    data = prj.get_data(dt.date(2024, 10, 23))
 
     prj.quit_project()
     plt.show()
