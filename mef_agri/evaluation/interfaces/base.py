@@ -53,8 +53,7 @@ class EvalInterface(object):
 
     def process_data(
             self, edefs:EvaluationDefinitions, rasters:dict[GeoRaster], 
-            gcs:np.ndarray, epoch:date, zid:str, 
-            **kwargs
+            gcs:np.ndarray, epoch:date, zid:str
         ) -> EvaluationDefinitions:
         """
         Within this method, representative values for a zone should be derived 

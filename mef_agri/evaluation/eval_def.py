@@ -8,7 +8,6 @@ from importlib import import_module
 
 from ..models.base import Model, Quantities as Q
 from ..models.tree import ModelTree
-from .zoning.field import Field
 
 
 def dict_from_model(model:Model) -> dict:
@@ -203,6 +202,14 @@ class EvaluationDefinitions(object):
         :param epoch_end: end of vegetation period
         :type epoch_end: datetime.date
         """
+        vpbs = [
+            date.fromisoformat(
+                vp['epoch_start']
+            ) for vp in self._edefs['crop_rotation']
+        ]
+        if epoch_start in vpbs:
+            return
+
         if isclass(crop_model):
             mmodule = crop_model.__module__
             mname = crop_model.__name__
@@ -267,7 +274,7 @@ class EvaluationDefinitions(object):
         Set field informations in the :func:`defs` dictionary. 
 
         The values in ``zones`` (i.e. again dictionaries) have to contain the 
-        keys ``'lat'`` and ``'gcs'``. 
+        keys ``'lat'`` (float) and ``'gcs'`` (2xn numpy.ndarray). 
 
         :param fname: name of the field
         :type fname: str
@@ -697,16 +704,16 @@ class EvaluationDefinitions(object):
         obj['epoch_start'] = defs['epoch_start']
         obj['epoch_end'] = defs['epoch_end']
         # process zone infos
+        zones = {}
         zids, zinfos = [], []
         for zid, zinfo in defs['add_info']['zones'].items():
-            zids.append(zid)
-            zinfos.append(
-                {'lat': zinfo['latitude'], 
-                 'gcs': np.array(GCSCoords.gcs_from_repr(zinfo['gcs']))}
-            )
+            zones[zid] = {
+                'lat': zinfo['latitude'], 
+                'gcs': np.array(GCSCoords.gcs_from_repr(zinfo['gcs']))
+            }
         obj.provide_field_info(
             defs['field'], defs['add_info']['crs'], defs['add_info']['height'],
-            zids, zinfos
+            zones
         )
 
         # process zone model

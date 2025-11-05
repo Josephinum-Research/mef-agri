@@ -1,7 +1,6 @@
 from datetime import date
 
-from ..evaluation.stats_utils import DISTRIBUTIONS
-
+from ...evaluation.stats_utils import DISTRIBUTIONS
 
 def nn_params_dict2model(nnps:dict, epoch:date=None) -> dict:
     def get_distr_param(dentry, i, j=None):

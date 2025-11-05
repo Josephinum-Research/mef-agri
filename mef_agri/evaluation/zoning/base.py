@@ -1,6 +1,6 @@
 import os
+import datetime as dt
 from copy import deepcopy
-from datetime import date, now, timedelta
 from inspect import isclass
 from pandas import date_range
 
@@ -8,6 +8,7 @@ from ..interfaces.base import EvalInterface
 from ..eval_def import EvaluationDefinitions
 from ...data.project import Project
 from ...models.base import Model
+from ..interfaces.jr_management.interface import Management_JRV01
 
 
 class Zoning(object):
@@ -32,13 +33,11 @@ class Zoning(object):
         self._ifs[ei.data_source_id] = ei
 
     def prepare_data(
-            self, tstart:date, tstop:date, field_name:str, save_edefs:bool=False
+            self, tstart:dt.date, tstop:dt.date, field_name:str, 
+            save_edefs:bool=False
         ) -> EvaluationDefinitions:
         ed = EvaluationDefinitions(self._zm)
         ed.set_epoch_start_end(tstart, tstop)
-        init_epoch = tstart - timedelta(days=1)
-        ed.set_zone_states_init_epoch(init_epoch)
-        ed.set_zone_params_init_epoch(init_epoch)
 
         zones = self.determine_zones(field_name)
         _, epsg = self._prj.get_field_geodata(field_name)
@@ -52,23 +51,32 @@ class Zoning(object):
                         epoch, dids=intf.data_source_id, fields=field_name
                     )[field_name][intf.data_source_id]
                     if intf.time_independent:
-                        epoch -= timedelta(days=1)
-                    intf.process_data(ed, rasters, zinfo['gcs'], epoch, zname)
+                        epoch -= dt.timedelta(days=1)
+                    ed = intf.process_data(
+                        ed, rasters, zinfo['gcs'], epoch, zname
+                    )
                     if intf.time_independent:
                         break
 
+        init_epoch = tstart - dt.timedelta(days=1)
+        ed.set_zone_states_init_epoch(init_epoch)
+        ed.set_zone_params_init_epoch(init_epoch)
+
         if save_edefs:
-            fpath = os.path.join(self._prj.project_path, ed.EVAL_FOLDER_NAME)
-            if not os.path.exists(fpath):
-                os.mkdir(fpath)
-            fpath = os.path.join(fpath, field_name)
-            if not os.path.exists(fpath):
-                os.mkdir(fpath)
-            fn = 'eid_'
-            if os.path.exists(os.path.join(fpath, fn + '.json')):
-                fn += now().isoformat()
-            ed.save(fpath, fn)
+            self.save_edefs(ed, field_name)
         return ed
+    
+    def save_edefs(self, ed:EvaluationDefinitions, field_name:str) -> None:
+        fpath = os.path.join(self._prj.project_path, ed.EVAL_FOLDER_NAME)
+        if not os.path.exists(fpath):
+            os.mkdir(fpath)
+        fpath = os.path.join(fpath, field_name)
+        if not os.path.exists(fpath):
+            os.mkdir(fpath)
+        fn = 'eid_'
+        if os.path.exists(os.path.join(fpath, fn + '.json')):
+            fn += dt.datetime.now().isoformat()
+        ed.save(fpath, fn)
     
     def determine_zones(self, field_name:str) -> dict:
         # NOTE implement in child class

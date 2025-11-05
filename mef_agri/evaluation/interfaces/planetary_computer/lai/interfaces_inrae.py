@@ -15,19 +15,21 @@ from ...utils import nn_params_dict2model
 
 class PCSentinel2_NNET10(Interface):
     def __init__(self):
-        super().__init__(Sentinel2Interface.DATA_SOURCE_ID)
-        self._hps_set:bool = False
+        super().__init__()
+        self.data_source_id = Sentinel2Interface.DATA_SOURCE_ID
+        self._hps_set = {}
 
-    def process_data(self, rasters, gcs, edefs, epoch, zid):
-        if not self._hps_set:
+    def process_data(self, edefs, rasters, gcs, epoch, zid):
+        if not str(zid) in self._hps_set.keys():
+            self._hps_set[str(zid)] = False
+        if not self._hps_set[str(zid)]:
             # epoch of hyper parameters is one day before start of evaluation
             nnhps = nn_params_dict2model(NNET10_PARAMS, epoch - timedelta(days=1))
             for qname, qinfo in nnhps.items():
-                edefs.set_qinfos(
-                    edefs['zmodel'], Q.HPARAM, 'zone.sentinel2_lai', qname, qinfo,
-                    zid=zid
+                edefs.set_zone_qinfos(
+                    zid, Q.PARAM, 'zone.sentinel2_lai', qname, qinfo
                 )
-            self._hps_set = True
+            self._hps_set[str(zid)] = True
 
         if rasters is None:
             # no image available for current epoch
@@ -40,9 +42,8 @@ class PCSentinel2_NNET10(Interface):
             return edefs
         s2obs = self._s2_zvals_2_model(zvals, epoch)
         for qname, qinfo in s2obs.items():
-            edefs.set_qinfos(
-                edefs['zmodel'], Q.OBS, 'zone.sentinel2_lai', qname, qinfo, 
-                zid=zid
+            edefs.set_zone_qinfos(
+                zid, Q.OBS, 'zone.sentinel2_lai', qname, qinfo
             )
 
         return edefs
@@ -60,22 +61,21 @@ class PCSentinel2_NNET10(Interface):
             newimg['SUN_ZENITH'][~veg] = np.nan
             newimg['VIEW_AZIMUTH_MEAN'][~veg] = np.nan
             newimg['VIEW_ZENITH_MEAN'][~veg] = np.nan
+            b03med = np.nanmedian(newimg['B03'][0, rows, cols].flatten())
+            b04med = np.nanmedian(newimg['B04'][0, rows, cols].flatten())
+            b08med = np.nanmedian(newimg['B08'][0, rows, cols].flatten())
+            samed = np.nanmedian(newimg['SUN_AZIMUTH'][0, rows, cols].flatten())
+            szmed = np.nanmedian(newimg['SUN_ZENITH'][0, rows, cols].flatten())
+            vamed = np.nanmedian(newimg['VIEW_AZIMUTH_MEAN'][0, rows, cols].flatten())
+            vzmed = np.nanmedian(newimg['VIEW_ZENITH_MEAN'][0, rows, cols].flatten())
+
+            vals = [b03med, b04med, b08med, samed, szmed, vamed, vzmed]
+            if True in np.isnan(vals):
+                return {}
             return {
-                'b03': np.nanmedian(newimg['B03'][0, rows, cols].flatten()),
-                'b04': np.nanmedian(newimg['B04'][0, rows, cols].flatten()),
-                'b08': np.nanmedian(newimg['B08'][0, rows, cols].flatten()),
-                'sun_azimuth': np.nanmedian(
-                    newimg['SUN_AZIMUTH'][0, rows, cols].flatten()
-                ),
-                'sun_zenith': np.nanmedian(
-                    newimg['SUN_ZENITH'][0, rows, cols].flatten()
-                ),
-                'view_azimuth': np.nanmedian(
-                    newimg['VIEW_AZIMUTH_MEAN'][0, rows, cols].flatten()
-                ),
-                'view_zenith': np.nanmedian(
-                    newimg['VIEW_ZENITH_MEAN'][0, rows, cols].flatten()
-                ),
+                'b03': b03med, 'b04': b04med, 'b08': b08med,
+                'sun_azimuth': samed, 'sun_zenith': szmed,
+                'view_azimuth': vamed, 'view_zenith': vzmed,
             }
         else:
             return {}

@@ -37,6 +37,15 @@ class Leaves(Model):
             }
         }
     }
+    INITIAL_STATE_VALUES = {
+        'lai': {
+            'value': 0.0,  # []
+            'distr': {
+                'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                'std': 0.05
+            }
+        }
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

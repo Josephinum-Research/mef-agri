@@ -54,6 +54,17 @@ class Development(Model):
             }
         }
     }
+    INITIAL_STATE_VALUES = {
+        'heat_unit_index': {
+            'value': 0.0,  # []
+            'distr': {
+                'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                'std': 0.01,
+                'lb': 0.0,
+                'ub': 1.0
+            }
+        }
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

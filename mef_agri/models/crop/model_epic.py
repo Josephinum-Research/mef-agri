@@ -18,6 +18,16 @@ from .cyield.model_epic import (
 from ...farming import crops
 from ...evaluation.stats_utils import DISTRIBUTIONS
 
+"""
+[1]
+Zhou, X. and Liu, H. and Li, L.
+Estimation of water interception of winter wheat canopy under sprinkler irrigation using UAV image data
+Water, Vol. 16, No. 24
+2024
+https://doi.org/10.3390/w16243609
+
+"""
+
 class Crop_Simple(Model):
     """
     This class acts as root-model containing several child models (i.e. 
@@ -33,7 +43,7 @@ class Crop_Simple(Model):
     DEFAULT_PARAM_VALUES = {
         crops.winter_wheat.__name__: {
             'water_storage_max': {
-                'value': 1.2,  # [ mm ] - approx. max. values from [2] figures 4 and 5
+                'value': 1.2,  # [ mm ] - approx. max. values from [1] figures 4 and 5
                 'distr': {
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 0.1
@@ -77,6 +87,15 @@ class Crop_Simple(Model):
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 0.3
                 }
+            }
+        }
+    }
+    INITIAL_STATE_VALUES = {
+        'biomass': {
+            'value': 0.0,  # [t/ha]
+            'distr': {
+                'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                'std': 0.05
             }
         }
     }

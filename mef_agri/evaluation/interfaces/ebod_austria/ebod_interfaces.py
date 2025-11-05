@@ -41,7 +41,8 @@ class EBOD_SoilSWAT_JRV1(Interface):
     PTF_FILENAME = 'ptf_jrv01.json'
 
     def __init__(self):
-        super().__init__(EbodInterface.DATA_SOURCE_ID)
+        super().__init__()
+        self.data_source_id = EbodInterface.DATA_SOURCE_ID
         self.time_independent = True
 
     def process_data(
@@ -54,9 +55,8 @@ class EBOD_SoilSWAT_JRV1(Interface):
         for qname, val in sdata.items():
             qinfo = deepcopy(val)
             qinfo['epoch'] = epoch
-            edefs.set_qinfos(
-                edefs['zmodel'], Quantities.PARAM, qinfo['qmodel'],
-                qinfo['qname'], qinfo, zid=zid
+            edefs.set_zone_qinfos(
+                zid, Quantities.PARAM, qinfo['qmodel'], qinfo['qname'], qinfo
             )
 
         return edefs

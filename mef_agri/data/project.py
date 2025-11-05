@@ -1,5 +1,6 @@
 import os
 import geopandas as gpd
+from numpy import nan
 from datetime import date
 from inspect import isclass
 from importlib import import_module
@@ -235,7 +236,8 @@ class Project(object):
                     # files or manually update data_available-information in .gpkg
                     try:
                         trng_upd = di.add_prj_data(aoi, trng[0], trng[1])
-                        trngs_requ_upd.append(trng_upd)
+                        if not nan in trng_upd:
+                            trngs_requ_upd.append(trng_upd)
                         if di.add_prj_data_error:
                             prc_ok = False
                             print(self.WRN_ADDDATA.format(dsrc=did, fld=field))
@@ -305,7 +307,7 @@ class Project(object):
     
     def get_field_height(self, field_name:str, hcol:str) -> float:
         ix = self._flds[self._db.field_name_column] == field_name
-        return self._flds[ix][hcol].values[0]
+        return float(self._flds[ix][hcol].values[0])
     
     def _get_dis_flds(self, dids, fields) -> tuple[list, list]:
         # if no specific data source is specified, data from all data sources 
@@ -344,37 +346,23 @@ class Project(object):
         """
         self._db.close()
 
-    @classmethod
-    def default_prj(
-        cls, project_path:str, gpkg_field_table:str=None, 
-        gpkg_field_name_column:str=None
-    ):
-        """
-        classmethod which returns an initialized project containing the 
-        following data-sources.
 
-        * TODO planetary_computer - sentinel2
-        * TODO geosphere_austria - inca
-        * TODO ebod_austria - soil
-        * TODO management
+def get_project_jrv01(
+        wdir:str, ftable_name:str, ftable_name_col:str
+    ) -> Project:
+    prj = Project(
+        wdir, 
+        gpkg_field_table=ftable_name, 
+        gpkg_field_name_column=ftable_name_col
+    )
+    from .geosphere_austria.inca.interface import INCAInterface
+    from .ebod_austria.interface import EbodInterface
+    from .planetary_computer.sentinel2.interface import Sentinel2Interface
+    from .jr_management.interface import ManagementInterface
+    prj.add_data_interface(INCAInterface)
+    prj.add_data_interface(EbodInterface)
+    prj.add_data_interface(Sentinel2Interface)
+    prj.add_data_interface(ManagementInterface)
+    prj.quit_project()
 
-        :param project_path: absolute path of folder where project is located in
-        :type project_path: str
-        :param gpkg_field_table: name of the table within the .gpkg in the project folder which contains the field geometries, defaults to None
-        :type gpkg_field_table: str, optional
-        :param gpkg_field_name_column: name of column within the field-table which contains the field names, defaults to None
-        :type gpkg_field_name_column: str, optional
-        """
-        from .planetary_computer.sentinel2.interface import Sentinel2Interface
-        from .geosphere_austria.inca.interface import INCAInterface
-        from .ebod_austria.interface import EbodInterface
-
-        prj = cls(project_path, gpkg_field_table, gpkg_field_name_column)
-        prj.add_data_interface(Sentinel2Interface)
-        prj.add_data_interface(INCAInterface)
-        prj.add_data_interface(EbodInterface)
-        # TODO management
-
-        prj.quit_project()
-
-        return cls(project_path)
+    return Project(wdir)

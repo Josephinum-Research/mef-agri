@@ -60,7 +60,8 @@ def inca_dict_2_zone_values(inca:dict[GeoRaster], gcs:np.ndarray) -> dict:
 
 class INCA_AtmosphereSWAT_JRV1(Interface):
     def __init__(self):
-        super().__init__(INCAInterface.DATA_SOURCE_ID)
+        super().__init__()
+        self.data_source_id = INCAInterface.DATA_SOURCE_ID
 
     def process_data(
             self, edefs:EvaluationDefinitions, rasters:dict[GeoRaster], 
@@ -70,8 +71,9 @@ class INCA_AtmosphereSWAT_JRV1(Interface):
         for qname, val in wdata.items():
             qinfo = deepcopy(val)
             qinfo['epoch'] = epoch
-            edefs.set_qinfos(edefs['zmodel'], Quantities.OBS, 
-                'zone.atmosphere.weather', qname, qinfo, zid=zid)
+            edefs.set_zone_qinfos(
+                zid, Quantities.OBS, 'zone.atmosphere.weather', qname, qinfo
+            )
         return edefs
 
     @staticmethod

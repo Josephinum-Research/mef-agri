@@ -3,11 +3,34 @@ import math as m
 import rasterio as rio
 import rasterio.windows as riowdw
 from rasterio.transform import Affine
-from shapely.geometry import Polygon, MultiPolygon
+from shapely.geometry import Polygon, MultiPolygon, Point
 from geopandas import GeoDataFrame
 
 
 EARTH_SPHERE_RADIUS = 6371000.0  # [m]
+
+def mean_latitude_wgs84(gcs:np.ndarray, epsg:int) -> float:
+    """
+    Compute the mean latitude in WGS84 from given geo-coordinates.
+
+    :param gcs: geo-coordinates (2, n) numpy.ndarray
+    :type gcs: numpy.ndarray
+    :param epsg: epsg code of crs
+    :type epsg: int
+    :return: mean latitidue in WGS84
+    :rtype: float
+    """
+    if epsg != 4326:
+        gdf = GeoDataFrame(
+            {'geometry': [Point(*np.mean(gcs, axis=1))]},
+            crs=epsg
+        )
+        gdf.to_crs(4326, inplace=True)
+        lat = gdf['geometry'].values[0].y
+    else:
+        lat = np.mean(gcs[1, :])  # second row corresponds to the y-value ("Hochwert")
+        
+    return lat * (np.pi / 180.0)  # NOTE conversion to [rad], as latitude in WGS84 comes at [deg]
 
 
 ################################################################################

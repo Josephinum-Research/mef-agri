@@ -26,6 +26,15 @@ class Roots(Model):
             }
         }
     }
+    INITIAL_STATE_VALUES = {
+        'biomass': {
+            'value': 0.0,  # [t/ha]
+            'distr': {
+                'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                'std': 0.01
+            }
+        }
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

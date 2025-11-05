@@ -185,6 +185,6 @@ DusLAS.SO3 = 0.15
 DusLAS.CaO = 0.11
 
 
-Cultan_17N = Fertilizer
+Cultan_17N = Fertilizer()
 Cultan_17N.NH4 = 0.17
 Cultan_17N.NO3 = 0.0
