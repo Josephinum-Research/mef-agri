@@ -47,7 +47,7 @@ def check_gpkg():
 if __name__ == '__main__':
     wdir = os.path.split(__file__)[0]
 
-    #check_gpkg()
+    check_gpkg()
 
     fpath = os.path.join(wdir, 'management', 'testdata.xlsx')
     df1 = read_sheet(fpath, sheet_fielddata, columns_fielddata)
