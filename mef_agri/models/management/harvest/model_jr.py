@@ -14,21 +14,21 @@ class Harvest(Model):
     def cyield(self) -> np.ndarray:
         """
         :return: yield of current zone in [kg/ha]
-        :rtype: np.ndarray
+        :rtype: numpy.ndarray
         """
 
     @Model.is_quantity(Q.OBS, U.none)
     def cn_ratio_res(self) -> np.ndarray:
         """
         :return: C/N ratio of crop residues and roots
-        :rtype: np.ndarray
+        :rtype: numpy.ndarray
         """
 
     @Model.is_quantity(Q.OBS, U.frac)
     def residues_removed(self) -> np.ndarray:
         """
         :return: fraction of aboveground biomass which is removed
-        :rtype: np.ndarray
+        :rtype: numpy.ndarray
         """
 
     @Model.is_required('biomass_aboveground', 'crop', U.kg_ha)

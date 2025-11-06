@@ -17,6 +17,24 @@ class Task(GeoRaster):
         self._meta['date_end'] = None
         self._meta['time_begin'] = None
         self._meta['time_end'] = None
+        self._meta['task_name'] = self.__class__.__name__
+        self._meta['task_module'] = self.__module__
+
+    @property
+    def task_name(self) -> str:
+        """
+        :return: name of the class representing the task
+        :rtype: str
+        """
+        return self._meta['task_name']
+    
+    @property
+    def task_module(self) -> str:
+        """
+        :return: module containing class representing the task
+        :rtype: str
+        """
+        return self._meta['task_module']
 
     @property
     def date_begin(self) -> datetime.date:
@@ -24,11 +42,11 @@ class Task(GeoRaster):
         :return: date when task has been started
         :rtype: datetime.date
         """
-        return self._meta['date_begin']
+        return datetime.date.fromisoformat(self._meta['date_begin'])
     
     @date_begin.setter
     def date_begin(self, val):
-        self._meta['date_begin'] = self._check_date(val)
+        self._meta['date_begin'] = self._check_date(val).isoformat()
 
     @property
     def time_begin(self) -> datetime.time:
@@ -36,11 +54,11 @@ class Task(GeoRaster):
         :return: time when task has been started
         :rtype: datetime.time
         """
-        return self._meta['time_begin']
+        return datetime.time.fromisoformat(self._meta['time_begin'])
     
     @time_begin.setter
     def time_begin(self, val):
-        self._meta['time_begin'] = self._check_time(val)
+        self._meta['time_begin'] = self._check_time(val).isoformat()
 
     @property
     def date_end(self) -> datetime.date:
@@ -48,11 +66,11 @@ class Task(GeoRaster):
         :return: date when task has been finished
         :rtype: datetime.date
         """
-        return self._meta['date_end']
+        return datetime.date.fromisoformat(self._meta['date_end'])
     
     @date_end.setter
     def date_end(self, val):
-        self._meta['date_end'] = self._check_date(val)
+        self._meta['date_end'] = self._check_date(val).isoformat()
 
     @property
     def time_end(self) -> datetime.time:
@@ -60,11 +78,11 @@ class Task(GeoRaster):
         :return: time when task has been finished
         :rtype: datetime.time
         """
-        return self._meta['time_end']
+        return datetime.time.fromisoformat(self._meta['time_end'])
     
     @time_end.setter
     def time_end(self, val):
-        self._meta['time_end'] = self._check_time(val)
+        self._meta['time_end'] = self._check_time(val).isoformat()
 
     @property
     def application_map(self) -> np.ndarray:
@@ -108,7 +126,7 @@ class Task(GeoRaster):
             self.raster_shape = (1, 1, 1)
             self.layer_index = 0
         elif isinstance(appl_val, np.ndarray):
-            self.raster = np.astype(appl_val, dtype=np.float32)
+            self.raster = appl_val.astype(np.float32)
             self.raster_shape = appl_val.shape
             if self.layer_index is None:
                 if appl_ix is None:
@@ -128,7 +146,9 @@ class Task(GeoRaster):
         if isinstance(appl_name, str):
             appl_name = [appl_name,]
         if isinstance(appl_unit, str):
-            appl_unit = [appl_unit,]
+            appl_unit = [
+                appl_unit for i in range(self.raster_shape[self.layer_index])
+            ]
         if len(appl_name) != self.raster_shape[self.layer_index]:
             msg = 'number of application names has to match the number of '
             msg += 'applications, i.e. number of layers in `appl_val`!'
@@ -141,8 +161,8 @@ class Task(GeoRaster):
         self.layer_ids = appl_name
         li = {}
         for ikey, ival in zip(appl_name, appl_unit):
-            li[ikey] = {'unit': ival}
-        self.layer_infos = li
+            li[ikey] = ival
+        self.layer_infos['units'] = li
     
     @classmethod
     def get_properties(cls) -> list:
@@ -188,3 +208,4 @@ class Task(GeoRaster):
         else:
             msg = 'Provided value cannot be converted to datetime.time!'
             raise ValueError(msg)
+        

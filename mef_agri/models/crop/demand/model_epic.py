@@ -3,9 +3,60 @@ import numpy as np
 from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
+from ....farming import crops
+from ....evaluation.stats_utils import DISTRIBUTIONS
 
 
 class Demand(Model):
+    DEFAULT_PARAM_VALUES = {
+        crops.maize.__name__: {
+            'ncoeff1': {
+                'value': 0.044,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff2': {
+                'value': 0.0164,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff3': {
+                'value': 0.0128,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.0005
+                }
+            }
+        },
+        crops.winter_wheat.__name__: {
+            'ncoeff1': {
+                'value': 0.06,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff2': {
+                'value': 0.0231,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff3': {
+                'value': 0.0134,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.0005
+                }
+            }
+        }
+    }
+
     @Model.is_quantity(Q.ROUT, U.mm_day)
     def water(self) -> np.ndarray:
         r"""

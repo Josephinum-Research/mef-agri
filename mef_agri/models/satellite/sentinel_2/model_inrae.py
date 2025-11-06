@@ -2,6 +2,7 @@ import numpy as np
 
 from ...base import Quantities as Q
 from ...utils import Units as U
+from ...requ import Requirement
 from ...nns import Layer, NeuralNetwork
 
 
@@ -155,6 +156,17 @@ class Sentinel2_LAI10m(NeuralNetwork):
         :rtype: numpy.ndarray
         """
 
+    @NeuralNetwork.is_required('lai_max', 'crop.leaves', U.none)
+    def lai_max(self) -> Requirement:
+        r"""
+        RQ - ``'lai_max'`` from model with id ``'crop.leaves'``
+
+        :math:`c_{\textrm{L-lmx},0}\ [\ ]` - [R2]_ (equ. 8, table 2)
+
+        :return: max. possible value of lai 
+        :rtype: mef_agri.models.requ.Requirement
+        """
+
     def initialize(self, epoch):
         super().initialize(epoch)
 
@@ -196,9 +208,9 @@ class Sentinel2_LAI10m(NeuralNetwork):
         self.lai = self._denormalize(
             self.lai_nonnorm, self._lai_nmin, self._lai_nmax
         )
-        # TODO make max. value of 8.0 dynamic
         lainoise = np.random.normal(0.0, 0.02, size=len(self.lai))
-        self.lai = np.where(self.lai <= 8.0, self.lai, 8.0 + lainoise)
+        laimax = np.mean(self.lai_max.value) * 1.1
+        self.lai = np.where(self.lai <= laimax, self.lai, laimax + lainoise)
 
     def _normalize(self, arr:np.ndarray, vmin:float, vmax:float) -> np.ndarray:
         aux =  2. * (arr - vmin) / (vmax - vmin) - 1.

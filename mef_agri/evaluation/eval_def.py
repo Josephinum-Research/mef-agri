@@ -8,7 +8,6 @@ from importlib import import_module
 
 from ..models.base import Model, Quantities as Q
 from ..models.tree import ModelTree
-from .zoning.field import Field
 
 
 def dict_from_model(model:Model) -> dict:
@@ -156,7 +155,9 @@ class EvaluationDefinitions(object):
     :param field: field-object which holds zoning information, defaults to None
     :type field: sitespecificcultivation.evaluation.zoning.field.Field, optional  # TODO
     """
-    def __init__(self, zone_model, field:Field=None):
+    EVAL_FOLDER_NAME = 'eval'
+
+    def __init__(self, zone_model):
         if isclass(zone_model):
             zone_model = zone_model()
         
@@ -178,10 +179,6 @@ class EvaluationDefinitions(object):
             'zone_models': {},
             'crop_rotation': [],
         }
-        if field is not None:
-            self.provide_field_info(
-                field.name, field.crs, field.height, field.zone_ids, field.zones
-            )
 
     @property
     def defs(self) -> dict:
@@ -205,6 +202,14 @@ class EvaluationDefinitions(object):
         :param epoch_end: end of vegetation period
         :type epoch_end: datetime.date
         """
+        vpbs = [
+            date.fromisoformat(
+                vp['epoch_start']
+            ) for vp in self._edefs['crop_rotation']
+        ]
+        if epoch_start in vpbs:
+            return
+
         if isclass(crop_model):
             mmodule = crop_model.__module__
             mname = crop_model.__name__
@@ -263,15 +268,13 @@ class EvaluationDefinitions(object):
                         pd['epoch'] = epoch.isoformat()
     
     def provide_field_info(
-            self, fname:str, fcrs:int, fheight:float, zone_ids:list, zones:list
+            self, fname:str, fcrs:int, fheight:float, zones:dict
         ) -> None:
         """
-        Set field informations in the :func:`defs` dictionary. The order within 
-        ``zone_ids`` and ``zones`` has to be consistent. The dictionaries in 
-        ``zones`` have to contain the keys ``'lat'`` and ``'gcs'``. The 
-        attributes ``zones`` and ``zone_ids`` from 
-        :class:`mef_agri.evaluation.zoning.field.Field` exhibit these desired 
-        properties.
+        Set field informations in the :func:`defs` dictionary. 
+
+        The values in ``zones`` (i.e. again dictionaries) have to contain the 
+        keys ``'lat'`` (float) and ``'gcs'`` (2xn numpy.ndarray). 
 
         :param fname: name of the field
         :type fname: str
@@ -279,16 +282,13 @@ class EvaluationDefinitions(object):
         :type fcrs: int
         :param fheight: approximate/mean height of the field
         :type fheight: float
-        :param zone_ids: list of zone ids
-        :type zone_ids: list of zone ids
-        :param zones: list of zone dictionaries containing zone informations
-        :type zones: list
+        :param zones: dictionary containing zone information (keys have to match the zone ids/names)
+        :type zones: dict
         """
         self._edefs['field'] = fname
         self._edefs['add_info']['crs'] = fcrs
         self._edefs['add_info']['height'] = fheight
-
-        for zid, zinfo in zip(zone_ids, zones):
+        for zid, zinfo in zones.items():
             self._edefs['zone_models'][zid] = deepcopy(self._zmdld)
             self._edefs['add_info']['zones'][zid] = {
                 'latitude': zinfo['lat'],
@@ -704,16 +704,16 @@ class EvaluationDefinitions(object):
         obj['epoch_start'] = defs['epoch_start']
         obj['epoch_end'] = defs['epoch_end']
         # process zone infos
+        zones = {}
         zids, zinfos = [], []
         for zid, zinfo in defs['add_info']['zones'].items():
-            zids.append(zid)
-            zinfos.append(
-                {'lat': zinfo['latitude'], 
-                 'gcs': np.array(GCSCoords.gcs_from_repr(zinfo['gcs']))}
-            )
+            zones[zid] = {
+                'lat': zinfo['latitude'], 
+                'gcs': np.array(GCSCoords.gcs_from_repr(zinfo['gcs']))
+            }
         obj.provide_field_info(
             defs['field'], defs['add_info']['crs'], defs['add_info']['height'],
-            zids, zinfos
+            zones
         )
 
         # process zone model

@@ -300,7 +300,7 @@ class Model(object):
     def current_epoch(self) -> date:
         """
         :return: current epoch of the model (i.e. for which epoch, the computations in ``Model.update()`` have already been performed)
-        :rtype: date
+        :rtype: datetime.date
         """
         return self._epoch
     

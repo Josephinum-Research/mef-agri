@@ -33,6 +33,7 @@ class Sowing(Task):
         self._meta['crop'] = None
         self._meta['cultivar'] = None
         self._meta['cultivar_info'] = None
+        self._meta['crop_module'] = None
         self._meta['tgw'] = None
         self._meta['tgw_unit'] = None
 
@@ -54,6 +55,14 @@ class Sowing(Task):
         :rtype: str
         """
         return self._av_sa
+    
+    @property
+    def crop_module(self) -> str:
+        """
+        :return: module containing the class representing :func:`crop`
+        :rtype: str
+        """
+        return self._meta['crop_module']
 
     @property
     def crop(self) -> str:
@@ -81,6 +90,7 @@ class Sowing(Task):
             msg = 'Use crop definitions from `mef_agri.farming.crops` for '
             msg += 'setting information in `Sowing`-Task!'
             raise ValueError(msg)
+        self._meta['crop_module'] = val.__module__
         self._meta['crop'] = cn
 
     @property
@@ -94,20 +104,20 @@ class Sowing(Task):
     @cultivar.setter
     def cultivar(self, val):
         if callable(val):
-            vinfo = val()
             cn, val = val.__qualname__.split('.')
             if not hasattr(crops, cn):
                 msg = 'Provided value is not a member of a crop-class from '
                 msg += '`mef_agri.farming.crops`!'
                 raise ValueError(msg)
-            self._crop = cn
+            self.crop = cn
 
         if isinstance(val, str):
             if self.crop is None:
                 msg = 'If provided cultivar variable is a string, '
                 msg += '`Sowing.crop` has to be set first!'
                 raise ValueError(msg)
-            crop = getattr(crops, self.crop)
+            crop = getattr(crops, self.crop)()
+            vinfo = getattr(crop, val)()
             if not val in crop.cultivars:
                 msg = 'Provided cultivar name is not available in '
                 msg += 'mef_agri.farming.crops.{}!'.format(self.crop)
@@ -115,6 +125,7 @@ class Sowing(Task):
             self._meta['cultivar'] = val
             if vinfo:
                 self._meta['cultivar_info'] = vinfo
+            return
 
         msg = 'Provided value for `cultivar` has to be a string or a method '
         msg += 'from a `mef_agri.farming.crops.Crop` child-class being '
@@ -170,7 +181,7 @@ class Sowing(Task):
             validu = (
                 Units.g_ha, Units.kg_ha, Units.t_ha, Units.g_m2, Units.kg_m2
             )
-            au = self.layer_infos[self.avname_sowing_amount]['unit']
+            au = self.layer_infos['units'][self.avname_sowing_amount]
             if not (au in validu):
                 msg = 'Non valid unit for `sowing_amount` - has to be mass per'
                 msg += 'unit area (see `mef_agri.models.utils.Units`)!'

@@ -3,9 +3,20 @@ import numpy as np
 from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
+from ....evaluation.stats_utils import DISTRIBUTIONS
 
 
 class Uptake(Model):
+    INITIAL_STATE_VALUES = {
+        'nitrogen_sum': {
+            'value': 0.0,
+            'distr': {
+                'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                'std': 0.001
+            }
+        }
+    }
+
     @Model.is_quantity(Q.STATE, U.kg_ha)
     def nitrogen_sum(self) -> np.ndarray:
         r"""

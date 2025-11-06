@@ -3,6 +3,8 @@ import numpy as np
 from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
+from ....farming import crops
+from ....evaluation.stats_utils import DISTRIBUTIONS
 
 
 class Roots(Model):
@@ -11,6 +13,40 @@ class Roots(Model):
 
     kwargs :math:`\rightarrow` :class:`mef_agri.models.base.Model`
     """
+    DEFAULT_PARAM_VALUES = {
+        crops.maize.__name__: {
+            'depth_max': {
+                'value': 2.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.15,
+                    'lb': 1.3,
+                    'ub': 2.1
+                }
+            }
+        },
+        crops.winter_wheat.__name__: {
+            'depth_max': {
+                'value': 2.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.15,
+                    'lb': 1.3,
+                    'ub': 2.1
+                }
+            }
+        }
+    }
+    INITIAL_STATE_VALUES = {
+        'biomass': {
+            'value': 0.0,  # [t/ha]
+            'distr': {
+                'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                'std': 0.01
+            }
+        }
+    }
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

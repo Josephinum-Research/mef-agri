@@ -36,7 +36,12 @@ class Crop(object):
         :rtype: list[str]
         """
         return self._cs
-    
+
+
+class winter_wheat(Crop):
+    def __init__(self):
+        super().__init__()
+
     @cultivar
     def generic(self):
         """
@@ -46,21 +51,40 @@ class Crop(object):
         return self.generic__info__
 
 
-class winter_wheat(Crop):
-    def __init__(self):
-        super().__init__()
-
-
 class winter_barley(Crop):
     def __init__(self):
         super().__init__()
+
+    @cultivar
+    def generic(self):
+        """
+        Unspecified cultivar triggering the usage of default values for crop
+        input parameters in the evaluation of models
+        """
+        return self.generic__info__
 
 
 class maize(Crop):
     def __init__(self):
         super().__init__()
 
+    @cultivar
+    def generic(self):
+        """
+        Unspecified cultivar triggering the usage of default values for crop
+        input parameters in the evaluation of models
+        """
+        return self.generic__info__
+
 
 class soybean(Crop):
     def __init__(self):
         super().__init__()
+
+    @cultivar
+    def generic(self):
+        """
+        Unspecified cultivar triggering the usage of default values for crop
+        input parameters in the evaluation of models
+        """
+        return self.generic__info__
