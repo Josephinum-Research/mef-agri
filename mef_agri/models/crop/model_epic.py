@@ -41,6 +41,54 @@ class Crop_Simple(Model):
 
     """
     DEFAULT_PARAM_VALUES = {
+        crops.maize.__name__: {
+            'water_storage_max': {
+                'value': 2.4,  # [ mm ] - deduced from winter wheat value
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.2
+                }
+            },
+            'energy_conversion': {
+                'value': 40.0,  # [( kg x m2 ) / (ha x MJ x day)]
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.0
+                }
+            },
+            'critical_aeration_factor': {
+                'value': 0.85,  # []
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.002,
+                    'lb': 0.0,
+                    'ub': 1.0
+                }
+            },
+            'height_max': {
+                'value': 2.5,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.1,
+                    'lb': 1.15,
+                    'ub': 1.5
+                }
+            },
+            'frost_coeff1': {
+                'value': 5.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'frost_coeff2': {
+                'value': 15.05,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.3
+                }
+            }
+        },
         crops.winter_wheat.__name__: {
             'water_storage_max': {
                 'value': 1.2,  # [ mm ] - approx. max. values from [1] figures 4 and 5

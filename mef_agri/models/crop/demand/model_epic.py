@@ -9,6 +9,29 @@ from ....evaluation.stats_utils import DISTRIBUTIONS
 
 class Demand(Model):
     DEFAULT_PARAM_VALUES = {
+        crops.maize.__name__: {
+            'ncoeff1': {
+                'value': 0.044,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff2': {
+                'value': 0.0164,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff3': {
+                'value': 0.0128,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.0005
+                }
+            }
+        },
         crops.winter_wheat.__name__: {
             'ncoeff1': {
                 'value': 0.06,

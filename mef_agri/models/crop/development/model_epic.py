@@ -16,6 +16,43 @@ class Development(Model):
     kwargs :math:`\rightarrow` see :class:`mef_agri.models.base.Model`
     """
     DEFAULT_PARAM_VALUES = {
+        crops.maize.__name__: {
+            'temperature_base': {
+                'value': 8.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'temperature_opt': {
+                'value': 25.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'heat_units_pot': {
+                'value': 2700.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 100.0
+                }
+            },
+            'hufl_coeff1': {
+                'value': 15.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.5
+                }
+            },
+            'hufl_coeff2': {
+                'value': 50.95,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.0
+                }
+            }
+        },
         crops.winter_wheat.__name__: {
             'temperature_base': {
                 'value': 0.0,

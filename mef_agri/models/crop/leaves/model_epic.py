@@ -13,6 +13,29 @@ class Leaves(Model):
     ...).
     """
     DEFAULT_PARAM_VALUES = {
+        crops.maize.__name__: {
+            'lai_max': {
+                'value': 6.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'hui_leaf_decline': {
+                'value': 0.8,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.02
+                }
+            },
+            'lai_regr_coeff': {
+                'value': 1.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.02
+                }
+            }
+        },
         crops.winter_wheat.__name__: {
             'lai_max': {
                 'value': 8.0,

@@ -190,6 +190,15 @@ class ManagementInterface(DataInterface):
             df1 = read_sheet(fpath, sheet_fielddata, columns_fielddata)
             df2 = read_sheet(fpath, sheet_fertilization, columns_fertilization)
             df3 = read_sheet(fpath, sheet_harvest, columns_harvest)
+            # following lines exist becuase i have no clue why excel is so stupid!
+            try:
+                df3['yield_fm_pp'] = df3['yield_fm_pp'].values.astype(float)
+            except:
+                newvals = [
+                    float(val.replace(',', '.')) 
+                    for val in df3['yield_fm_pp'].values
+                ]
+                df3['yield_fm_pp'] = newvals
             # add field name to df2 and df3
             df2 = df2.join(df1[['field_name', 'pid']].set_index('pid'), on='pid')
             df3 = df3.join(df1[['field_name', 'pid']].set_index('pid'), on='pid')
@@ -339,15 +348,13 @@ class ManagementInterface(DataInterface):
             )
             
     def _create_minfert_tasks(self, df:pd.DataFrame) -> None:
-        feps = self._find_task_dates(df)
+        feps = self._find_task_dates(df, mindiff=1)
         spath = os.path.join(self.project_directory, self.save_directory)
         for tpl in feps.itertuples():
             cond1 = df['field_name'] == tpl.field_name
             cond2 = df['epoch'] >= tpl.date_begin
             cond3 = df['epoch'] <= tpl.date_end
             dffer = df[cond1 & cond2 & cond3]
-
-            # TODO self.DELTA_DAYS_SAME_TASK not appropriate for specific tasks
 
             aux = dffer['fertilizer'].unique()
             if len(aux) > 1:
@@ -450,14 +457,16 @@ class ManagementInterface(DataInterface):
                 fpath, overwrite=True, compress=True, filename='task'
             )
 
-    def _find_task_dates(self, df:pd.DataFrame) -> pd.DataFrame:
+    def _find_task_dates(self, df:pd.DataFrame, mindiff=None) -> pd.DataFrame:
+        if mindiff is None:
+            mindiff = self.DELTADAYS_SAME_TASK
         feps_raw = df[['field_name', 'epoch']].drop_duplicates()
         feps = {'field_name': [], 'date_begin': [], 'date_end': []}
         for tpl in feps_raw.itertuples():
             diffs = np.array(
                 [dt.days for dt in (feps_raw['epoch'] - tpl.epoch).values]
             )
-            check = (np.abs(diffs) < self.DELTADAYS_SAME_TASK)
+            check = (np.abs(diffs) < mindiff)
             feps['field_name'].append(tpl.field_name)
             if not True in (check & (diffs != 0)):
                 feps['date_begin'].append(tpl.epoch)

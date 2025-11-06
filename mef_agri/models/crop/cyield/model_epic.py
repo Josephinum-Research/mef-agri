@@ -16,6 +16,17 @@ class Yield(Model):
     kwargs :math:`\rightarrow` see :class:`mef_agri.models.base.Model`
     """
     DEFAULT_PARAM_VALUES = {
+        crops.maize.__name__: {
+            'harvest_index_max': {
+                'value': 0.5,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.02,
+                    'lb': 0.4,
+                    'ub': 0.6
+                }
+            }
+        },
         crops.winter_wheat.__name__: {
             'harvest_index_max': {
                 'value': 0.42,
@@ -166,6 +177,26 @@ class Yield_Stressed(Yield):
     i.e. incorporating equations 62 and 63 from [R2]_ .
     """
     DEFAULT_PARAM_VALUES = {
+        crops.maize.__name__: {
+            'harvest_index_max': {
+                'value': 0.5,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.02,
+                    'lb': 0.4,
+                    'ub': 0.6
+                }
+            },
+            'water_stress_influence': {
+                'value': 0.05,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.002,
+                    'lb': 0.0,
+                    'ub': 1.0
+                }
+            }
+        },
         crops.winter_wheat.__name__: {
             'harvest_index_max': {
                 'value': 0.42,
