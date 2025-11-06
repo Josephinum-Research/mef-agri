@@ -36,14 +36,13 @@ columns_fertilization = {
     'fertilization_date': 'Datum'
 }
 
-sheet_harvest = 'harvest'
+sheet_harvest = 'harvestplots'
 columns_harvest = {
     'pid': 'PID',
-    'hid': 'HID',  # id of harvest plot/parcel
     'harvest_date': 'Datum',
     'plength': 'Parzellenlaenge',  # length of the harvest plot [m]
     'pwidth': 'Parzellenbreite',  # width of the harvest plot [m]
-    'yield_fm_pp': 'FMKornErtrag',  # fresh mass of yield per harvest plot [g]
+    'yield_fm_pp': 'FMKornErtrag',  # fresh mass of yield per harvest plot [kg]
     'moisture': 'Feuchte',  # [%]
 }
 
@@ -58,6 +57,8 @@ crop_mapper = {
 
 def read_sheet(fpath:str, sheet_name:str, columns:dict) -> pd.DataFrame:
     df = pd.read_excel(fpath, sheet_name=sheet_name, skiprows=[1])
+    for cn in df.columns.values:
+        df.rename(columns={cn: cn.strip()}, inplace=True)
     data = {}
     for col in columns.keys():
         data[col] = df[columns[col]].values.tolist()
@@ -129,7 +130,12 @@ class ManagementInterface(DataInterface):
         cs = (self._dfs['epoch'] >= tstart) & (self._dfs['epoch'] <= tstop)
         cf = (self._dff['epoch'] >= tstart) & (self._dff['epoch'] <= tstop)
         ch = (self._dfh['epoch'] >= tstart) & (self._dfh['epoch'] <= tstop)
-        dfs, dff, dfh = self._dfs[cs], self._dff[cf], self._dfh[ch]
+        csfn = self._dfs['field_name'] == self.current_field
+        cffn = self._dff['field_name'] == self.current_field
+        chfn = self._dfh['field_name'] == self.current_field
+        dfs = self._dfs[cs & csfn]
+        dff = self._dff[cf & cffn]
+        dfh = self._dfh[ch & chfn]
 
         self._fr = GeoRaster.from_gdf_and_objres(
             aoi, self.object_resolution, lix=0, nlayers=1
@@ -218,6 +224,7 @@ class ManagementInterface(DataInterface):
             date.fromisoformat(d) for d in zones['date_begin'].values
         ]
         zones = zones[(zones['epoch'] >= tstart) & (zones['epoch'] <= tstop)]
+        zones = zones[zones[self.GPKG_PTABLE_FIELDCOL] == self.current_field]
 
         # determine zones from parcels in the project-gpkg-database
         spath = os.path.join(self.project_directory, self.save_directory)
@@ -340,6 +347,8 @@ class ManagementInterface(DataInterface):
             cond3 = df['epoch'] <= tpl.date_end
             dffer = df[cond1 & cond2 & cond3]
 
+            # TODO self.DELTA_DAYS_SAME_TASK not appropriate for specific tasks
+
             aux = dffer['fertilizer'].unique()
             if len(aux) > 1:
                 msg = 'Only one type of fertilizer is supported per date of '
@@ -391,7 +400,7 @@ class ManagementInterface(DataInterface):
         spath = os.path.join(self.project_directory, self.save_directory)
         # computing yield of fresh mass in kg/ha
         df['yield_fm'] = df['yield_fm_pp'] / (df['plength'] * df['pwidth'])  # yield per square meter
-        df['yield_fm'] *= 1e4 * 1e-3  # yield kg per hectar
+        df['yield_fm'] *= 1e4  # yield kg per hectar
         for tpl in feps.itertuples():
             cond1 = df['field_name'] == tpl.field_name
             cond2 = df['epoch'] >= tpl.date_begin
@@ -455,8 +464,8 @@ class ManagementInterface(DataInterface):
                 feps['date_end'].append(tpl.epoch)
             else:
                 mind, maxd = np.min(diffs[check]), np.max(diffs[check])
-                db = tpl.epoch + timedelta(days=mind)
-                de = tpl.epoch + timedelta(days=maxd)
+                db = tpl.epoch + timedelta(days=int(mind))
+                de = tpl.epoch + timedelta(days=int(maxd))
                 feps['date_begin'].append(db)
                 feps['date_end'].append(de)
         ret = pd.DataFrame(feps)
