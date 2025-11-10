@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from datetime import date, timedelta
 
-from .....data.planetary_computer.sentinel2.interface import Sentinel2Interface
+#from .....data.planetary_computer.sentinel2.interface import Sentinel2Interface
 from .....data.planetary_computer.sentinel2.sentinel2 import (
     ImageSentinel2, SCLMAP
 )
@@ -16,7 +16,8 @@ from ...utils import nn_params_dict2model
 class PCSentinel2_NNET10(Interface):
     def __init__(self):
         super().__init__()
-        self.data_source_id = Sentinel2Interface.DATA_SOURCE_ID
+        self.data_source_id = 'sentinel-2_planetary-computer'  # NOTE this is a workaround, better to fix the next line
+        #self.data_source_id = Sentinel2Interface.DATA_SOURCE_ID
         self._hps_set = {}
 
     def process_data(self, edefs, rasters, gcs, epoch, zid):

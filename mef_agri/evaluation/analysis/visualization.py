@@ -178,9 +178,16 @@ class Visualization(object):
 
         axs = self._axs[axsid]['obj']
         markercol = self._CTHEMES[color_theme]['mean']
+        marker, lstyle = 'x', ''
+        if 'marker' in kwargs.keys():
+            marker = kwargs['marker']
+            del kwargs['marker']
+        if 'linestyle' in kwargs.keys():
+            lstyle = kwargs['linestyle']
+            del kwargs['linestyle']
         axs.plot(
-            xvals, vmed, color=markercol, marker='x', linestyle='', label=label,
-            **kwargs
+            xvals, vmed, color=markercol, marker=marker, linestyle=lstyle, 
+            label=label, **kwargs
         )
 
     def get_eval_data_values(
