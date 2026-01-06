@@ -12,7 +12,6 @@ from ...farming.tasks.fertilization import MineralFertilization
 from ...farming.tasks.harvest import Harvest
 from ...farming.tasks.zoning import Zoning
 from ...farming import crops
-from ...farming import fertilizers
 from ...utils.raster import GeoRaster
 from ...utils.rv_manipulation import RasterVectorIntersection
 from ...models.utils import Units

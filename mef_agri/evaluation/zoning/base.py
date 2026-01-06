@@ -1,6 +1,5 @@
 import os
 import datetime as dt
-from copy import deepcopy
 from inspect import isclass
 from pandas import date_range
 
@@ -8,7 +7,6 @@ from ..interfaces.base import EvalInterface
 from ..eval_def import EvaluationDefinitions
 from ...data.project import Project
 from ...models.base import Model
-from ..interfaces.jr_management.interface import Management_JRV01
 
 
 class Zoning(object):

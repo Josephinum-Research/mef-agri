@@ -350,6 +350,24 @@ class Project(object):
 def get_project_jrv01(
         wdir:str, ftable_name:str, ftable_name_col:str
     ) -> Project:
+    """
+    Returns an initialized project with the following data-types
+
+    * inca (geosphere)
+    * ebod
+    * sentinel-2 (planetary computer)
+    * jr management data
+
+    :param wdir: directory where the .gpkg with fields is located
+    :type wdir: str
+    :param ftable_name: name of the table containing the fields
+    :type ftable_name: str
+    :param ftable_name_col: name of the column containing the field names (within ``ftable_name`` table)
+    :type ftable_name_col: str
+    :return: initialized project
+    :rtype: mef_agri.data.project.Project
+    """
+
     prj = Project(
         wdir, 
         gpkg_field_table=ftable_name, 

@@ -4,6 +4,7 @@ from datetime import date
 import numpy as np
 
 from ..evaluation.stats_utils import DISTRIBUTION_TYPE
+from ..utils.misc import get_decorated_methods
 
 
 class __QS__(object):
@@ -324,23 +325,9 @@ class Model(object):
         return ret
 
     def _get_decorated_methods(self) -> str:
-        def loop(cls, ret):
-            ret += inspect.getsource(cls)
-            for supcls in cls.__bases__:
-                if issubclass(supcls, Model):
-                    if supcls == Model:
-                        pass
-                    else:
-                        ret = loop(supcls, ret)
-            return ret
-
-        sc = ''
-        sc = loop(self.__class__, sc)
-        decos = []
-        for dec  in self.decorators:
-            for part in sc.split(dec)[1:]:
-                decos.append(part.split('def ')[1].split('(self')[0].strip())
-        return decos
+        return get_decorated_methods(
+            self, self.decorators, iterate_super_class=Model
+        )
     
     ############################################################################
     # Methods which should/can be further implemented in child class

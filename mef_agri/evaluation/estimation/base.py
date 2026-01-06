@@ -5,17 +5,14 @@ import pandas as pd
 from importlib import import_module
 from datetime import date, timedelta
 
-from mef_agri.utils.misc import set_attributes
-
 from ...models.zone.base import Zone
 from ..db import EvalDB_Quantiles
 from ..stats_utils import RVSampler
 
 
-TMPFOLDER = 'tmp_est'
-
-
 class Estimator(object):
+    TMPFOLDER = 'tmp_est'
+
     def __init__(self, nps:int, edb:EvalDB_Quantiles) -> None:
         """
         Class which does the overall setup of an evaluation based on sequential
@@ -30,6 +27,19 @@ class Estimator(object):
         self._nps:int = nps  # number of particles representing distribution of state vector
         self._db:EvalDB_Quantiles = edb
         self._rvs = RVSampler()  # sampler object to get RVs
+        self._zmdl = None
+        ########################################################################
+        # GET AND SETUP EVALUATION DATA
+        # get required data for evaluation from database
+        eval_data = self._db.get_eval_data(self._db.evaluation_id)
+        self._ep_1 = date.fromisoformat(eval_data['epoch_start'].values[0])
+        self._ep_n = date.fromisoformat(eval_data['epoch_end'].values[0])
+        self._ep_0 = self._ep_1 - timedelta(days=1)  # initialization epoch of states and parameters is one day before the start of the evaluation
+        self._zmcl = getattr(
+            import_module(eval_data['zmodel_module'].values[0]), 
+            eval_data['zmodel'].values[0]
+        )
+        self._zd = self._db.get_zones_data(self._db.evaluation_id)
 
     @property
     def n_particles(self) -> int:
@@ -46,43 +56,54 @@ class Estimator(object):
         :rtype: EvaluationDB
         """
         return self._db
+    
+    @property
+    def epoch_init(self) -> date:
+        return self._ep_0
+    
+    @property
+    def epoch_start(self) -> date:
+        return self._ep_1
+    
+    @property
+    def epoch_end(self) -> date:
+        return self._ep_n
+    
+    @property
+    def zone_model_class(self):
+        return self._zmcl
+    
+    @property
+    def zones(self) -> pd.DataFrame:
+        return self._zd
+    
+    @property
+    def zids(self) -> list[str]:
+        return list(self._zd['zid'].unique())
 
     def process(self, wdir:str) -> None:
+        ########################################################################
         # initialize sql script
-        tmpp = os.path.join(wdir, TMPFOLDER)
+        tmpp = os.path.join(wdir, self.TMPFOLDER)
         if not os.path.exists(tmpp):
             os.mkdir(tmpp)
         self._db.create_sql_script(tmpp, 'sqlscr.txt')
 
         ########################################################################
-        # GET AND SETUP EVALUATION DATA
-        # get required data for evaluation from database
-        eid = self._db.evaluation_id
-        eval_data = self._db.get_eval_data(eid)
-        epoch_start = date.fromisoformat(eval_data['epoch_start'].values[0])
-        epoch_end = date.fromisoformat(eval_data['epoch_end'].values[0])
-        zmdl_class = getattr(
-            import_module(eval_data['zmodel_module'].values[0]), 
-            eval_data['zmodel'].values[0]
-        )
-
-        # get zones and corresponding data
-        zone_data = self._db.get_zones_data(eid)
-        for zid in zone_data['zid'].unique():
-            zname = zone_data[zone_data['zid'] == zid]['zname'].values[0]
+        # Evaluation
+        for zid in self.zids:
+            zdata = self.zone_data[self.zone_data['zid'] == zid]
+            zname = zdata['zname'].values[0]
             ####################################################################
             # GET AND SETUP ZONE DATA
             zone_gcs = self._db.get_zone_gcs(zid).values
-            # initial values of states and parameters
-            # epoch has to be one day before start of the evaluation
-            epoch_init = epoch_start - timedelta(days=1)
 
             ####################################################################
             # PROCESS MODEL
-            self._zmdl:Zone = zmdl_class()
+            self._zmdl:Zone = self.zone_model_class()
             self._zmdl.gcs = zone_gcs
-            self._zmdl.latitude = zone_data['latitude'].values[0]
-            self._zmdl.height = zone_data['height'].values[0]
+            self._zmdl.latitude = zdata['latitude'].values[0]
+            self._zmdl.height = zdata['height'].values[0]
             self._zmdl.model_tree.n_particles = self._nps
 
             ####################################################################
@@ -93,27 +114,25 @@ class Estimator(object):
 
             ################################################################
             # SET INITIAL STATES, PARAMS, PFUNCS
-            self._set_states(zid, epoch_init)
-            self._set_params(zid, epoch_init)
-            self._set_pfuncs(zid, epoch_init)
+            self._set_states(zid, self.epoch_init)
+            self._set_params(zid, self.epoch_init)
+            self._set_pfuncs(zid, self.epoch_init)
 
             ################################################################
             # INITIALIZE ZONE MODEL AND START PROCESSING FOR EACH DAY
-            self._zmdl.initialize(epoch_init)
-            for pd_epoch in pd.date_range(epoch_start, epoch_end):
+            self._zmdl.initialize(self.epoch_init)
+            for pd_epoch in pd.date_range(self.epoch_start, self.epoch_end):
                 epoch = pd_epoch.date()
                 print(zname + ' - processing epoch: ' + epoch.isoformat())
                 ############################################################
                 # GET OBSERVATIONS FROM DATABASE AND SET THEM IN THE MODEL
                 self._set_obs(zid, epoch)
-
                 ############################################################
                 # STATE PROPAGATION
                 self.propagate(epoch)
                 ############################################################
                 # PF-UPDATE / WEIGHT COMPUTATION
                 self.update(epoch)
-
                 ############################################################
                 # SAVE STATES, OUTPUTS AND EVALUATED PFUNCTIONS
                 for model in self._zmdl.model_tree.models:

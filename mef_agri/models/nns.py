@@ -5,6 +5,7 @@ import numpy as np
 from .base import Model, Quantities as Q, MODEL_DECORATORS
 from .utils import Units as U
 from ..evaluation.stats_utils import DISTRIBUTION_TYPE
+from ..utils.misc import get_decorated_methods
 
 
 NNMODEL_DECORATORS = MODEL_DECORATORS + [
@@ -211,23 +212,10 @@ class NeuralNetwork(Model):
         :return: source code as string of child classes of ``NeuralNetwork``
         :rtype: str
         """
-        def loop(cls, ret):
-            ret += inspect.getsource(cls)
-            for supcls in cls.__bases__:
-                if issubclass(supcls, Model):
-                    if supcls in (Model, NeuralNetwork):  # only difference is here
-                        pass
-                    else:
-                        ret = loop(supcls, ret)
-            return ret
-
-        sc = ''
-        sc = loop(self.__class__, sc)
-        decos = []
-        for dec  in self.decorators:
-            for part in sc.split(dec)[1:]:
-                decos.append(part.split('def ')[1].split('(self')[0].strip())
-        return decos
+        return get_decorated_methods(
+            self, self.decorators, iterate_super_class=Model, 
+            exclude_intermediate_classes=[NeuralNetwork]
+        )
 
     def initialize(self, epoch):
         """

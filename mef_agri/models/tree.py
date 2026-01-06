@@ -92,6 +92,14 @@ class ModelTree(object):
         return ret
     
     @property
+    def model_ids_intern(self) -> list[str]:
+        """
+        :return: ids of the models in the tree (neglecting connected trees)
+        :rtype: list[str]
+        """
+        return list(self._tree.keys())
+    
+    @property
     def models(self) -> list:
         """
         :return: references to the objects representing the models in the tree (also connected trees are considered)

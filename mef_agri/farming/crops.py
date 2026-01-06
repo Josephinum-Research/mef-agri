@@ -1,5 +1,8 @@
 from functools import wraps
 
+from ..utils.misc import get_decorated_methods
+
+
 def cultivar(func):
     """
     Decorator to specify cultivars in child classes of :class:`crop`
@@ -28,6 +31,11 @@ class Crop(object):
     """
     def __init__(self):
         self._cs = []
+        dms = get_decorated_methods(
+            self, ['@cultivar'], iterate_super_class=Crop
+        )
+        for dm in dms:
+            getattr(self, dm)()
 
     @property
     def cultivars(self) -> list[str]:

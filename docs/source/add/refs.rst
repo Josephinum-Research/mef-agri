@@ -57,3 +57,31 @@ References
     IEEE Signal Processing Magazine, vol. 73
     2007
     https://doi.org/10.1109/MSP.2007.4286566
+
+.. [R9]
+    Julier, S.J. and Uhlmann, J.K.
+    Unscented filtering and nonlinear estimation
+    Proceedings of the IEEE, Vol. 92, No. 3, pp. 401-422
+    2004
+    https://doi.org/10.1109/JPROC.2003.823141
+
+.. [R10]
+    van der Merwe, R. and Doucet, A. and de Freitas, N. and Wan, E.
+    The unscented particle filter
+    Cambridge University, Engineering Department, CUED/F-INFENG/TR380
+    2000
+    https://www.eecs.yorku.ca/course_archive/2010-11/W/4421/lectures/upf.pdf 
+
+.. [R11]
+    Johnen, T. and Boettcher, U. and Kage, H.
+    A variable thermal time of the double ridge to flag leaf emergence phase improves the predictive quality of a CERES-Wheat type phenology model
+    Computers and Electronics in Agriculture, vol. 89, pp. 62-69
+    2012
+    https://doi.org/10.1016/j.compag.2012.08.002
+
+.. [R12]
+    McMaster, G.S. and White, J.W. and Hunt, L.A. and Jamieson, P.D. and Dhillon, S.S., Ortiz-Monasterio, J.I.
+    Simulating the influence of vernalization, photoperiod and optimum temperature on wheat developmental rates
+    Annals of Bottany, vol. 102, no. 4, pp. 561-569
+    2008
+    https://doi.org/10.1093/aob/mcn115

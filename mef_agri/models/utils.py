@@ -142,6 +142,14 @@ class __UNITS__:
         return '[ ( 1 ) / ( degC ) ]'
     
     @property
+    def degCday(self) -> str:
+        r"""
+        :return: thermal time :math:`^\circ C\cdot day`
+        :rtype: str
+        """
+        return '[ degC x day ]'
+    
+    @property
     def mm_day(self) -> str:
         r"""
         :return: mm per day (e.g. hydraulic conductivity) :math:`\frac{mm}{day}`

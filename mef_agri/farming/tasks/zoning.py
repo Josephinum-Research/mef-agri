@@ -8,7 +8,7 @@ class Zoning(Task):
     Inherits from :class:`mef_agri.farming.tasks.task.Task`.
 
     This class is used when zoning information within a field is manually 
-    provided. The :func:`raster` attribute hast to contain a layer for each 
+    provided. The :func:`raster` attribute has to contain a layer for each 
     zone, where pixels within a zone are indicated with ones and the remaining 
     pixels contain zeros (float values). Thus, each layer can be used as mask 
     in the following way ``arr[np.where(zoning_task['layer_id'])] = value``.
