@@ -77,6 +77,8 @@ class ObsValueList(object):
     
     @staticmethod
     def list_from_repr(lrepr:str) -> list[float]:
+        if not lrepr:
+            return []
         return [float(val) for val in lrepr.split(', ')]
     
 
@@ -93,6 +95,8 @@ class ObsEpochList(object):
     
     @staticmethod
     def list_from_repr(lrepr) -> list[str]:
+        if not lrepr:
+            return []
         return [val for val in lrepr.split(', ')]
     
 
@@ -407,9 +411,11 @@ class EvaluationDefinitions(object):
 
     def _check_model_defs(self, mdldefs:dict, mname:str, qname:str) -> None:
         if not mname in mdldefs.keys():
-            raise ValueError('Provided model name not available!')
+            msg = 'Provided model name `{}` not available!'.format(mname)
+            raise ValueError(msg)
         if not qname in mdldefs[mname].keys():
-            raise ValueError('Provided quantity name not available!')
+            msg = 'Provided quantity name `{}` not available!'.format(qname)
+            raise ValueError(msg)
 
     def _set_qinfos(self, exqi:dict, qinfo:dict, qtype:str) -> dict:
         if qtype == Q.PFUNC:

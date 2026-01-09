@@ -65,10 +65,15 @@ class Management_JRV01(EvalInterface):
                     for smid, submdl in zipped:
                         if hasattr(submdl, 'DEFAULT_PARAM_VALUES'):
                             defpvals = getattr(submdl, 'DEFAULT_PARAM_VALUES')
+                            # TODO consider parameter-functions here
                             for pname, pinfo in defpvals[self._crop].items():
+                                if 'fdef' in pinfo.keys():
+                                    qtype = Q.PFUNC
+                                else:
+                                    qtype = Q.PARAM
                                 pinfo['epoch'] = self._crbeg
                                 edefs.set_crop_qinfos(
-                                    cm.__class__.__name__, self._crbeg, Q.PARAM,
+                                    cm.__class__.__name__, self._crbeg, qtype,
                                     smid, pname, pinfo
                                 )
                         if hasattr(submdl, 'INITIAL_STATE_VALUES'):

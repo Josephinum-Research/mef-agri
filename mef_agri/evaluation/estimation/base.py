@@ -92,7 +92,7 @@ class Estimator(object):
         ########################################################################
         # Evaluation
         for zid in self.zids:
-            zdata = self.zone_data[self.zone_data['zid'] == zid]
+            zdata = self.zones[self.zones['zid'] == zid]
             zname = zdata['zname'].values[0]
             ####################################################################
             # GET AND SETUP ZONE DATA
@@ -145,8 +145,6 @@ class Estimator(object):
                             )
                         )
                     for oname in model.random_output_names:
-                        if oname == 'finished':  # TODO check if this is still necessary
-                            pass
                         self._db.add_out_eval(
                             zid, epoch, oname, model.model_id,
                             getattr(model, oname), 
@@ -156,6 +154,8 @@ class Estimator(object):
                         )
                     for fname in model.pfunction_names:
                         pf = getattr(model, fname)
+                        if pf is None:
+                            continue
                         if pf.is_sampled:
                             self._db.add_pfuncs_eval(
                                 zid, epoch, fname, model.model_id,

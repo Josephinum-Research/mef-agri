@@ -85,3 +85,9 @@ References
     Annals of Bottany, vol. 102, no. 4, pp. 561-569
     2008
     https://doi.org/10.1093/aob/mcn115
+
+.. [R13]
+    Shawon, A.R. and Memic, E. and Kottmann, L. and Uptmoor, R. and Hackauf, B. and Feike, T.
+    Comprehensive evaluation of the DSSAT-CSM-CERES-Wheat for simulating winter rye against multi-environment data in Germany
+    Agronomy Journal, vol. 116, no. 4, pp. 1844-1868
+    https://doi.org/10.1002/agj2.21590

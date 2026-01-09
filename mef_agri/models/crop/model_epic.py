@@ -10,6 +10,7 @@ from .stress.model_epic import Stress as StressEPIC
 from .development.model_epic import (
     Development as DevelEPIC, Development_Dormancy as DevelDormEPIC
 )
+from .development.model_ceres import Development as DevelBBCH
 from .leaves.model_epic import Leaves as LeavesEPIC
 from .roots.model_epic import Roots as RootsEPIC
 from .cyield.model_epic import (
@@ -310,8 +311,6 @@ class Crop_Simple(Model):
         :rtype: numpy.ndarray
         """
 
-
-    ##### QUANTITIES ##################################################
     @Model.is_required('temperature_min', 'zone.atmosphere.weather', U.degC)
     def tmin(self) -> Requirement:
         r"""
@@ -459,6 +458,19 @@ class Crop_Simple(Model):
         :rtype: mef_agri.models.crop.development.model_epic.Development
         """
 
+    @Model.is_child_model(DevelBBCH)
+    def development_stages(self) -> DevelBBCH:
+        """
+        Child Model
+
+        NOTE: currently this model is just an "addon", meaning, that it does not 
+        influence any other models in the model-tree (still it requires 
+        quantities from the zone.atmosphere models).
+
+        :return: model which computes the BBCH stages
+        :rtype: mef_agri.models.crop.development.model_ceres.DevelBBCH
+        """
+
     @Model.is_child_model(LeavesEPIC)
     def leaves(self) -> LeavesEPIC:
         """
@@ -504,6 +516,7 @@ class Crop_Simple(Model):
 
         self.uptake.initialize(epoch)
         self.development.initialize(epoch)
+        self.development_stages.initialize(epoch)
         self.stress.initialize(epoch)
         self.leaves.initialize(epoch)
         self.roots.initialize(epoch)
@@ -550,6 +563,7 @@ class Crop_Simple(Model):
         # models which are updated in the beginning before crop growth is computed
         self.uptake.update(epoch)
         self.development.update(epoch)
+        self.development_stages.update(epoch)
 
         # compute biomass increase
         self.radiation_intercepted = 0.5 * self.rad.value * (
