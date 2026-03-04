@@ -103,29 +103,32 @@ class EvaluationDB(object):
     # methods of EvaluationDB
     def __init__(self, directory:str, dbname:str) -> None:
         """
-        This class does the whole DB stuff for the (multiprocessing) evaluation  
-        of `.estimation.py`. The database contains exhaustive data and results  
-        to ensure, that information do not has to be searched in parts of the 
-        code or elsewhere.
+        This class does the whole DB stuff for the (multiprocessing) evaluation
+        of agricultural models. 
+        The database contains exhaustive data and results to ensure, that 
+        information do not has to be searched in parts of the code or elsewhere.
         
         Each run of an estimation gets an id (automatically incremented) which 
-        is the PK of the evaluations-table. Each zone of 
-        the considered field(s) is stored in the DB in two tables. The 
-        zones-table contains the zone-id (automatically incremented) which 
+        is the PK of the evaluations-table. 
+        Each zone of the considered field(s) is stored in the DB in two tables. 
+        The zones-table contains the zone-id (automatically incremented) which 
         represent the PK and the FK of most of the other tables to assign the 
         inputs and outputs of the estimation to the correct evaluation-run and 
-        zone. The zone_geo_coordinates-table holds the coordinates of the raster 
+        zone. 
+        The zone_geo_coordinates-table holds the coordinates of the raster 
         elements (info in evaluations-table) which can be used for the 
         visualization of the results.
 
-        The *_def-tables contain information about the quantities of inference 
-        the observations, states, parameters and pfunctions. Each of 
-        these quantities belongs to a specific model (see 
-        `sitespecificcultivation.inference.models`) and its name has to be 
-        unique (only) within this model. For the states, params, pfunctions 
-        the epoch will usually be the initial epoch. For all of this quantities, 
-        it is necessary to provide a value and the distribution information 
-        (see`sitespecificcultivation.inference.stats_utils` for more details).
+        The *_def-tables contain information about the model-quantities
+        the observations, states, parameters and pfunctions. 
+        Each of these quantities belongs to a specific model (see 
+        `mef_agri.models`) and its name has to be unique (only) within this 
+        model.
+        For the states, params, pfunctions, the epoch will usually be the 
+        initial epoch. 
+        For all of this quantities, it is necessary to provide a value and the 
+        distribution information (see`mef_agri.evaluation.stats_utils` for more 
+        details).
 
         The *_eval-tables contain the evaluated values for the corresponding 
         quantities. All model-outputs are considered. Thus, all 
@@ -236,13 +239,13 @@ class EvaluationDB(object):
         point, the edge length can be computed).
 
         :param epoch_start: first epoch of evaluation
-        :type epoch_start: date
+        :type epoch_start: datetime.date
         :param model: name of the top-level model (i.e. the zone-model)
-        :type model: sitespecificcultivation.inference.models.zone.base.Zone
+        :type model: mef_agri.models.zone.base.Zone
         :param crs: coordinate reference system (necessary for definition of geo-coordinates in the zone_geo_coordinates-table)
         :type crs: int
         :param epoch_end: epoch when to stop the evaluation, defaults to None
-        :type epoch_end: date, optional
+        :type epoch_end: datetime.date, optional
         :param eval_info: information about the evaluation, defaults to None
         :type eval_info: str, optional
         :return: flag if sql-execution has been successfull
@@ -286,7 +289,7 @@ class EvaluationDB(object):
         :param eid: evaluation id, defaults to None
         :type eid: int, optional
         :return: DataFrame with corresponding row of evaluations-table
-        :rtype: pd.DataFrame
+        :rtype: pandas.DataFrame
         """
         if eid is None:
             if self._eid is None:
@@ -424,7 +427,7 @@ class EvaluationDB(object):
         :param zid: name of the zone
         :type zid: str
         :return: DataFrame with rows containing the geo-coordinates
-        :rtype: pd.DataFrame
+        :rtype: pandas.DataFrame
         """
         return self.get_data_frame(self.GET_ZGCS.format(zid))
     
@@ -443,9 +446,9 @@ class EvaluationDB(object):
         :param crop_model: model representing the crop
         :type crop_model: object or class
         :param epoch_start: sowing/planting date
-        :type epoch_start: date
+        :type epoch_start: datetime.date
         :param epoch_end: harvesting/mulching date
-        :type epoch_end: date
+        :type epoch_end: datetime.date
         """
         if isclass(crop_model):
             mmodule = crop_model.__module__
@@ -475,7 +478,7 @@ class EvaluationDB(object):
         :param model: `Model.model_id` of the model which the observation belongs to
         :type model: str
         :param epoch: epoch which the observation belongs to
-        :type epoch: date
+        :type epoch: datetime.date
         :param value: value of the observation
         :type value: float
         :param distr: dictionary containing information about distribution
@@ -501,7 +504,7 @@ class EvaluationDB(object):
         :param smodel: `Model.model_id` of the model which the state belongs to
         :type smodel: str
         :param epoch: epoch which the state belongs to
-        :type epoch: date
+        :type epoch: datetime.date
         :param value: value of the state
         :type value: float
         :param distr: dictionary containing information about distribution
@@ -527,7 +530,7 @@ class EvaluationDB(object):
         :param hmodel: `Model.model_id` of the model which the parameter belongs to
         :type hmodel: str
         :param epoch: epoch which the parameter belongs to
-        :type epoch: date
+        :type epoch: datetime.date
         :param value: value of the parameter
         :type value: float
         :param distr: dictionary containing information about distribution
@@ -552,7 +555,7 @@ class EvaluationDB(object):
         :param fmodel: `Model.model_id` of the model which the pfunction belongs to
         :type fmodel: str
         :param epoch: epoch which the pfunction belongs to
-        :type epoch: date
+        :type epoch: datetime.date
         :param fdef: dictionary containing information about the pfunction
         :type fdef: dict
         """
@@ -634,7 +637,7 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: int
         :return: crop rotation information
-        :rtype: pd.DataFrame
+        :rtype: pandas.DataFrame
         """
         return self.get_data_frame(self.GET_CROPROT.format(zid))
         
@@ -646,9 +649,9 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: str
         :param epoch: epoch of state definition
-        :type epoch: date
+        :type epoch: datetime.date
         :return: state definitions
-        :rtype: pd.DataFrame
+        :rtype: pandas.DataFrame
         """
         return self.get_data_frame(
             self.GET_STATES_DEF.format(zid, epoch.isoformat())
@@ -662,9 +665,9 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: int
         :param epoch: epoch of parameter definition
-        :type epoch: date
+        :type epoch: datetime.date
         :return: parameter definitions
-        :rtype: pd.DataFrame
+        :rtype: pandas.DataFrame
         """
         return self.get_data_frame(
             self.GET_PARAMS_DEF.format(zid, epoch.isoformat())
@@ -678,9 +681,9 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: int
         :param epoch: epoch of pfunction definition
-        :type epoch: date
+        :type epoch: datetime.date
         :return: pfunction definitions
-        :rtype: pd.DataFrame
+        :rtype: pandas.DataFrame
         """
         return self.get_data_frame(
             self.GET_PFUNCS_DEF.format(zid, epoch.isoformat())
@@ -694,9 +697,9 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: str
         :param epoch: epoch of the observation definition
-        :type epoch: date
+        :type epoch: datetime.date
         :return: observation definitions
-        :rtype: pd.DataFrame
+        :rtype: pandas.DataFrame
         """
         return self.get_data_frame(
             self.GET_OBS_DEF.format(zid, epoch.isoformat())
@@ -705,6 +708,20 @@ class EvaluationDB(object):
     def get_quantity_def(
             self, qname:str, qtype:str, qmodel:str, zid:int=None
         ) -> pd.DataFrame:
+        """
+        Get definitions for provided quantity.
+
+        :param qname: name of quantity within ``qmodel``
+        :type qname: str
+        :param qtype: quantity type (see ``mef_agri.models.base.__QS__``)
+        :type qtype: str
+        :param qmodel: attribute ``model_id`` from ``mef_agri.models.base.Model``
+        :type qmodel: str
+        :param zid: zone-id, if not provided, values will be returned for all evaluated zones, defaults to None
+        :type zid: int, optional
+        :return: quantity definitions and corresponding epochs
+        :rtype: pandas.DataFrame
+        """
         cmd = 'SELECT value, epoch FROM {} WHERE name=\'{}\' AND model=\'{}\''
         cmd = cmd.format(self.DEF_TABLE_NAMES[qtype], qname, qmodel)
         if zid is not None:
@@ -726,7 +743,7 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: int
         :param epoch: evaluation epoch
-        :type epoch: date
+        :type epoch: datetime.date
         :param sname: name of the state within `model`
         :type sname: str
         :param smodel: `Model.model_id` of the model which contains the `sname`
@@ -749,7 +766,7 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: str
         :param epoch: evaluation epoch
-        :type epoch: date
+        :type epoch: datetime.date
         :param hname: name of the parameter within `model`
         :type hname: str
         :param hmodel: `Model.model_id` of the model which contains the `hname`
@@ -772,7 +789,7 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: int
         :param epoch: evaluation epoch
-        :type epoch: date
+        :type epoch: datetime.date
         :param fname: name of the parameter within `model`
         :type fname: str
         :param hmodel: `Model.model_id` of the model which contains the `fname`
@@ -795,7 +812,7 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: int
         :param epoch: evaluation epoch
-        :type epoch: date
+        :type epoch: datetime.date
         :param oname: name of the observation within `model`
         :type oname: str
         :param omodel: `Model.model_id` of the model which contains the `oname`
@@ -820,7 +837,7 @@ class EvaluationDB(object):
         :param zid: id of the zone
         :type zid: str
         :param epoch: evaluation epoch
-        :type epoch: date
+        :type epoch: datetime.date
         :param oname: name of the output within `model`
         :type oname: str
         :param omodel: `Model.model_id` of the model which contains the `oname`
@@ -836,6 +853,26 @@ class EvaluationDB(object):
         self, icmd:str, zid:int, epoch:date, qname:str, qmodel:str, 
         value:np.ndarray, discrete:bool=False
     ) -> str:
+        """
+        Has to be implemented in child class
+
+        :param icmd: sql-insert command
+        :type icmd: str
+        :param zid: zone-id
+        :type zid: int
+        :param epoch: current evaluation epoch
+        :type epoch: datetime.date
+        :param qname: name of quantitiy withn ``qmodel``
+        :type qname: str
+        :param qmodel: ``Model.model_id`` of the model which contains ``qname``
+        :type qmodel: str
+        :param value: evaluated value
+        :type value: numpy.ndarray
+        :param discrete: specify if probability distribution is discrete or continuous, defaults to False
+        :type discrete: bool, optional
+        :return: updated sql-insert command with new data to be inserted
+        :rtype: str
+        """
         pass
         
     def insert_states_eval_cmd(self) -> str:
@@ -875,6 +912,10 @@ class EvaluationDB(object):
         return ret
     
     def insert_pfuncs_eval_cmd(self) -> str:
+        """
+        :return: sql-command to insert evaluated parametric functions
+        :rtype: str
+        """
         ret = self._iepf[:-1] + ';'
         self._reset_insert_epfuncs()
         return ret
@@ -882,6 +923,20 @@ class EvaluationDB(object):
     def get_quantity_eval(
             self, qname:str, qtype:str, qmodel:str, zid:int=None
         ) -> pd.DataFrame:
+        """
+        Get evaluated values for provided quantity.
+
+        :param qname: name of quantity within ``qmodel``
+        :type qname: str
+        :param qtype: quantity type (see ``mef_agri.models.base.__QS__``)
+        :type qtype: str
+        :param qmodel: attribute ``model_id`` from ``mef_agri.models.base.Model``
+        :type qmodel: str
+        :param zid: zone-id, if not provided, values will be returned for all evaluated zones, defaults to None
+        :type zid: int, optional
+        :return: evaluated data and corresponding epochs
+        :rtype: pandas.DataFrame
+        """
         cmd = 'SELECT value, epoch FROM {} WHERE name=\'{}\' AND model=\'{}\''
         cmd = cmd.format(self.EVAL_TABLE_NAMES[qtype], qname, qmodel)
         if zid is not None:
@@ -1027,6 +1082,9 @@ class EvaluationDB(object):
     ############################################################################
     # CLASS METHODS
     ############################################################################
+    # TODO change this method, because it is not intuitive when using the same
+    # TODO edefs for multiple evaluations => in this case, this method needs to 
+    # TODO be called multiple times
     @classmethod
     def from_eval_def(cls, dbdir:str, dbname:str, edefs):
         def loop_quantities(
@@ -1107,7 +1165,12 @@ class EvaluationDB(object):
         edb.insert_pfuncs_def()
         edb.connection.commit()
         return edb
-    
+
+
+################################################################################
+# CHILD CLASSES OF EvaluationDB which should be used by an application
+################################################################################
+
 
 class EvalDB_AllParticles(EvaluationDB):
     CREATE_EOBS =  'CREATE TABLE obs_eval ('
