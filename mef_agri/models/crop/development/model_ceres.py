@@ -79,6 +79,68 @@ class Development(Model):
                 }
             }
 
+        },
+        crops.maize.__name__: {
+            'vern_days_func': {
+                'fdef': {  # [R12]_ figure 2
+                    'ftype': PFunction.FTYPE.PIECEWISE_LINEAR,
+                    'values-x': [-5., 0., 8., 15.],
+                    'values-y': [0., 1., 1., 0.],
+                    'distr-x': {
+                        'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                        'std': 0.3
+                    },
+                    'distr-y': {
+                        'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                        'std': 0.03,
+                        'lb': 0.,
+                        'ub': 1.
+                    }
+                }
+            },
+            'temperature_base': {
+                'value': 0.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'vern_days_requ': {
+                'value': 5.,  # [R12]_ table 3 + [R13]_ table A2
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.
+                }
+            },
+            'sens_photoperiod': {
+                'value': 2.5,  # [R11]_ table 2
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 3.
+                }
+            },
+            'tt_sowing2emergence': {
+                'value': 100.,  # [R11]_ table 2
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 10.
+                }
+            },
+            'phyllochron': {
+                'value': 100.,  # [R11]_ table 2
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 5.
+                }
+            },
+            'tt_filling2maturity': {
+                'value': 10.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 10.
+                }
+            }
+
         }
     }
     INITIAL_STATE_VALUES = {

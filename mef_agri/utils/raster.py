@@ -496,7 +496,7 @@ class GeoRaster(object):
         :rtype: tuple[float, float]
         """
         xy = self.transformation @ np.array([[ci, ri, 1]]).astype('float').T
-        return tuple(xy[:2])
+        return (xy[0, 0], xy[1, 0])
     
     def get_rasterio_dataset(self, filename:str, count:int=1):
         """
