@@ -26,6 +26,8 @@
 
 `npm install ol`
 
+`npm install proj4`
+
 - if changes are present in `mef-agri/mef_agri/app/web/src/`, it is necessary to bundle this. Therefore perform the following comand in the `mef-agri/mef_agri/app/web/` directory
 
 `npm run build`

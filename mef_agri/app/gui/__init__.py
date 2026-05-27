@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QTabWidget
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTabWidget, QSizePolicy
 
 from .project import ProjectTab
 
@@ -8,8 +8,8 @@ class MainWindow(QWidget):
         super().__init__()
         self.setWindowTitle('MEF-Agri')
         self.showMaximized()
-        self._l = QGridLayout()
+        self._l = QHBoxLayout()
         self._tabs = QTabWidget()
-        self._tabs.addTab(ProjectTab(), 'Project')
+        self._tabs.addTab(ProjectTab(self), 'Project')
         self._l.addWidget(self._tabs)
         self.setLayout(self._l)
