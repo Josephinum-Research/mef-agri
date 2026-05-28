@@ -5,8 +5,6 @@ from PyQt5.QtWidgets import (
 )
 
 from .map import MapView
-from .utils.widgets import ComboBox
-
 
 class __TEXT__:
     BTN_SELPRJ = 'select project-directory'
@@ -24,6 +22,7 @@ class __TEXT__:
 class ProjectTab(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
+
         # class internal variables
         self._pp:str = None  # path to folder where project is located
         self._prj_exists:bool = False  # flag to indicate if current project already exists or is newly created

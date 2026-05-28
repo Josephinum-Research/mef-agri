@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTabWidget, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTabWidget
 
 from .project import ProjectTab
 

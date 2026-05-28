@@ -1,6 +1,6 @@
 # Guide to build openlayers webapp in manjaro
 
-- install nvm
+- install nvm on manjaro
 
 `pamac install nvm`
 
