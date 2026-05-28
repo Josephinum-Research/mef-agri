@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtWidgets import (
     QWidget, QGridLayout, QFileDialog, QPushButton, QHBoxLayout, QFormLayout,
-    QLabel, QLineEdit
+    QLabel, QLineEdit, QTableWidget
 )
 
 from .map import MapView
@@ -14,6 +14,11 @@ class __TEXT__:
     LBL_DBNAME = 'name of database'
     LBL_FTBLNAME = 'name of field-table'
     LBL_FCOLNAME = 'name of field-name-column'
+    LBL_CRS = 'crs/epsg'
+    DEF_DBNAME = 'project'
+    DEF_FTBLNAME = 'fields'
+    DEF_FCOLNAME = 'fname'
+    DEF_CRS = '25833'
 
 
 class ProjectTab(QWidget):
@@ -45,12 +50,43 @@ class ProjectTab(QWidget):
         # form layout and widgets with db/gpkg settings
         self._ldb = QFormLayout()
         self._lbl_dbname = QLabel(__TEXT__.LBL_DBNAME, self)
-        self._lbl_dbname.hide()
         self._inp_dbname = QLineEdit(self)
-        self._inp_dbname.setText('TEST')
-        self._inp_dbname.hide()
+        self._inp_dbname.setText(__TEXT__.DEF_DBNAME)
         self._ldb.addRow(self._lbl_dbname, self._inp_dbname)
-        self._ll.addLayout(self._ldb, 2, 0)
+        self._lbl_ftblname = QLabel(__TEXT__.LBL_FTBLNAME, self)
+        self._inp_ftblname = QLineEdit(self)
+        self._inp_ftblname.setText(__TEXT__.DEF_FTBLNAME)
+        self._ldb.addRow(self._lbl_ftblname, self._inp_ftblname)
+        self._lbl_fcolname = QLabel(__TEXT__.LBL_FCOLNAME, self)
+        self._inp_fcolname = QLineEdit(self)
+        self._inp_fcolname.setText(__TEXT__.DEF_FCOLNAME)
+        self._ldb.addRow(self._lbl_fcolname, self._inp_fcolname)
+        self._lbl_crs = QLabel(__TEXT__.LBL_CRS, self)
+        self._inp_crs = QLineEdit(self)
+        self._inp_crs.setText(__TEXT__.DEF_CRS)
+        self._inp_crs.setEnabled(False)  # NOTE make selectable later
+        self._ldb.addRow(self._lbl_crs, self._inp_crs)
+        self._ldb_widgets = [
+            self._lbl_dbname, self._inp_dbname, self._lbl_ftblname, 
+            self._inp_ftblname, self._lbl_fcolname, self._inp_fcolname,
+            self._lbl_crs, self._inp_crs
+        ]
+        self._ll.addLayout(self._ldb, 2, 0, 1, 2)
+
+        # table view of fields
+        self._tbl_flds = QTableWidget(self)
+        self._tbl_flds.setColumnCount(3)
+        self._tbl_flds.setHorizontalHeaderLabels([
+            'fid', self._inp_fcolname.text(), 'geometry'
+        ])
+        self._fld_widgets = [
+            self._tbl_flds
+        ]
+        self._ll.addWidget(self._tbl_flds, 4, 0, 1, 5)
+
+        # hide most widgets initially
+        for wi in self._ldb_widgets + self._fld_widgets:
+            wi.hide()
 
         # add remaining stuff
         self._lm.addLayout(self._ll, 1)
@@ -58,8 +94,12 @@ class ProjectTab(QWidget):
         self.setLayout(self._lm)
 
     def _show_prjcont(self):
-        self._lbl_dbname.show()
-        self._inp_dbname.show()
+        for wi in self._ldb_widgets + self._fld_widgets:
+            wi.show()
+        if self._prj_exists:
+            self._inp_dbname.setEnabled(False)
+            self._inp_ftblname.setEnabled(False)
+            self._inp_fcolname.setEnabled(False)
 
     def _create_project(self):
         self._prj_exists = False

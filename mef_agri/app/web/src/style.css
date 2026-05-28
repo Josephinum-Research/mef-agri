@@ -11,3 +11,45 @@ html, body {
     bottom: 0;
     width: 100%;
 }
+
+#add-field-control {
+    position: absolute;
+    left: 5%;
+    bottom: 2.5%;
+    display: grid;
+    grid-template-areas: 'btn1 btn2 btn3 btn4' 'fnlbl fninp fninp fninp';
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    column-gap: 5px;
+    row-gap: 5px;
+    background-color: rgba(255, 255, 255, 0.75);
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#add-field-button {
+    grid-area: btn1;
+}
+
+#finish-field-button {
+    grid-area: btn2;
+}
+
+#redo-point-button {
+    grid-area: btn3;
+}
+
+#cancel-field-button {
+    grid-area: btn4;
+}
+
+#field-name-label {
+    grid-area: fnlbl;
+    text-align: right;
+}
+
+#field-name-input {
+    grid-area: fninp;
+}
