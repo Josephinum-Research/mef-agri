@@ -12,7 +12,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-#dist/
 downloads/
 eggs/
 .eggs/
@@ -211,3 +210,6 @@ __marimo__/
 
 .vscode
 .scripts
+
+mef_agri/app/web/node_modules/
+mef_agri/app/web/package-lock.json

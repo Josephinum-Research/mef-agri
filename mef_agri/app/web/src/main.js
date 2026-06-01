@@ -12,6 +12,9 @@ import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 
 
+////////////////////////////////////////////////////////////////////////////////
+///   UI ELEMENTS TO ADD FIELDS
+////////////////////////////////////////////////////////////////////////////////
 class AddField extends Control {
     constructor() {
         const addBtn = document.createElement('button');
@@ -69,7 +72,15 @@ class AddField extends Control {
             fnameInp: fnameInp
         };
 
+        this.draw = new Draw({
+            source: fldSource,
+            type: 'Polygon'
+        });
+        this.draw.addEventListener('drawstart', this.handleDrawStart.bind(this));
+        this.draw.addEventListener('drawend', this.handleDrawEnd.bind(this));
+
         this.addFieldActive = false;  // flag to indicate if a field is currently created
+        this.interactionRemoved = false // flag to indicate if map interaction has already been canceled (i.e. when user tries to draw a second field-polygon)
         this.newFeature = null;  // last added feature
     }
 
@@ -97,24 +108,20 @@ class AddField extends Control {
         }
         this.addFieldActive = true;
         document.body.style.cursor = 'crosshair';
-        this.nFeaturesBefore = fldSource.getFeatures().length;
-        
-        // enable drawing of polygon
-        draw = new Draw({
-            source: fldSource,
-            type: 'Polygon'
-        });
-        draw.addEventListener('drawend', this.handleDrawEnd.bind(this));
-        this.getMap().addInteraction(draw);
+        this.getMap().addInteraction(this.draw);
+        this.interactionRemoved = false;
+    }
+
+    handleDrawStart(event) {
+        if (this.newFeature != null) {
+            document.body.style.cursor = 'auto';
+            this.getMap().removeInteraction(this.draw);
+            this.interactionRemoved = true;
+        }
     }
 
     handleDrawEnd(event) {
-        appConn.sendPolygon(event.feature);
-        //if (this.newFeature != null) {
-        //    fldSource.removeFeature(event.feature);
-        //    return;
-        //}
-        //this.newFeature = event.feature;
+        this.newFeature = event.feature;
     }
 
     handleUndoPoint(event) {
@@ -123,16 +130,16 @@ class AddField extends Control {
 
     handleFinishField(event) {
         this.#stopAddField();
-        // TODO send field data to gpkg
-        //this.newFeature = null;
+        appConn.sendPolygon(this.newFeature);
+        this.newFeature = null;
     }
 
     handleCancelField(event) {
         this.#stopAddField();
-        //if (this.newFeature != null) {
-        //    fldSource.removeFeature(this.newFeature);
-        //}
-        //this.newFeature = null;
+        if (this.newFeature != null) {
+            fldSource.removeFeature(this.newFeature);
+        }
+        this.newFeature = null;
     }
 
     #undoDrawnPoint() {
@@ -148,11 +155,16 @@ class AddField extends Control {
             }
         }
         this.addFieldActive = false;
-        document.body.style.cursor = 'auto';
-        this.getMap().removeInteraction(draw);
+        if (!this.interactionRemoved) {
+            document.body.style.cursor = 'auto';
+            this.getMap().removeInteraction(this.draw);
+        }
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+///   WEBSOCKET TO CONNECT WEB WITH GUI
+////////////////////////////////////////////////////////////////////////////////
 class AppConnection {
     constructor () {
         this.ws = new WebSocket('ws://127.0.0.1:33611/');
@@ -167,12 +179,33 @@ class AppConnection {
         this.connOpen = true;
     }
 
+    handleError(event) {
+        cont = {
+            method: 'POST',
+            type: 'error',
+            error: event
+        };
+        this.ws.send(JSON.stringify(cont))
+    }
+
     incomingMessage(event) {
         this.log_recv.push(JSON.parse(event.data));
     }
 
     sendPolygon(feat) {
-        this.ws.send(JSON.stringify({method: 'GET'}));
+        this.ws.send(JSON.stringify({
+            method: 'POST',
+            type: 'geometry',
+            geometry: feat.getGeometry().getCoordinates()
+        }));
+    }
+
+    sendLogMessage(msg) {
+        this.ws.send(JSON.stringify({
+            method: 'POST',
+            type: 'logmsg',
+            logmsg: msg
+        }));
     }
 }
 
@@ -184,6 +217,7 @@ useGeographic();
 
 const parser = new WMTSCapabilities();
 const fldSource = new VectorSource({wrapX: false});
+const fldLayer = new VectorLayer({source: fldSource});
 const appConn = new AppConnection();
 let map;
 let draw;
@@ -199,11 +233,10 @@ fetch('https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml')
             matrixSet: 'EPSG:4326',
         };
         const options = optionsFromCapabilities(result, wmtsSettings);
-        const layer1 = new TileLayer({source: new WMTS(options)});
-        const layer2 = new VectorLayer({source: fldSource});
+        const mapLayer = new TileLayer({source: new WMTS(options)});
         const mapSettings = {
             target: 'map',
-            layers: [layer1, layer2],
+            layers: [mapLayer, fldLayer],
             view: new View({center: [15.1445, 48.1328], zoom:14}),
             controls: defaultControls().extend([new AddField()])
         }
