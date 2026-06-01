@@ -10,6 +10,10 @@ import { defaults as defaultControls } from 'ol/control/defaults.js';
 import Draw from 'ol/interaction/Draw.js';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
+import Select from 'ol/interaction/Select.js';
+import Style from 'ol/style/Style.js';
+import Fill from 'ol/style/Fill.js';
+import Stroke from 'ol/style/Stroke.js';
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,6 +112,8 @@ class AddField extends Control {
         }
         this.addFieldActive = true;
         document.body.style.cursor = 'crosshair';
+        this.getMap().removeInteraction(selectClick);
+        selectedFeature = null;
         this.getMap().addInteraction(this.draw);
         this.interactionRemoved = false;
     }
@@ -143,7 +149,7 @@ class AddField extends Control {
     }
 
     #undoDrawnPoint() {
-        draw.removeLastPoint();
+        this.draw.removeLastPoint();
     }
 
     #stopAddField() {
@@ -159,6 +165,7 @@ class AddField extends Control {
             document.body.style.cursor = 'auto';
             this.getMap().removeInteraction(this.draw);
         }
+        this.getMap().addInteraction(selectClick);
     }
 }
 
@@ -213,15 +220,47 @@ class AppConnection {
 ///   SCRIPT STARTS HERE
 ////////////////////////////////////////////////////////////////////////////////
 
-useGeographic();
+// websocket initialization
+const appConn = new AppConnection();
 
+// gis stuff
+useGeographic();
 const parser = new WMTSCapabilities();
 const fldSource = new VectorSource({wrapX: false});
 const fldLayer = new VectorLayer({source: fldSource});
-const appConn = new AppConnection();
+
+// feature selection stuff
+var selectedFeature = null;
+const selected = new Style({
+    fill: new Fill({
+        color: 'rgba(255, 150, 150, 0.5)'
+    }),
+    stroke: new Stroke({
+        color: 'rgba(255, 0, 0, 1.0)'  // rgb+opacity
+    })
+});
+function selectStyle(feature) {
+    const color = feature.get('COLOR') || 'rgba(255, 150, 150, 0.5)';
+    selected.getFill().setColor(color);
+    selectedFeature = feature;
+    return selected
+}
+
+// TODO maybe move this part into promise
+function handleDeleteField(event) {
+    if (selectedFeature == null) {
+        return;
+    }
+    if (event.code == 'Delete') {
+        fldSource.removeFeature(selectedFeature);
+    }
+}
+const selectClick = new Select({style: selectStyle});
+document.addEventListener('keyup', handleDeleteField);
+
+// map preparation
 let map;
 let draw;
-
 fetch('https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml')
     .then(function (response) {
         return response.text();
@@ -241,4 +280,5 @@ fetch('https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml')
             controls: defaultControls().extend([new AddField()])
         }
         map = new Map(mapSettings);
+        map.addInteraction(selectClick);
     });
