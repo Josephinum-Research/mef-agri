@@ -1,194 +1,185 @@
 import os
-import geopandas as gpd
-from numpy import nan
-from datetime import date
+import shutil
+from geopandas import GeoDataFrame
+from copy import deepcopy
 from inspect import isclass
 from importlib import import_module
+from datetime import date, timedelta
 
-from .db import ProjectDatabase
+from ..utils.gpkg import Geopackage, SQLTable, ForeignKey, GeometryType
+from .utils import (
+    daterange_consider_existing_dates, merge_dateranges, timerange_from_epochs
+)
+from .interface import Interface
 
 
-class Project(object):
-    """
-    This class does the setup of a project. 
-    
-    A geopackage has to be located in 
-    the provided folder ``project_path`` which at least contains a table with 
-    field geometries and field names. This geopackage will be extended to 
-    contain information on which data is available on which dates (see
-    :class:`mef_agri.data.db.ProjectDatabase`). 
+################################################################################
+# SCHEMA OF PROJECT DATABASE
+################################################################################
+class DB:
+    class TBL_DSRCS:
+        NAME = 'data_sources'
+        COL_DID = 'did'
+        COL_INAME = 'intf_name'
+        COL_IMODULE = 'intf_module'
+        Q_INTFS = f'SELECT * FROM {NAME};'
+    class TBL_FIELDS:
+        NAME = 'fields'
+        COL_FIELDNAME = 'field_name'
+    class TBL_DAVLBL:
+        NAME = 'data_available'
+        COL_DID = 'did'
+        COL_FIELD = 'field'
+        COL_TSTART = 'tstart'
+        COL_TSTOP = 'tstop'
+        Q_DATERANGES = f'SELECT {COL_TSTART}, {COL_TSTOP} FROM {NAME} WHERE '
+        Q_DATERANGES += f'{COL_DID}=' + '\'{did}\' AND ' + f'{COL_FIELD}='
+        Q_DATERANGES += '\'{fld}\';'
+        INSERT_START = f'INSERT INTO {NAME} '
+        INSERT_START += f'({COL_DID}, {COL_FIELD}, {COL_TSTART}, {COL_TSTOP}) '
+        INSERT_START += 'VALUES '
+        INSERT_TUPLE = '(\'{did}\', \'{fld}\', \'{tstart}\', \'{tstop}\')'
+    class TBL_DEPOCHS:
+        NAME = 'data_epochs'
+        COL_DID = 'did'
+        COL_FIELD = 'field'
+        COL_EPOCH = 'epoch'
+        INSERT_START = f'INSERT INTO {NAME} '
+        INSERT_START += f'({COL_DID}, {COL_FIELD}, {COL_EPOCH}) VALUES '
+        INSERT_TUPLE = '(\'{did}\', \'{fld}\', \'{epoch}\')'
+        Q_EPOCHS = f'SELECT {COL_EPOCH} FROM {NAME} WHERE '
+        Q_EPOCHS += f'{COL_DID}=' + '\'{did}\' AND '
+        Q_EPOCHS += f'{COL_FIELD}=' + '\'{fld}\' AND '
+        Q_EPOCHS += f'date({COL_EPOCH}) >= ' + 'date(\'{tstart}\') AND '
+        Q_EPOCHS += f'date({COL_EPOCH}) <= ' + 'date(\'{tstop}\');'
 
-    If data-interfaces/-sources are added with :func:`add_data_interface`, the 
-    folder structure will be extended (or initialized in the first call of this 
-    method). The top-level data-folder will be located directly in the 
-    project-folder and its name is specified via the class variable 
-    ``DATA_DIRECTORY`` (default is ``data``). 
-    
-    An example structure is as follows
 
-    * project.DATA_DIRECTORY
+_tds = SQLTable()
+_tds.name = DB.TBL_DSRCS.NAME
+_tds.columns = {
+    DB.TBL_DSRCS.COL_DID: 'TEXT',
+    DB.TBL_DSRCS.COL_INAME: 'TEXT',
+    DB.TBL_DSRCS.COL_IMODULE: 'TEXT'
+}
+_tds.primary_key = [DB.TBL_DSRCS.COL_DID]
 
-        * data_interface_1.DATA_SOURCE_ID (e.g. dynamic data)
+_tfld = SQLTable()
+_tfld.name = DB.TBL_FIELDS.NAME
+_tfld.columns = {
+    DB.TBL_FIELDS.COL_FIELDNAME: 'TEXT'
+}
+_tfld.geom = GeometryType.POLYGON
+_tfld.unique_cols = [DB.TBL_FIELDS.COL_FIELDNAME]
 
-            * field_1
+_tda = SQLTable()
+_tda.name = DB.TBL_DAVLBL.NAME
+_tda.columns = {
+    DB.TBL_DAVLBL.COL_DID: 'TEXT',
+    DB.TBL_DAVLBL.COL_FIELD: 'TEXT',
+    DB.TBL_DAVLBL.COL_TSTART: 'CHAR(12)',
+    DB.TBL_DAVLBL.COL_TSTOP: 'CHAR(12)'
+}
+_tda.primary_key = [DB.TBL_DAVLBL.COL_DID, DB.TBL_DAVLBL.COL_FIELD]
+_tda_tds_fk = ForeignKey()
+_tda_tds_fk.fkey_columns = [DB.TBL_DAVLBL.COL_DID]
+_tda_tds_fk.ftable = _tds.name
+_tda_tds_fk.ftable_columns = _tds.primary_key
+_tda_tds_fk.on_delete = 'CASCADE'
+_tda_tds_fk.on_update = 'CASCADE'
+_tda_fld_fk = ForeignKey()
+_tda_fld_fk.fkey_columns = [DB.TBL_DAVLBL.COL_FIELD]
+_tda_fld_fk.ftable = _tfld.name
+_tda_fld_fk.ftable_columns = _tfld.unique_cols
+_tda_fld_fk.on_delete = 'CASCADE'
+_tda_fld_fk.on_update = 'CASCADE'
+_tda.foreign_keys = [_tda_tds_fk, _tda_fld_fk]
 
-                * date_1
 
-                    * TIFF file(s)
-
-                * date_2
-
-                    * TIFF file(s)
-
-                * ...
-
-            * field_2
-            
-                * date_1
-
-                    * TIFF file(s)
-
-                * date_2
-
-                    * TIFF file(s)
-
-                * ...
-
-            * ...
-
-        * data_interface_2.DATA_SOURCE_ID (e.g. static data)
-
-            * field_1
-
-                * TIFF file(s)
-
-            * field_2
-
-                * TIFF file(s)
-
-            * ...
-
-    :param project_path: absolute path of folder where project is located in
-    :type project_path: str
-    :param gpkg_field_table: name of the table within the .gpkg in the project folder which contains the field geometries, defaults to None
-    :type gpkg_field_table: str, optional
-    :param gpkg_field_name_column: name of column within the field-table which contains the field names, defaults to None
-    :type gpkg_field_name_column: str, optional
-    """
+################################################################################
+# PROJECT CLASS
+################################################################################
+class Project(Geopackage):
     DATA_DIRECTORY = 'data'
-
-    ERR_PRJPATH = 'Provided path does not exist!'
-    ERR_GPKGFILE = 'No .gpkg file in provided project path!'
-    ERR_FLDNOTAVLBL = 'Provided field-name not available in the GeoPackage!'
-    ERR_DIDNOTAVLBL = 'Provided data-source-id not available or provided yet!'
-    
     WRN_ADDDATA = 'Error when adding data from data source `{dsrc}` '
     WRN_ADDDATA += 'at field `{fld}` - no entry inserted in `data_available`'
     WRN_ADDDATA += '-table for this case!'
 
-    def __init__(
-            self, project_path:str, gpkg_field_table:str=None, 
-            gpkg_field_name_column:str=None
-        ):
-        if not os.path.exists(project_path):
-            raise ValueError(self.ERR_PRJPATH)
-        self._pp:str = project_path
-        
-        # database setup
-        self._db:ProjectDatabase = None
-        self._flds:gpd.GeoDataFrame = None
-        for file in os.listdir(project_path):
-            if '.gpkg' in file and not file.split('.gpkg')[-1]:
-                fgpkg = os.path.join(project_path, file)
-                self._db = ProjectDatabase(
-                    fgpkg, field_table=gpkg_field_table, 
-                    field_name_column=gpkg_field_name_column
-                )
-                self._flds = gpd.read_file(
-                    fgpkg, layer=self._db.field_table_name
-                )
-        if self._db is None:
-            raise ValueError(self.ERR_GPKGFILE)
-        
-        # check if data path exists
-        dpath = os.path.join(self._pp, self.DATA_DIRECTORY)
-        if not os.path.exists(dpath):
-            os.mkdir(dpath)
-
-        # load previously added interfaces
-        self._dis:dict = {}
-        dis = self._db.get_data_sources()
-        for tpl in dis.itertuples():
-            di = getattr(import_module(tpl.intf_module), tpl.intf_name)()
-            di.project_directory = self._pp
-            di.project_ref = self
-            self._dis[di.DATA_SOURCE_ID] = di
+    def __init__(self, project_dir, gpkg_name):
+        super().__init__(project_dir, gpkg_name)
+        self._dis:dict = None  # dictionary containing data-interface instances
+        self._pdir:str = project_dir  # project directory
+        self._flds:GeoDataFrame = None
+        self.tables = {
+            _tds.name: _tds,
+            _tfld.name: _tfld,
+            _tda.name: _tda
+        }
 
     @property
-    def database(self) -> ProjectDatabase:
+    def directory(self) -> str:
         """
-        :return: prject database
-        :rtype: mef_agri.data.db.ProjectDatabase
+        :return: project directory where the .gpkg file is located (absolute path)
+        :rtype: str
         """
-        return self._db
-    
-    @property
-    def fields(self) -> gpd.GeoDataFrame:
-        """
-        :return: table from geopackage containing field geometries
-        :rtype: geopandas.GeoDataFrame
-        """
-        return self._flds
-    
+        return self._pdir
+
     @property
     def interfaces(self) -> dict:
         """
-        :return: dictionaray containing references to interface-objects (keys are the data-source-idas)
+        :return: data interface instances (see :class:`mef_agri.data.interface.Interface`)
         :rtype: dict
         """
+        if self._dis is None:
+            dis = self.query(DB.TBL_DSRCS.Q_INTFS)
+            for tpl in dis.itertuples():
+                di = getattr(import_module(tpl.intf_module), tpl.intf_name)()
+                di.project_directory = self.directory
+                di.project_ref = self
+                self._dis[tpl.did] = di
         return self._dis
     
     @property
-    def project_path(self) -> str:
+    def fields(self) -> GeoDataFrame:
         """
-        :return: absolute path to the project folder
-        :rtype: str
+        :return: fields available in .gpkg file of the project
+        :rtype: geopandas.GeoDataFrame
         """
-        return self._pp
-    
-    def add_data_interface(self, data_intf) -> None:
+        if self._flds is None:
+            self._flds = self.query_gdf(DB.TBL_FIELDS.NAME)
+        return self._flds
+
+    def add_data_interface(self, data_intf:Interface) -> None:
         """
-        Method to add a :class:`mef_agri.data.interface.DataInterface` to the 
+        Method to add a :class:`mef_agri.data.interface.Interface` to the 
         project.
 
-        :param data_intf: the desired :class:`mef_agri.data.interface.DataInterface`-subclass
+        :param data_intf: the desired :class:`mef_agri.data.interface.Interface`-subclass
         :type data_intf: class or instance
         """
-        # if data interface already has been added, the check in the project 
-        # database should yield True and nothing is left to do
-        if self._db.check_data_source(data_intf.DATA_SOURCE_ID):
+        # check if data interface already has been added
+        if data_intf.data_source_id in list(self.interfaces.keys()):
             return
         
         # create folder within the data folder for the 
         dpath = os.path.join(
-            self._pp, self.DATA_DIRECTORY, data_intf.DATA_SOURCE_ID
+            self._pdir, self.DATA_DIRECTORY, data_intf.data_source_id
         )
         if not os.path.exists(dpath):
             os.mkdir(dpath)
+
         # intialize data interface if necessary and set project and save paths
         if isclass(data_intf):
             data_intf = data_intf()
-        data_intf.project_directory = self._pp
-        data_intf.project_ref = self
         # add data interface to the dict containing all interfaces of the prj
-        self._dis[data_intf.DATA_SOURCE_ID] = data_intf
+        self._dis[data_intf.data_source_id] = data_intf
+
         # insert data interface information to the project database
-        self._db.insert_data_source(
-            data_intf.DATA_SOURCE_ID, data_intf.__class__.__name__,
-            data_intf.__class__.__module__
-        )
-        # commit changes to gpkg/sqlite database
-        self._db._conn.commit()
+        self.execute(self.tables[DB.TBL_DSRCS.NAME].sql_insert(
+            did=data_intf.data_source_id,
+            intf_name=data_intf.__class__.__name__,
+            intf_module=data_intf.__class__.__module__
+        ))
+        self.fetchall()
 
     def add_data(self, tstart:date, tstop:date, dids=None, fields=None) -> None:
         """
@@ -200,187 +191,189 @@ class Project(object):
         If ``fields`` is not provided, all fields will be considered.
 
         :param tstart: start epoch of the requested data
-        :type tstart: date
+        :type tstart: datetime.date
         :param tstop: last epoch of the requested data
-        :type tstop: date
+        :type tstop: datetime.date
         :param dids: data-source-ids available in the corresponding data-interface, defaults to None
         :type dids: list[str] or str, optional
         :param fields: name of the fields, defaults to None
         :type fields: list[str] or str, optional
         """
-        dids, fields = self._get_dis_flds(dids, fields)
+        # prepare dids and fields
+        dids = self._prepare_list(dids, list(self.interfaces.keys()))
+        fields = self._prepare_list(
+            fields, self.fields[DB.TBL_FIELDS.COL_FIELDNAME].values.tolist()
+        )
+        
+        # get data from interfaces
         for did in dids:
             di = self._dis[did]
-            dspath = os.path.join(self.DATA_DIRECTORY, di.DATA_SOURCE_ID)
+            dspath = os.path.join(self.DATA_DIRECTORY, di.data_source_id)
             for field in fields:
+                print(did + ' -> ' + field)  # TODO think on how to change this to interact with GUI
+
+                # prepare paths
                 fpath = os.path.join(dspath, field)
                 if not os.path.exists(os.path.join(self._pp, fpath)):
                     os.mkdir(os.path.join(self._pp, fpath))
-                
-                print(did + ' -> ' + field)
 
-                # add data into project directory structure
-                aoi = self._flds[
-                    self._flds[self._db.field_name_column] == field
-                ]
-                di.save_directory = fpath
-                di.current_field = field
-                trngs_requ, trngs = self._db.get_date_ranges(
-                    did, field, tstart, tstop
+                # prepare geometry stuff
+                aoi = self.fields[DB.TBL_FIELDS.COL_FIELDNAME == field]
+
+                ret = self.query(
+                    DB.TBL_DAVLBL.Q_DATERANGES.format(did=did, fld=field)
                 )
-                prc_ok = True
-                trngs_requ_upd = []
+                # process static data
+                if di.static_data:
+                    if len(ret) > 0:
+                        return
+                    di.prj_add_data(fpath, aoi)
+                    insda = f'INSERT INTO {DB.TBL_DAVLBL.NAME} '
+                    insda += f'({DB.TBL_DAVLBL.COL_DID}, '
+                    insda += f'{DB.TBL_DAVLBL.COL_FIELD}) VALUES ({did}, '
+                    insda += f'{field});'
+                    insde = DB.TBL_DEPOCHS.INSERT_START
+                    insde += DB.TBL_DEPOCHS.INSERT_TUPLE.format(
+                        did=did, fld=field, epoch=date.today().isoformat()
+                    )
+                    self.execute(insda)
+                    self.execute(insde)
+                    return
+
+                # prepare timeranges for requesting dynamic data
+                trngs = []
+                for tpl in ret.itertuples():
+                    trng.append([
+                        date.fromisoformat(tpl.tstart), 
+                        date.fromisoformat(tpl.tstop)
+                    ])
+                trngs_requ = daterange_consider_existing_dates(
+                    [tstart, tstop], trngs
+                )
+
+                # process data interfaces
+                epochs_new = []
                 for trng in trngs_requ:
-                    # when there is an error, nothing is inserted into the .gpkg 
-                    # user has to manually delete the corresponding folders and 
-                    # files or manually update data_available-information in .gpkg
                     try:
-                        trng_upd = di.add_prj_data(aoi, trng[0], trng[1])
-                        if not nan in trng_upd:
-                            trngs_requ_upd.append(trng_upd)
-                        if di.add_prj_data_error:
-                            prc_ok = False
-                            print(self.WRN_ADDDATA.format(dsrc=did, fld=field))
-                            break    
+                        epochs_new += di.prj_add_data(fpath, aoi, trng)
                     except Exception as exc:
-                        prc_ok = False
                         print(exc)
-                        print(self.WRN_ADDDATA.format(dsrc=did, fld=field))
                         break
 
-                if prc_ok:
-                    self._db.update_date_ranges(
-                        did, field, trngs_requ_upd, trngs
-                    )
-                    self._db._conn.commit()
+                # check if saved data and epochs_new are consistent
+                # create sql-commands for .gpkg
+                oneday = timedelta(days=1)
+                insdeps, do_ins_deps = DB.TBL_DEPOCHS.INSERT_START, False
+                trngs_new = []
+                for trng in trngs_requ:
+                    day = trng[0]
+                    epochs = []
+                    while day <= trng[1]:
+                        epdir = os.path.join(fpath, day.isoformat())
+                        c1 = os.path.isdir(epdir)
+                        c2 = day in epochs_new
+                        if c1:
+                            if c2:
+                                do_ins_deps = True
+                                insdeps += DB.TBL_DEPOCHS.INSERT_TUPLE.format(
+                                    did=did, fld=field, epoch=day.isoformat()
+                                ) + ', '
+                                epochs.append(day)
+                            else:
+                                shutil.rmtree(epdir)
+                        day += oneday
+                    if epochs:
+                        trngs_new.append([epochs[0], epochs[-1]])
 
-    def get_data(self, epoch:date, dids=None, fields=None) -> dict:
+                # write epochs with available data to .gpkg
+                if do_ins_deps:
+                    self.execute(insdeps[:-2] + ';')
+
+                # update timeranges and write them to .gpkg
+                trngs_new = merge_dateranges(trngs + trngs_new)
+                sql_ins = DB.TBL_DAVLBL.INSERT_START
+                for trng in trngs_new:
+                    sql_ins += DB.TBL_DAVLBL.INSERT_TUPLE.format(
+                        did=did, fld=field, tstart=trng[0].isoformat(),
+                        tstop=trng[1].isoformat()
+                    ) + ', '
+                self.execute(DB.TBL_DAVLBL.DEL_BY_DID_FLD.format(
+                    did=did, fld=field
+                ))
+                self.execute(sql_ins[:-2] + ';')
+
+    def get_data(self, tstart:date, tstop:date=None, dids=None, fields=None):
         """
-        Method to load raster data from GeoTIFFs of different data sources in 
-        the project folder structure.
-        The first level of keys of the resulting dictionary corresponds to the 
-        field names specified in `fields` and the second level of keys 
-        corresponds to the data-source-ids specified in `dids`. 
-        The values of the second level are again dictionaries containing the 
-        :class:`mef_agri.utils.raster.GeoRaster` instances or ``None`` if there
-        is nothing available for the provided arguments.
+        Get data from project. 
+        The returned dictionary exhibits the same structure as the 
+        folders in ``Project.DATA_DIRECTORY``.
+        Available data is loaded by calling the classmethod 
+        :func:`mef_agri.utils.raster.GeoRaster.from_directory` from the class 
+        specified with :func:`mef_agri.data.interface.Interface.georaster_class`.
 
-        :param epoch: date of the data
-        :type epoch: datetime.date
-        :param dids: data-source-ids available in the corresponding data-interface, defaults to None
-        :type dids: list[str] or str, optional
-        :param fields: name of the fields, defaults to None
-        :type fields: list[str] or str, optional
-        :return: dictionary with ``GeoRaster`` instances
+        :param tstart: first epoch for which data should be provided
+        :type tstart: datetime.date
+        :param tstop: last epoch for which data should be provided, defaults to None
+        :type tstop: datetime.date, optional
+        :param dids: defining data interfaces for which data should be provided (:func:`mef_agri.data.interface.Interface.data_source_id`), defaults to None
+        :type dids: list[str] | str, optional
+        :param fields: defining fields for which data should be provided, defaults to None
+        :type fields: list[str] | str, optional
+        :return: dictionary with georasters
         :rtype: dict
         """
-        dids, fields = self._get_dis_flds(dids, fields)
-
+        dids = self._prepare_list(dids, list(self.interfaces.keys()))
+        fields = self._prepare_list(
+            fields, self.fields[DB.TBL_FIELDS.COL_FIELDNAME].values.tolist()
+        )
+        if tstop is None:
+            tstop = deepcopy(tstart)
         ret = {}
-        for field in fields:
-            ret[field] = {}
-            for did in dids:
-                di = self._dis[did]
-                di.current_field = field
-                di.save_directory = os.path.join(
-                    self.DATA_DIRECTORY, di.DATA_SOURCE_ID, field
-                )
-                ret[field][di.DATA_SOURCE_ID] = di.get_prj_data(epoch)
-                
-        return ret
-    
-    def get_field_geodata(self, field_name:str) -> tuple:
-        """
-        Get the information about georeference of a field as 
-        `shapely.geometry.Polygon` and EPSG code of the coordinate reference 
-        system.
-
-        :param field_name: name of the field
-        :type field_name: str
-        :return: polygon and crs
-        :rtype: tuple
-        """
-        crs = self._flds.crs.to_epsg()
-        ix = self._flds[self._db.field_name_column] == field_name
-        plgn = self._flds[ix]['geometry'].values[0]
-        return plgn, crs
-    
-    def get_field_height(self, field_name:str, hcol:str) -> float:
-        ix = self._flds[self._db.field_name_column] == field_name
-        return float(self._flds[ix][hcol].values[0])
-    
-    def _get_dis_flds(self, dids, fields) -> tuple[list, list]:
-        # if no specific data source is specified, data from all data sources 
-        # will be added for specified fields
-        all_dids = list(self._dis.keys())
-        if dids is None:
-            dids = all_dids
-        elif isinstance(dids, str):
-            dids = [dids]
         for did in dids:
-            if not did in all_dids:
-                # commit db-changes made within this loop before erroneous data
-                # source id appears
-                self.quit_project()
-                raise ValueError(self.ERR_DIDNOTAVLBL)
+            di:Interface = self._dis[did]
+            ret[did] = {}
+            for field in fields:
+                ret[did][field] = {}
+                fdir = os.path.join(
+                    self._pdir, self.DATA_DIRECTORY, di.data_source_id, field
+                )
+                if di.static_data:
+                    if di.data_types is None:
+                        ret[did][field] = di.georaster_class.from_directory(
+                            fdir
+                        )
+                    else:
+                        ret[did][field] = {}
+                        for dtype in di.data_types:
+                            ret[did][field][dtype] = \
+                                di.georaster_class.from_directory(
+                                    os.path.join(fdir, dtype)
+                                )
+                    continue
 
-        # if no field is specified, the data will be added for all fields
-        all_fields = self._flds[self._db.field_name_column].values.tolist()
-        if fields is None:
-            fields = all_fields
-        elif isinstance(fields, str):
-            fields = [fields]
-        for field in fields:
-            if not field in all_fields:
-                # commit db-changes made within this loop before erroneous field
-                # name definition appears
-                self.quit_project()
-                raise ValueError(self.ERR_FLDNOTAVLBL)
-
-        return dids, fields
-    
-    def quit_project(self) -> None:
-        """
-        Method which should be always called in the end of script to make all 
-        changes in :class:`mef_agri.data.db.ProjectDatabase` persistent.
-        """
-        self._db.close()
-
-
-def get_project_jrv01(
-        wdir:str, ftable_name:str, ftable_name_col:str
-    ) -> Project:
-    """
-    Returns an initialized project with the following data-types
-
-    * inca (geosphere)
-    * ebod
-    * sentinel-2 (planetary computer)
-    * jr management data
-
-    :param wdir: directory where the .gpkg with fields is located
-    :type wdir: str
-    :param ftable_name: name of the table containing the fields
-    :type ftable_name: str
-    :param ftable_name_col: name of the column containing the field names (within ``ftable_name`` table)
-    :type ftable_name_col: str
-    :return: initialized project
-    :rtype: mef_agri.data.project.Project
-    """
-
-    prj = Project(
-        wdir, 
-        gpkg_field_table=ftable_name, 
-        gpkg_field_name_column=ftable_name_col
-    )
-    from .geosphere_austria.inca.interface import INCAInterface
-    from .ebod_austria.interface import EbodInterface
-    from .planetary_computer.sentinel2.interface import Sentinel2Interface
-    from .jr_management.interface import ManagementInterface
-    prj.add_data_interface(INCAInterface)
-    prj.add_data_interface(EbodInterface)
-    prj.add_data_interface(Sentinel2Interface)
-    prj.add_data_interface(ManagementInterface)
-    prj.quit_project()
-
-    return Project(wdir)
+                epochs = self.query(DB.TBL_DEPOCHS.Q_EPOCHS.format(
+                    did=did, fld=field, tstart=tstart, tstop=tstop
+                ))
+                for ep in epochs[DB.TBL_DEPOCHS.COL_EPOCH].values.tolist():
+                    ddir = os.path.join(fdir, ep)
+                    if di.data_types is None:
+                        ret[did][field][ep] = di.georaster_class.from_directory(
+                            ddir
+                        )
+                    else:
+                        ret[did][field][ep] = {}
+                        for dtype in di.data_types:
+                            ret[did][field][ep][dtype] = \
+                                di.georaster_class.from_directory(
+                                    os.path.join(ddir, dtype)
+                                )
+        return ret
+                            
+    @staticmethod
+    def _prepare_list(provided:list[str] | str | None, all_values:list[str]):
+            if provided is None:
+                return all_values
+            elif isinstance(provided, str):
+                return [provided]
+            else:
+                return provided

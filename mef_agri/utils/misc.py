@@ -64,7 +64,7 @@ def get_decorated_methods(
     def loop(cls, ret):
         ret += inspect.getsource(cls)
         if iterate_super_class is None:
-            return
+            return ret
         else:
             if exclude_intermediate_classes is None:
                 noscreen = [iterate_super_class]

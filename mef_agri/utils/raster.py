@@ -116,6 +116,7 @@ class GeoRaster(object):
         self._trf:np.ndarray = None
         self._trf_inv:np.ndarray = None
         self._meta = {}
+        self._crs = None
 
         self._reset_iteration()
 
@@ -592,15 +593,18 @@ class GeoRaster(object):
         json.dump(self.metadata, fio, indent=2)
         fio.close()
 
-    def load_geotiff(self, savepath:str) -> None:
+    def load_geotiff(self, directory:str) -> None:
         """
         Load raster data from GeoTIFF.
+        Filenames do not have to be provided, because this method screens the 
+        provided ``directory`` for a .json file with name 
+        ``GeoRaster.META_FILENAME`` which contains the required metadata.
 
-        :param savepath: folder where metadata and raster data is located
-        :type savepath: str
+        :param directory: folder where metadata and raster data is located
+        :type directory: str
         """
         # load metadata
-        fmeta = os.path.join(savepath, self.META_FILENAME + '.json')
+        fmeta = os.path.join(directory, self.META_FILENAME + '.json')
         if not os.path.exists(fmeta):
             msg = 'No {}.json file in the provided folder!'.format(
                 self.META_FILENAME
@@ -617,7 +621,7 @@ class GeoRaster(object):
         # load raster data
         arr = None
         for fn in self._meta[self.META_DATAFILES_KEY]:
-            sdata = rio.open(os.path.join(savepath, fn))
+            sdata = rio.open(os.path.join(directory, fn))
             if arr is None:
                 arr = sdata.read()
             else:
@@ -867,4 +871,19 @@ class GeoRaster(object):
         rstr.raster = np.zeros(rstr.raster_shape, dtype=rtype)
         rstr.raster[:] = nodataval
 
+        return rstr
+    
+    @classmethod
+    def from_directory(cls, directory:str):
+        """
+        Create instance of :class:`GeoRaster` from provided ``directory`` by 
+        using :func:`load_geotiff`.
+
+        :param directory: absolute path of directory where geotiff(s) and metadata (.json) is located
+        :type directory: str
+        :return: instance of :class:`GeoRaster`
+        :rtype: mef_agri.utils.raster.GeoRaster
+        """
+        rstr = cls()
+        rstr.load_geotiff(directory)
         return rstr

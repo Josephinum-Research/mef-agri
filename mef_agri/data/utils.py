@@ -1,9 +1,21 @@
 import datetime
 import numpy as np
+from copy import deepcopy
 
 
 DELTADAY = datetime.timedelta(days=1)
 EPOCH0 = datetime.date(1970, 1, 1)
+
+
+def timerange_from_epochs(
+        epochs:list[datetime.date | str]
+    ) -> list[datetime.date]:
+    eps = deepcopy(epochs)
+    if isinstance(epochs[0], str):
+        eps = [datetime.date.fromisoformat(ep) for ep in eps]
+    eps.sort()
+    return [eps[0], eps[-1]]
+
 
 def merge_dateranges(
     dranges:list[list[datetime.date, datetime.date]]

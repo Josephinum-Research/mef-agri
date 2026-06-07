@@ -23,7 +23,7 @@ class GeometryType:
 
 class ERRORS:
     NONSTR_ELEMENTS = 'Elements in provided iterable are not of type `str`!'
-    INVALID_DTYPE = 'Provided datatype is non-valid, has to be `str`, '
+    INVALID_DTYPE = 'Provided dstatatype is non-valid, has to be `str`, '
     INVALID_DTYPE += '`list[str]` or tuple[str]!'
     NONSTR_VALUE = 'Provided value has to be of type `str`!'
     NONINT_VALUE = 'Provided value has to be of type `int`!'
@@ -724,7 +724,6 @@ class Geopackage(object):
         :type sql: str
         """
         self._curs.execute(sql)
-
 
     @DB.connect
     @DB.close
