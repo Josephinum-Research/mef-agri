@@ -41,10 +41,9 @@ class Interface(object):
     order within :func:`prj_add_data`.
     The return-values of decorated methods have to be dictionaries which will 
     be passed to the next task in the specified order as ``kwargs``.
-    The last task must return a tuple with two instances of ``datetime.date``,
-    representing the first and last epoch which have been really processed (
-    in contrast to the ``tstart`` and ``tstop`` provided to 
-    :func:`prj_add_data`).
+    The last task must return a list with epochs (``datetime.date`` or 
+    iso-formatted strings ``YYYY-MM-dd``) for which data has been requested and 
+    saved
     
     When setting ``parallel`` to ``True`` in this decorator, the corresponding 
     task will be split into sub-processess.
@@ -274,6 +273,25 @@ class Interface(object):
         ) -> list[date | str]:
         """
         Processes the methods which are decorated with :func:`add_data_task`.
+
+        If georasters are saved, the project-data structure has to be satisfied, 
+        because otherwise these data will not be considered in the 
+        consistency checks within 
+        :func:`mef_agri.data.project.Project.add_data`.
+        The structure of data-folders is
+
+        1. :func:`data_source_id`s
+        2. name of the field
+        3. epochs
+        4. :func:`data_types`
+
+        1.) and 2.) are available through :func:`directory`.
+        Thus, it is only necessary to consider 3.) and 4.) when saving 
+        georasters in the tasks.
+        If :func:`static_data` is ``True``, level 3.) of the folder structure 
+        is omitted.
+        If :func:`data_types` is ``None``, level 4.) of the folder structure is 
+        omitted.
 
         :param ddir: directory where data should be located, see :func:`directory`
         :type ddir: str
