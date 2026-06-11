@@ -44,7 +44,7 @@ def merge_dateranges(
     drngs = [[tstart, tstop] for tstart, tstop in zip(t0, t1)]
     
     # merge dateranges if timedelta is smaller than or equal one day
-    drngs_out = [drngs[0]]
+    drngs_out = [[0]]
     for drng in drngs[1:]:
         if (drng[0] - drngs_out[-1][1]) <= DELTADAY:
             drngs_out[-1] = [drngs_out[-1][0], drng[1]]

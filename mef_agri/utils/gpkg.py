@@ -724,6 +724,7 @@ class Geopackage(object):
         :type sql: str
         """
         self._curs.execute(sql)
+        print(self._curs.fetchall())
 
     @DB.connect
     @DB.close
@@ -770,7 +771,7 @@ class Geopackage(object):
             raise ValueError(msg)
         # get column names of table
         cols = list(self.tables[table].columns.keys())
-        sql = 'SELECT {}, ST_AsText({}) AS {}, '.format(
+        sql = 'SELECT {}, ST_AsText(CastAutomagic({})) AS {}, '.format(
             SQLTable.ID_COL_NAME, SQLTable.GEOM_COL_NAME, SQLTable.GEOM_COL_NAME
         )
         sql += ', '.join(cols) + ' FROM ' + table

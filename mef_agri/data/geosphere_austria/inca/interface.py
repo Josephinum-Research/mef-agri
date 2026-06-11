@@ -3,245 +3,14 @@ import requests
 import datetime
 import geopandas as gpd
 import numpy as np
+from importlib import import_module
 from shapely.geometry import Point
 from copy import deepcopy
 from pandas import concat
 
 from ....utils.gis import bbox_from_gdf, EARTH_SPHERE_RADIUS
 from .inca import IncaGridDaily, INCADATA
-from ...interface import Interface
-
-
-class INCAInterface_old(DataInterface):
-    DATA_SOURCE_ID = 'inca_geosphere-austria'
-    HOST = 'https://dataset.api.hub.geosphere.at'
-    VERS = 'v1'
-    ID_INCA = 'inca-v1-1h-1km'
-    INCA_OUT_FORMAT = 'geojson'
-    INCA_STAMPS = 'timestamps'
-    INCA_FEATS = 'features'
-    INCA_GEOM_LVL1 = 'geometry'
-    INCA_GEOM_LVL2 = 'coordinates'
-    INCA_DATA_LVL1 = 'properties'
-    INCA_DATA_LVL2 = 'parameters'
-    INCA_DATA_LVL3 = 'data'
-
-    def __init__(self) -> None:
-        """
-        Interface to load data from https://data.hub.geosphere.at/
-        The output/target crs can be defined either by explicitely setting 
-        the `target_crs` attribute or it will be derived from the provided 
-        GeoDataFrames specifying the area of interest.
-        """
-        super().__init__()
-        self.url_common:str = self.HOST + '/' + self.VERS + '/'
-        self.target_crs:int = None
-        self.add_bbox_km:float = 1.1  # in [km]
-        self._delta_235959 = datetime.timedelta(
-            hours=23, minutes=59, seconds=59
-        )
-
-        self.inca_data:list[str] = INCADATA.keys()
-
-    def add_prj_data(self, aoi, tstart, tstop) -> tuple:
-        """
-        Method from parent-class which is called within 
-        `sitespecificcultivation.data.project.Project` to save inca data
-        in the project folder structure.
-
-        :param aoi: area of interest for which data is requested
-        :type aoi: geopandas.GeoDataFrame
-        :param tstart: start date of requested data (inca data is available for this whole day)
-        :type tstart: datetime.date
-        :param tstop: stop date of requested data (inca data is available for this whole day)
-        :type tstop: datetime.date
-        """
-        self.save_inca_grid_daily(
-            self.get_inca_grid_daily(
-                self.get_inca_grid_historical(aoi, tstart, tstop)
-            )
-        )
-        return tstart, tstop
-
-    def get_prj_data(self, epoch):
-        """
-        Method from parent-class which is called within 
-        `sitespecificcultivation.data.project.Project` to load inca data from 
-        the project folder structure
-
-        :param epoch: date of inca data
-        :type epoch: datetime.date
-        :return: dictionary with keys being the inca-data-ids and values the corresponding `GeoRaster` containing the hourly data for the provided `epoch`
-        :rtype: dict
-        """
-        dpath = os.path.join(
-            self.project_directory, self.save_directory, epoch.isoformat()
-        )
-        if not os.path.exists(dpath):
-            return
-        
-        ret = {}
-        for key, val in INCADATA.items():
-            inca = IncaGridDaily(
-                data_id=key, epoch=epoch, 
-                data_descr=val['descr'], data_units=val['units']
-            )
-            fpath = os.path.join(dpath, key)
-            inca.load_geotiff(fpath)
-            ret[key] = inca
-        return ret
-
-    def get_inca_grid_historical(
-            self, aoi:gpd.GeoDataFrame, tstart:datetime.date, 
-            tstop:datetime.date
-        ) -> gpd.GeoDataFrame:
-        """
-        Request inca-data (grid+historical endpoint). Data is provided as 
-        geojson in the WGS84 crs from the geosphere-API, which will be returned 
-        as `geopandas.GeoDataFrame` from this method. This geodataframe is also 
-        defined in WGS84 and the `target_crs` will be applied when creating the 
-        `GeoRaster` representation in `self.get_inca_grid_daily()` or when 
-        using `self.save_inca_grid_historical(gdf, apply_target_crs=True)`.
-        If `self.target_crs` is not set or changed afterwards, it will be the 
-        same as contained in `aoi`.
-
-        The reason for staying in WGS84 is, that a projection (e.g. to UTM), 
-        distorts the points such that they do not exhibit a 1km x 1km raster 
-        anymore and therefore a proper raster representation is not possible.
-        Only the projection to Austria Lambert (EPSG 31287) keeps this property 
-        as this is the CRS where INCA data is processed by Geosphere Austria.
-
-        :param aoi: GeoDataFrame representing the area of interest
-        :type aoi: geopandas.GeoDataFrame
-        :param tstart: start time of requested data (data/timestamps starting from 00:00:00 of this day)
-        :type tstart: datetime.date
-        :param tstop: stop time of requested data (whole day is included in the resulting GeoDataFrame, i.e. data/timestamps end at 23:00:00 of this day)
-        :type tstop: datetime.date
-        :return: inca-data as geojson (`geopandas.GeoDataFrame`)
-        :rtype: gpd.GeoDataFrame
-        """
-        # adddeg is used to expand the size of the aoi such that it covers at 
-        # least a square-km (otherwise nothing is returned from api)
-        adddeg = np.rad2deg((self.add_bbox_km * 1000.0) / EARTH_SPHERE_RADIUS)  # [deg]
-        if self.target_crs is None:
-            self.target_crs = aoi.crs.to_epsg()
-
-        # rearranging bbox because geosphere requires (south, west, north, east)
-        # sitespecificcultivation-definition is (west, south, east, north)
-        # TODO: !!! adddeg only works for positive latitude and positive longitude !!!
-        aoi_src = aoi.to_crs(epsg=IncaGridDaily.EPSG_REQUEST)
-        bbox = bbox_from_gdf(aoi_src)
-        bbox = (
-            bbox[1] - adddeg,
-            bbox[0] - adddeg, 
-            bbox[3] + adddeg, 
-            bbox[2] + adddeg
-        )
-        bboxstr = ''.join([str(ci) + ',' for ci in bbox])[:-1]
-
-        resp = requests.get(
-            self.url_common + 'grid/historical/' + self.ID_INCA,
-            params=dict(
-                parameters=self.inca_data,
-                start=datetime.datetime(
-                    tstart.year, tstart.month, tstart.day
-                ).isoformat(),
-                end=(
-                    datetime.datetime(
-                        tstop.year, tstop.month, tstop.day
-                    ) + self._delta_235959
-                ).isoformat(),
-                bbox=bboxstr,
-                output_format=self.INCA_OUT_FORMAT
-            )
-        ).json()
-        if not self.INCA_FEATS in resp.keys():
-            if 'message' in resp.keys():
-                print(resp['message'])
-
-        data = {'geometry': [], 'timestamps': []}
-        for key in self.inca_data:
-            data[key] = []
-        for gdata in resp[self.INCA_FEATS]:
-            data['geometry'].append(
-                Point(gdata[self.INCA_GEOM_LVL1][self.INCA_GEOM_LVL2])
-            )
-            data['timestamps'].append(resp[self.INCA_STAMPS])
-            for key in self.inca_data:
-                pvals = gdata[self.INCA_DATA_LVL1][self.INCA_DATA_LVL2]
-                data[key].append(
-                    pvals[key][self.INCA_DATA_LVL3]
-                )
-
-        return gpd.GeoDataFrame(data=data, crs=IncaGridDaily.EPSG_REQUEST)
-    
-    def get_inca_grid_daily(self, gdf:gpd.GeoDataFrame) -> dict:
-        """
-        Convert GeoDataFrame from `self.get_inca_grid_historical()` into 
-        GeoRasters for each day and each kind of inca data (each having 
-        24 layers representing the hourly inca data).
-
-        The GeoDataFrame has to be defined in WGS84 (EPSG 4326)!!!
-
-        :param gdf: GeoDataFrame containing data from geosphere-inca API
-        :type gdf: gpd.GeoDataFrame
-        :return: dictionary with `sitespecificcultivation.data_sources.geosphere.inca.IncaGridDaily` objects where first level of keys correspond to the dates in `gdf` and second level of keys correspond to the individual inca data types
-        :rtype: dict
-        """
-        if gdf.crs.to_epsg() != IncaGridDaily.EPSG_REQUEST:
-            msg = '`gdf` has to be defined in WGS84!'
-            raise ValueError(msg)
-
-        inca = {}
-        outstr = 'GeoSphereInterface.get_inca_grid_daily() - processing day {}'
-        for ix in np.arange(
-            start=0, stop=len(gdf['timestamps'].iloc[0]), step=24
-        ):
-            inca_day = {}
-            data = {
-                'geometry': list(gdf['geometry'].values),
-                'timestamps': np.array(list(gdf['timestamps']))[:, ix:ix + 24].tolist()
-            }
-            str_day = data['timestamps'][0][0].split('T')[0]
-            print(outstr.format(str_day))
-            for col in list(self.inca_data):
-                idata = deepcopy(data)
-                idata[col] = np.array(list(gdf[col]))[:, ix:ix + 24].tolist()
-                inca_day[col] = IncaGridDaily.from_points(
-                    gpd.GeoDataFrame(idata, crs=gdf.crs, geometry='geometry'),
-                    col, datetime.date.fromisoformat(str_day), self.target_crs
-                )
-            inca[str_day] = inca_day
-
-        return inca
-
-    def save_inca_grid_historical(
-            self, gdf:gpd.GeoDataFrame, apply_target_crs:bool=False
-        ) -> None:
-        self._check_dirs()
-        spath = os.path.join(self.project_directory, self.save_directory)
-        tstart = gdf['timestamps'].values[0][0]
-        tstop = gdf['timestamps'].values[0][0]
-        if apply_target_crs:
-            gdf.to_crs(self.target_crs, inplace=True)
-        gdf.to_file(
-            os.path.join(spath, tstart + '__to__' + tstop + '.json'), 
-            driver='GeoJSON'
-        )
-
-    def save_inca_grid_daily(self, inca:dict) -> None:
-        self._check_dirs()
-        for day, data in inca.items():
-            daypath = os.path.join(
-                self.project_directory, self.save_directory, day
-            )
-            if not os.path.exists(daypath):
-                os.mkdir(daypath)
-            for key, obs in data.items():
-                spath = os.path.join(daypath, key)
-                if not os.path.exists(spath):
-                    os.mkdir(spath)
-                obs.save_geotiff(spath, compress=True, filename=key)
+from ...interface import Interface, Worker
 
 
 class INCAInterface(Interface):
@@ -303,6 +72,24 @@ class INCAInterface(Interface):
     def get_inca_grid_historical(
             self, aoi:gpd.GeoDataFrame=None, timerange:list[datetime.date]=None
         ) -> gpd.GeoDataFrame:
+        """
+        Request inca-data (grid+historical endpoint). 
+        Data is provided as geojson in the WGS84 crs from the geosphere-API, 
+        which will be returned as `geopandas.GeoDataFrame` from this method.
+
+        The reason for staying in WGS84 is, that a projection (e.g. to UTM), 
+        distorts the points such that they do not exhibit a 1km x 1km raster 
+        anymore and therefore a proper raster representation is not possible.
+        Only the projection to Austria Lambert (EPSG 31287) keeps this property 
+        as this is the CRS where INCA data is processed by Geosphere Austria.
+
+        :param aoi: aoi for which data will be requested, defaults to None
+        :type aoi: gpd.GeoDataFrame, optional
+        :param timerange: timerange for which data will be requested, defaults to None
+        :type timerange: list[datetime.date], optional
+        :return: geodataframe with n_gridpoints x n_timestamps rows
+        :rtype: gpd.GeoDataFrame
+        """
         # adddeg is used to expand the size of the aoi such that it covers at 
         # least a square-km (otherwise nothing is returned from api)
         adddeg = np.rad2deg((self._add_bbox_km * 1000.0) / EARTH_SPHERE_RADIUS)  # [deg]
@@ -385,13 +172,23 @@ class INCAInterface(Interface):
     @Interface.add_data_task(order=1)
     def prepare_inca_grid_historical(self, **kwargs):
         gdf = self.get_inca_grid_historical()
-        ndays = len(gdf) // 24
+        ret = {}
+
+        # create temporary folder where geojsons for each process are stored
+        tempf = os.path.join(self.directory, 'temp')
+        if not os.path.exists(tempf):
+            os.mkdir(tempf)
+
+        # create chunks from inca-grid historical data being processed in 
+        # next task
+        locs = gdf['location'].drop_duplicates().values
+        ndays = len(gdf) // 24 // len(locs)
         if (ndays // self.n_processes) < 2:
             self.n_processes = 1
         perprc, resid = ndays // self.n_processes, ndays % self.n_processes
-        locs = gdf['location'].drop_duplicates().values()
         for i in range(self.n_processes):
-            prcdf = None
+            prcdf:gpd.GeoDataFrame = None
+            # create indices
             i1, i2 = i * perprc * 24, (i + 1) * perprc * 24
             if (i + 1) == self.n_processes:
                 i2 += resid * 24
@@ -402,50 +199,89 @@ class INCAInterface(Interface):
                     prcdf = df
                 else:
                     prcdf = concat([prcdf, df], ignore_index=True)
-            # save prcdf to a temp-file being available for sub-processes in next task
-            # TODO
+            # save prcdf to a temp-file being available for sub-processes 
+            # in next task
+            fpath = os.path.join(tempf, self.process_ids[i] + '.json')
+            prcdf.to_file(fpath, driver='GeoJSON')
+            ret[self.process_ids[i]] = {
+                'target_crs': self.aoi.crs.to_epsg(),
+                'gjson_file': fpath,
+                'data_cols': self.data_types,
+                'loc_col': 'location',
+                'time_col': 'timestamps',
+                'geom_col': 'geometry',
+                'data_dir': self.directory,
+                'grclass': IncaGridDaily.__name__,
+                'grmodule': IncaGridDaily.__module__
+            }
 
-        ret = {'target_crs': self.aoi.crs.to_epsg()}
         return ret
     
     @Interface.add_data_task(order=2, parallel=True)
-    def get_inca_grid_daily(self, gdf:gpd.GeoDataFrame) -> dict:
-        # TODO overwork this method to work as parallel task
-        """
-        Convert GeoDataFrame from `self.get_inca_grid_historical()` into 
-        GeoRasters for each day and each kind of inca data (each having 
-        24 layers representing the hourly inca data).
+    def process_chunks(self, **kwargs):
+        gdf = gpd.read_file(kwargs['gjson_file'])
+        neps = None
+        grclass = getattr(import_module(kwargs['grmodule']), kwargs['grclass'])
 
-        The GeoDataFrame has to be defined in WGS84 (EPSG 4326)!!!
+        # prepare gdf such that there is only one row for each location
+        data = {kwargs['geom_col']: [], kwargs['time_col']: []}
+        for loc in gdf[kwargs['loc_col']].drop_duplicates().values:
+            gdfl = gdf[gdf[kwargs['loc_col']] == loc]
+            data[kwargs['time_col']].append(
+                gdfl[kwargs['time_col']].values.tolist()
+            )
+            data[kwargs['geom_col']].append(
+                gdfl[kwargs['geom_col']].values[0]
+            )
+            for dcol in kwargs['data_cols']:
+                di = gdfl[dcol].values.tolist()
+                if neps is None:
+                    neps = len(di)
+                if not dcol in data.keys():
+                    data[dcol] = di
+                else:
+                    data[dcol].append(di)
 
-        :param gdf: GeoDataFrame containing data from geosphere-inca API
-        :type gdf: gpd.GeoDataFrame
-        :return: dictionary with `sitespecificcultivation.data_sources.geosphere.inca.IncaGridDaily` objects where first level of keys correspond to the dates in `gdf` and second level of keys correspond to the individual inca data types
-        :rtype: dict
-        """
-        if gdf.crs.to_epsg() != IncaGridDaily.EPSG_REQUEST:
-            msg = '`gdf` has to be defined in WGS84!'
-            raise ValueError(msg)
-
-        inca = {}
-        outstr = 'GeoSphereInterface.get_inca_grid_daily() - processing day {}'
-        for ix in np.arange(
-            start=0, stop=len(gdf['timestamps'].iloc[0]), step=24
-        ):
-            inca_day = {}
-            data = {
-                'geometry': list(gdf['geometry'].values),
-                'timestamps': np.array(list(gdf['timestamps']))[:, ix:ix + 24].tolist()
-            }
-            str_day = data['timestamps'][0][0].split('T')[0]
-            print(outstr.format(str_day))
-            for col in list(self.inca_data):
-                idata = deepcopy(data)
-                idata[col] = np.array(list(gdf[col]))[:, ix:ix + 24].tolist()
-                inca_day[col] = IncaGridDaily.from_points(
-                    gpd.GeoDataFrame(idata, crs=gdf.crs, geometry='geometry'),
-                    col, datetime.date.fromisoformat(str_day), self.target_crs
+        # create daily georasters and save them
+        epochs = []
+        for ix in np.arange(0, neps, 24):
+            tsday = data[kwargs['time_col']][0][ix:ix + 24]
+            epoch = datetime.date.fromisoformat(
+                tsday[0].split('T')[0]
+            )
+            kwargs['queue'].put(
+                Worker.QFLAG_MESSAGE, 
+                'INCA-Interface: processing epoch {} in process {}'.format(
+                    epoch.isoformat(), kwargs['pid']
                 )
-            inca[str_day] = inca_day
+            )
+            epdir = os.path.join(kwargs['data_dir'], epoch.isoformat())
+            if not os.path.exists(epdir):
+                os.mkdir(epdir)
+            for dcol in kwargs['data_cols']:
+                datalocs = []
+                for dataloc in data[dcol]:
+                    datalocs.append(dataloc[ix:ix + 24])
+                dataday = {
+                    kwargs['geom_col']: data[kwargs['geom_col']],
+                    kwargs['time_col']: tsday,
+                    dcol: datalocs
+                }
+                gr = grclass.from_points(
+                    gpd.GeoDataFrame(dataday, crs=gdf.crs, geometry='geometry'),
+                    dcol, epoch, kwargs['target_crs']
+                )
+                ddir = os.path.join(epdir, dcol)
+                if not os.path.exists(ddir):
+                    os.mkdir(ddir)
+                gr.save_geotiff(ddir, compress=True, filename=dcol)
+            epochs.append(epoch.isoformat())
+        
+        kwargs['queue'].put(kwargs['pid'] + '_epochs', epochs)
 
-        return inca
+    @Interface.add_data_task(order=3)
+    def finish_processing(self, **kwargs):
+        epochs = []
+        for pid in self.process_ids:
+            epochs += kwargs[pid + '_epochs']
+        return [datetime.date.fromisoformat(ep) for ep in epochs]

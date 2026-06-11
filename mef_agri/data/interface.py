@@ -270,7 +270,7 @@ class Interface(object):
     # METHODS
     def prj_add_data(
             self, ddir:str, aoi:GeoDataFrame, trange:list[date]=None
-        ) -> list[date | str]:
+        ) -> list[date]:
         """
         Processes the methods which are decorated with :func:`add_data_task`.
 
@@ -300,7 +300,7 @@ class Interface(object):
         :param trange: first and last epoch for which data should be gathered, defaults to None
         :type trange: list[datetime.date], optional
         :return: list of epochs for which data is indeed gathered (empty list or ``None`` if :func:`static_data` is ``True``)
-        :rtype: list[datetime.date | str]
+        :rtype: list[datetime.date]
         """
         # set properties such that they are available in methods of child class
         self._dir = ddir

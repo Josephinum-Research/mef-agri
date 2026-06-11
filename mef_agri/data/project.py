@@ -5,6 +5,7 @@ from copy import deepcopy
 from inspect import isclass
 from importlib import import_module
 from datetime import date, timedelta
+from multiprocessing import cpu_count
 
 from ..utils.gpkg import Geopackage, SQLTable, ForeignKey, GeometryType
 from .utils import (
@@ -94,6 +95,27 @@ _tda_fld_fk.on_delete = 'CASCADE'
 _tda_fld_fk.on_update = 'CASCADE'
 _tda.foreign_keys = [_tda_tds_fk, _tda_fld_fk]
 
+_tde = SQLTable()
+_tde.name = DB.TBL_DEPOCHS.NAME
+_tde.columns = {
+    DB.TBL_DEPOCHS.COL_DID: 'TEXT',
+    DB.TBL_DEPOCHS.COL_FIELD: 'TEXT',
+    DB.TBL_DEPOCHS.COL_EPOCH: 'CHAR(12)'
+}
+_tde.primary_key = list(_tde.columns.keys())
+_tde_tds_fk = ForeignKey()
+_tde_tds_fk.fkey_columns = [DB.TBL_DEPOCHS.COL_DID]
+_tde_tds_fk.ftable = _tds.name
+_tde_tds_fk.ftable_columns = _tds.primary_key
+_tde_tds_fk.on_delete = 'CASCADE'
+_tde_tds_fk.on_update = 'CASCADE'
+_tde_fld_fk = ForeignKey()
+_tde_fld_fk.fkey_columns = [DB.TBL_DEPOCHS.COL_FIELD]
+_tde_fld_fk.ftable = _tfld.name
+_tde_fld_fk.ftable_columns = _tfld.unique_cols
+_tde_fld_fk.on_delete = 'CASCADE'
+_tde_fld_fk.on_update = 'CASCADE'
+_tde.foreign_keys = [_tde_tds_fk, _tde_fld_fk]
 
 ################################################################################
 # PROJECT CLASS
@@ -105,14 +127,20 @@ class Project(Geopackage):
     WRN_ADDDATA += '-table for this case!'
 
     def __init__(self, project_dir, gpkg_name):
+        ddir = os.path.join(project_dir, self.DATA_DIRECTORY)
+        if not os.path.exists(ddir):
+            os.mkdir(ddir)
+
         super().__init__(project_dir, gpkg_name)
         self._dis:dict = None  # dictionary containing data-interface instances
         self._pdir:str = project_dir  # project directory
         self._flds:GeoDataFrame = None
+        self._nprcs:int = max(cpu_count() // 2, 2)  # number of cores to use for tasks
         self.tables = {
             _tds.name: _tds,
             _tfld.name: _tfld,
-            _tda.name: _tda
+            _tda.name: _tda,
+            _tde.name: _tde
         }
 
     @property
@@ -130,9 +158,12 @@ class Project(Geopackage):
         :rtype: dict
         """
         if self._dis is None:
+            self._dis = {}
             dis = self.query(DB.TBL_DSRCS.Q_INTFS)
             for tpl in dis.itertuples():
                 di = getattr(import_module(tpl.intf_module), tpl.intf_name)()
+                if self.n_processes is not None:
+                    di.n_processes = self.n_processes
                 di.project_directory = self.directory
                 di.project_ref = self
                 self._dis[tpl.did] = di
@@ -147,6 +178,23 @@ class Project(Geopackage):
         if self._flds is None:
             self._flds = self.query_gdf(DB.TBL_FIELDS.NAME)
         return self._flds
+    
+    @property
+    def n_processes(self) -> int:
+        """
+        Settable
+
+        Default value: half the number of ``multiprocessing.cpu_count()`` but at least 2
+
+        :return: number of processes which should be used to execute functions decorated with ``Interface.add_data_task``
+        :rtype: int
+        """
+        return self._nprcs
+
+    @n_processes.setter
+    def n_processes(self, value):
+        self._nprcs = value
+        self._pids = None
 
     def add_data_interface(self, data_intf:Interface) -> None:
         """
@@ -156,6 +204,10 @@ class Project(Geopackage):
         :param data_intf: the desired :class:`mef_agri.data.interface.Interface`-subclass
         :type data_intf: class or instance
         """
+        # intialize data interface if necessary and set project and save paths
+        if isclass(data_intf):
+            data_intf = data_intf()
+
         # check if data interface already has been added
         if data_intf.data_source_id in list(self.interfaces.keys()):
             return
@@ -167,9 +219,6 @@ class Project(Geopackage):
         if not os.path.exists(dpath):
             os.mkdir(dpath)
 
-        # intialize data interface if necessary and set project and save paths
-        if isclass(data_intf):
-            data_intf = data_intf()
         # add data interface to the dict containing all interfaces of the prj
         self._dis[data_intf.data_source_id] = data_intf
 
@@ -179,7 +228,7 @@ class Project(Geopackage):
             intf_name=data_intf.__class__.__name__,
             intf_module=data_intf.__class__.__module__
         ))
-        self.fetchall()
+        self._curs.fetchall()
 
     def add_data(self, tstart:date, tstop:date, dids=None, fields=None) -> None:
         """
@@ -208,17 +257,21 @@ class Project(Geopackage):
         # get data from interfaces
         for did in dids:
             di = self._dis[did]
-            dspath = os.path.join(self.DATA_DIRECTORY, di.data_source_id)
+            dspath = os.path.join(
+                self._pdir, self.DATA_DIRECTORY, di.data_source_id
+            )
             for field in fields:
                 print(did + ' -> ' + field)  # TODO think on how to change this to interact with GUI
 
                 # prepare paths
                 fpath = os.path.join(dspath, field)
-                if not os.path.exists(os.path.join(self._pp, fpath)):
-                    os.mkdir(os.path.join(self._pp, fpath))
+                if not os.path.exists(os.path.join(self._pdir, fpath)):
+                    os.mkdir(os.path.join(self._pdir, fpath))
 
                 # prepare geometry stuff
-                aoi = self.fields[DB.TBL_FIELDS.COL_FIELDNAME == field]
+                aoi = self.fields[
+                    self.fields[DB.TBL_FIELDS.COL_FIELDNAME] == field
+                ]
 
                 ret = self.query(
                     DB.TBL_DAVLBL.Q_DATERANGES.format(did=did, fld=field)
@@ -259,6 +312,8 @@ class Project(Geopackage):
                     except Exception as exc:
                         print(exc)
                         break
+
+                return
 
                 # check if saved data and epochs_new are consistent
                 # create sql-commands for .gpkg
