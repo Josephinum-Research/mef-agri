@@ -1,3 +1,4 @@
+import os
 import inspect
 
 class PixelUnits:
@@ -86,3 +87,24 @@ def get_decorated_methods(
         for part in sc.split(dec)[1:]:
             decos.append(part.split('def ')[1].split('(self')[0].strip())
     return decos
+
+
+def search_files(directory:str, fformat:str) -> list[str]:
+    if fformat[0] != '.':
+        fformat = '.' + fformat
+    lenff = len(fformat)
+    files = []
+    for cont in os.listdir(directory):
+        if len(cont) <= lenff:
+            continue
+        if cont[-lenff:] == fformat:
+            files.append(cont)
+    return files
+
+
+def search_file(directory:str, fformat:str, which:str='first') -> str | None:
+    files = search_files(directory, fformat)
+    if not files:
+        return None
+    if which == 'first':
+        return files[0]

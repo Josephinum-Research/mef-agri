@@ -40,6 +40,8 @@ class DB:
         INSERT_START += f'({COL_DID}, {COL_FIELD}, {COL_TSTART}, {COL_TSTOP}) '
         INSERT_START += 'VALUES '
         INSERT_TUPLE = '(\'{did}\', \'{fld}\', \'{tstart}\', \'{tstop}\')'
+        DEL_BY_DID_FLD = f'DELETE FROM {NAME} WHERE {COL_DID}=' + '\'{did}\' '
+        DEL_BY_DID_FLD += f'AND {COL_FIELD}=' + '\'{fld}\';'
     class TBL_DEPOCHS:
         NAME = 'data_epochs'
         COL_DID = 'did'
@@ -80,7 +82,9 @@ _tda.columns = {
     DB.TBL_DAVLBL.COL_TSTART: 'CHAR(12)',
     DB.TBL_DAVLBL.COL_TSTOP: 'CHAR(12)'
 }
-_tda.primary_key = [DB.TBL_DAVLBL.COL_DID, DB.TBL_DAVLBL.COL_FIELD]
+_tda.primary_key = [
+    DB.TBL_DAVLBL.COL_DID, DB.TBL_DAVLBL.COL_FIELD, DB.TBL_DAVLBL.COL_TSTART
+]
 _tda_tds_fk = ForeignKey()
 _tda_tds_fk.fkey_columns = [DB.TBL_DAVLBL.COL_DID]
 _tda_tds_fk.ftable = _tds.name
@@ -120,11 +124,16 @@ _tde.foreign_keys = [_tde_tds_fk, _tde_fld_fk]
 ################################################################################
 # PROJECT CLASS
 ################################################################################
-class Project(Geopackage):
+class ProjectData(Geopackage):
+    """
+    This class represents the data (together with its administration and 
+    structure) which is necessary to evaluate crop and soil models on 
+    available fields (see :func:`fields`).
+    Data interfaces :class:`mef_agri.data.interface.Interface`, have to be 
+    registered with :func:`add_data_interface`, such that they can be used 
+    in :func:`add_data` and :func:`get_data`.
+    """
     DATA_DIRECTORY = 'data'
-    WRN_ADDDATA = 'Error when adding data from data source `{dsrc}` '
-    WRN_ADDDATA += 'at field `{fld}` - no entry inserted in `data_available`'
-    WRN_ADDDATA += '-table for this case!'
 
     def __init__(self, project_dir, gpkg_name):
         ddir = os.path.join(project_dir, self.DATA_DIRECTORY)
@@ -228,7 +237,6 @@ class Project(Geopackage):
             intf_name=data_intf.__class__.__name__,
             intf_module=data_intf.__class__.__module__
         ))
-        self._curs.fetchall()
 
     def add_data(self, tstart:date, tstop:date, dids=None, fields=None) -> None:
         """
@@ -296,7 +304,7 @@ class Project(Geopackage):
                 # prepare timeranges for requesting dynamic data
                 trngs = []
                 for tpl in ret.itertuples():
-                    trng.append([
+                    trngs.append([
                         date.fromisoformat(tpl.tstart), 
                         date.fromisoformat(tpl.tstop)
                     ])
@@ -312,8 +320,6 @@ class Project(Geopackage):
                     except Exception as exc:
                         print(exc)
                         break
-
-                return
 
                 # check if saved data and epochs_new are consistent
                 # create sql-commands for .gpkg
@@ -364,7 +370,8 @@ class Project(Geopackage):
         folders in ``Project.DATA_DIRECTORY``.
         Available data is loaded by calling the classmethod 
         :func:`mef_agri.utils.raster.GeoRaster.from_directory` from the class 
-        specified with :func:`mef_agri.data.interface.Interface.georaster_class`.
+        specified with 
+        :func:`mef_agri.data.interface.Interface.georaster_class`.
 
         :param tstart: first epoch for which data should be provided
         :type tstart: datetime.date

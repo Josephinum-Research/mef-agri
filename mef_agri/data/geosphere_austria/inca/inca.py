@@ -1,3 +1,4 @@
+import os
 import datetime
 import numpy as np
 import geopandas as gpd
@@ -8,6 +9,10 @@ from ....utils.raster import GeoRaster
 
 
 class INCALABELS:
+    """
+    Labels of inca-data-types according to 
+    https://data.hub.geosphere.at/dataset/inca-v1-1h-1km
+    """
     PRECIPITATION = 'RR'
     TEMPERATURE = 'T2M'
     PRESSURE = 'P0'
@@ -94,6 +99,45 @@ class IncaGridDaily(GeoRaster):
     @property
     def epoch(self) -> date:
         return date.fromisoformat(self.metadata['epoch'])
+    
+    def _det_shape_from_points(self, arr:np.ndarray) -> int:
+        arr -= arr.min()
+        thresh = self.GRID_OBJRES - self.GRID_COORDS_MAXDEV
+        ret = 1
+        while arr.max() > thresh:
+            ix = np.where(arr > thresh)[0]
+            arr[ix] -= self.GRID_OBJRES
+            ret += 1
+        if arr.max() > self.GRID_COORDS_MAXDEV:
+            ret = 0
+        return ret
+    
+    @classmethod
+    def from_directory(cls, directory):
+        """
+        Overrides the classmethod from :class:`mef_agri.utils.raster.GeoRaster`.
+        It is required, that the last folder level equals the inca-data-key 
+        (see :class:`INCALABELS`) and the second last folder level equals the 
+        iso-formatted date.
+
+        :param directory: absolute path of directory where geotiff(s) and metadata (.json) is located
+        :type directory: str
+        :return: instance of :class:`IncaGridDaily`
+        :rtype: mef_agri.data.geosphere_austria.inca.inca.IncaGridDaily
+        """
+        remdp, incadtyp = os.path.split(directory)
+        estr = os.path.split(remdp)[1]
+        if not incadtyp in INCADATA.keys():
+            msg = 'IncaGridDaily.from_directory >>> Last folder level of '
+            msg += 'provided `directory` is not equal to an inca-data-label!'
+            raise ValueError(msg)
+        try:
+            epoch = date.fromisoformat(estr)
+        except Exception as exc:
+            raise ValueError('IncaGridDaily.from_directory >>> ' + str(exc))
+        rstr = cls(incadtyp, epoch **INCADATA[incadtyp])
+        rstr.load_geotiff(directory)
+        return rstr
     
     @classmethod
     def from_points(
@@ -191,14 +235,3 @@ class IncaGridDaily(GeoRaster):
             inca.reproject(target_crs)
         return inca
         
-    def _det_shape_from_points(self, arr:np.ndarray) -> int:
-        arr -= arr.min()
-        thresh = self.GRID_OBJRES - self.GRID_COORDS_MAXDEV
-        ret = 1
-        while arr.max() > thresh:
-            ix = np.where(arr > thresh)[0]
-            arr[ix] -= self.GRID_OBJRES
-            ret += 1
-        if arr.max() > self.GRID_COORDS_MAXDEV:
-            ret = 0
-        return ret

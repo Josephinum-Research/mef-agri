@@ -7,6 +7,7 @@ from importlib import import_module
 from shapely.geometry import Point
 from copy import deepcopy
 from pandas import concat
+from shutil import rmtree
 
 from ....utils.gis import bbox_from_gdf, EARTH_SPHERE_RADIUS
 from .inca import IncaGridDaily, INCADATA
@@ -219,13 +220,17 @@ class INCAInterface(Interface):
     
     @Interface.add_data_task(order=2, parallel=True)
     def process_chunks(self, **kwargs):
+        import numpy as np
+
         gdf = gpd.read_file(kwargs['gjson_file'])
         neps = None
         grclass = getattr(import_module(kwargs['grmodule']), kwargs['grclass'])
+        q = kwargs['queue']
 
         # prepare gdf such that there is only one row for each location
         data = {kwargs['geom_col']: [], kwargs['time_col']: []}
-        for loc in gdf[kwargs['loc_col']].drop_duplicates().values:
+        locs = gdf[kwargs['loc_col']].drop_duplicates().values
+        for loc in locs:
             gdfl = gdf[gdf[kwargs['loc_col']] == loc]
             data[kwargs['time_col']].append(
                 gdfl[kwargs['time_col']].values.tolist()
@@ -238,7 +243,7 @@ class INCAInterface(Interface):
                 if neps is None:
                     neps = len(di)
                 if not dcol in data.keys():
-                    data[dcol] = di
+                    data[dcol] = [di]
                 else:
                     data[dcol].append(di)
 
@@ -246,25 +251,25 @@ class INCAInterface(Interface):
         epochs = []
         for ix in np.arange(0, neps, 24):
             tsday = data[kwargs['time_col']][0][ix:ix + 24]
-            epoch = datetime.date.fromisoformat(
-                tsday[0].split('T')[0]
-            )
-            kwargs['queue'].put(
+            epoch = tsday[0].date()
+            tsday = [ts.isoformat() for ts in tsday]
+            q.put([
                 Worker.QFLAG_MESSAGE, 
                 'INCA-Interface: processing epoch {} in process {}'.format(
                     epoch.isoformat(), kwargs['pid']
                 )
-            )
+            ])
             epdir = os.path.join(kwargs['data_dir'], epoch.isoformat())
             if not os.path.exists(epdir):
                 os.mkdir(epdir)
             for dcol in kwargs['data_cols']:
-                datalocs = []
+                datalocs, tslocs = [], []
                 for dataloc in data[dcol]:
+                    tslocs.append(tsday)
                     datalocs.append(dataloc[ix:ix + 24])
                 dataday = {
                     kwargs['geom_col']: data[kwargs['geom_col']],
-                    kwargs['time_col']: tsday,
+                    kwargs['time_col']: tslocs,
                     dcol: datalocs
                 }
                 gr = grclass.from_points(
@@ -277,10 +282,15 @@ class INCAInterface(Interface):
                 gr.save_geotiff(ddir, compress=True, filename=dcol)
             epochs.append(epoch.isoformat())
         
-        kwargs['queue'].put(kwargs['pid'] + '_epochs', epochs)
+        q.put([kwargs['pid'] + '_epochs', epochs])
 
     @Interface.add_data_task(order=3)
     def finish_processing(self, **kwargs):
+        # remove temporary folder from first task
+        tempf = os.path.join(self.directory, 'temp')
+        if os.path.exists(tempf):
+            rmtree(tempf)
+        # return processed epochs
         epochs = []
         for pid in self.process_ids:
             epochs += kwargs[pid + '_epochs']
