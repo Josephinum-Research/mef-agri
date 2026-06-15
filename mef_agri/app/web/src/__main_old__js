@@ -190,6 +190,12 @@ class AddField extends Control {
 // websocket initialization
 const appConn = new AppConnection();
 
+// gis stuff
+useGeographic();
+const parser = new WMTSCapabilities();
+const fldSource = new VectorSource({wrapX: false});
+const fldLayer = new VectorLayer({source: fldSource});
+
 // feature selection stuff
 var selectedFeature = null;
 const selected = new Style({
@@ -215,11 +221,29 @@ function handleDeleteField(event) {
         fldSource.removeFeature(selectedFeature);
     }
 }
+const selectClick = new Select({style: selectStyle});
 document.addEventListener('keyup', handleDeleteField);
 
-// map creation
-const fMap = new FieldMap();
-fMap.addControl(new AddField());
-fMap.addInteraction(new Select({style: selectStyle}));
-fMap.initializeWMTS();
-fMap.run();
+// map preparation
+let map;
+fetch('https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml')
+    .then(function (response) {
+        return response.text();
+    })
+    .then(function (text) {
+        const result = parser.read(text);
+        const wmtsSettings = {
+            layer: 'bmaporthofoto30cm',
+            matrixSet: 'EPSG:4326',
+        };
+        const options = optionsFromCapabilities(result, wmtsSettings);
+        const mapLayer = new TileLayer({source: new WMTS(options)});
+        const mapSettings = {
+            target: 'map',
+            layers: [mapLayer, fldLayer],
+            view: new View({center: [15.1445, 48.1328], zoom:14}),
+            controls: defaultControls().extend([new AddField()])
+        }
+        map = new Map(mapSettings);
+        map.addInteraction(selectClick);
+    });

@@ -53,3 +53,7 @@ html, body {
 #field-name-input {
     grid-area: fninp;
 }
+
+#field-name-input::placeholder {
+    color: red;
+}

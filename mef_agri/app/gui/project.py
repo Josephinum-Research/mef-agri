@@ -1,10 +1,13 @@
+import geopandas as gpd
 from PyQt5.QtWidgets import (
     QWidget, QGridLayout, QFileDialog, QPushButton, QHBoxLayout, QFormLayout,
     QLabel, QLineEdit, QTableWidget, QDialog, QMessageBox
 )
+from shapely.geometry import Polygon
 
 from .map import MapView
-from ...data.project import ProjectData
+from .server import WebsocketServer, Messages
+from ...data.project import ProjectData, DB
 from ...utils.misc import search_file
 
 class _TEXT:
@@ -38,6 +41,12 @@ class _ErrorDialogs:
     @staticmethod
     def gpkg_exists_in_pdir():
         msg = 'A .gpkg already exists in the selected directory!'
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+    @staticmethod
+    def no_project_selected():
+        msg = 'No project has been created or selected yet!'
         dlg = _CustomErrorDialog(msg)
         dlg.exec()
 
@@ -108,6 +117,8 @@ class ProjectTab(QWidget):
         super().__init__(parent)
         # class internal variables
         self._pd:ProjectData = None
+        self._wss:WebsocketServer = parent.websocket_server
+        self._wss.register_handler(self._add_field, Messages.GotDrawnField)
 
         # initializing the layouts
         self._lm = QHBoxLayout()  # main layout
@@ -179,3 +190,17 @@ class ProjectTab(QWidget):
         
         self._pd = ProjectData(pdir, dbn)
         self._show_prjcont()
+
+    def _add_field(self, msg:Messages.GotDrawnField):
+        if self._pd is None:
+            _ErrorDialogs.no_project_selected()
+            return
+        
+        gdf = gpd.GeoDataFrame(
+            data={
+                DB.TBL_FIELDS.COL_FIELDNAME: [msg.field_name],
+                DB.TBL_FIELDS.COL_GEOM: [Polygon(shell=msg.points[0])]
+            },
+            crs=msg.epsg
+        )
+        self._pd.insert_from_gdf(DB.TBL_FIELDS.NAME, gdf)

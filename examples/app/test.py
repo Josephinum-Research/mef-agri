@@ -1,6 +1,7 @@
 import os
 from multiprocessing import cpu_count
 from datetime import date
+from inspect import isclass
 
 from mef_agri.data.project import ProjectData
 from mef_agri.data.geosphere_austria.inca.interface import INCAInterface
@@ -13,10 +14,16 @@ def init_prj(prj:ProjectData):
 
 
 if __name__ == '__main__':
+    from mef_agri.app.gui.server import Messages
+    for key, val in Messages.__dict__.items():
+        if isclass(val):
+            if hasattr(val, 'MTYPE'):
+                print(getattr(val, 'MTYPE'))
+
     develdir = os.path.join('/', 'home', 'aet', 'devel')
     wdir = os.path.join(develdir, 'projects', 'test_prj')
-    prj = ProjectData(wdir, 'fields.gpkg')
-    prj.n_processes = 8
-    print(prj.query('SELECT * FROM data_available;'))
-    print(prj.query('SELECT * FROM data_epochs;'))
+    #prj = ProjectData(wdir, 'fields.gpkg')
+    #prj.n_processes = 8
+    #print(prj.query('SELECT * FROM data_available;'))
+    #print(prj.query('SELECT * FROM data_epochs;'))
     #prj.add_data(date(2025, 5, 1), date(2025, 6, 1), fields='oberaschbach')

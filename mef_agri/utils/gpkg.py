@@ -787,9 +787,7 @@ class Geopackage(object):
             ret, geometry=SQLTable.GEOM_COL_NAME, crs=srs_id
         )
 
-    def insert_from_gdf(
-            self, table:str, gdf:gpd.GeoDataFrame, _gdf_checked:bool=False
-        ):
+    def insert_from_gdf(self, table:str, gdf:gpd.GeoDataFrame):
         """
         This method inserts data into the geopackage from the provided ``gdf``.
         ``gdf`` is screened for duplicates - within ``gdf`` and also with tuples 
@@ -808,16 +806,13 @@ class Geopackage(object):
         :type table: str
         :param gdf: GeoDataFrame which should be inserted into ``table``
         :type gdf: gpd.GeoDataFrame
-        :param _gdf_checked: for internal use if ``gdf`` has already been passed into ``Geopackage._check_none_values()``, defaults to False
-        :type _gdf_checked: bool, optional
         :raises ValueError: if provided ``gdf`` contains multiple geometry types
         :raises ValueError: if provided ``gdf`` does not represent a vector feature from the geopackage
         :raises ValueError: if provided ``gdf`` is not of the same geometry type as the specified ``table`` in the geopackage
         :raises ValueError: if provided ``gdf`` does not contain all columns from the unique-specification of the ``table`` in the geopackage
         """
         # check for None values if not already done within the class
-        if not _gdf_checked:
-            gdf = self._check_none_values(gdf)
+        gdf = self._check_none_values(gdf)
         # check if geometry type of ``gdf`` equals the one in the gpkg
         geoms = gdf.geom_type.drop_duplicates()
         if len(geoms) > 1:
@@ -833,9 +828,6 @@ class Geopackage(object):
             msg += 'corresponding table in the geopackage!'
             raise ValueError(msg)
         
-        # child classes can do a check on the gdf if necessary before processing
-        gdf = self.check_gdf_before_process(table, gdf)
-
         # check epsg/srs_id of provided ``gdf``
         srs_id = self.get_table_srs_id(table)
         if gdf.crs.to_epsg() != srs_id:
@@ -871,11 +863,6 @@ class Geopackage(object):
         elif not set(ucols).issubset(set(list(ngdf.columns))):
             raise ValueError(ERRORS.GDF_NO_UCOLS)
 
-        # get column sql data type definitions
-        cts = self.query(
-            'SELECT cname, dtype FROM definitions WHERE tname=\'{}\';'.format(table)
-        ).set_index('cname').to_dict(orient='index')
-
         # processing
         next_fid = len(egdf)
         ins = 'INSERT INTO {} ('.format(table)
@@ -902,7 +889,7 @@ class Geopackage(object):
                     wkt = DB.insert_text(to_wkt(getattr(tpl, col)))
                     vi = 'ST_GeomFromText({}, {})'.format(wkt, srs_id)
                 else:
-                    ct = cts[col]['dtype']
+                    ct = self.tables[table].columns[col]
                     if ct == 'TEXT':
                         vi = DB.insert_text(str(getattr(tpl, col)))
                     else:
