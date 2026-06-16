@@ -1,17 +1,8 @@
 import './style.css';
 import { AppConnection } from './conn.js';
 import { FieldMap } from './fmap.js';
-import Map from 'ol/Map.js';
-import WMTS, {optionsFromCapabilities} from 'ol/source/WMTS.js';
-import WMTSCapabilities from 'ol/format/WMTSCapabilities.js';
-import TileLayer from 'ol/layer/Tile.js';
-import View from 'ol/View.js'
-import { useGeographic } from 'ol/proj';
 import Control from 'ol/control/Control.js';
-import { defaults as defaultControls } from 'ol/control/defaults.js';
 import Draw from 'ol/interaction/Draw.js';
-import VectorSource from 'ol/source/Vector';
-import VectorLayer from 'ol/layer/Vector';
 import Select from 'ol/interaction/Select.js';
 import Style from 'ol/style/Style.js';
 import Fill from 'ol/style/Fill.js';
@@ -21,8 +12,10 @@ import Stroke from 'ol/style/Stroke.js';
 ////////////////////////////////////////////////////////////////////////////////
 ///   UI ELEMENTS TO ADD FIELDS
 ////////////////////////////////////////////////////////////////////////////////
-class AddField extends Control {
-    constructor() {
+class ManipulateFields extends Control {
+    constructor(fldSource) {
+        ////////////////////////////////////////////////////////////////////////
+        // UI-ELEMENTS ON MAP
         const addBtn = document.createElement('button');
         addBtn.id = 'add-field-button';
         addBtn.innerHTML = 'add field';
@@ -68,7 +61,6 @@ class AddField extends Control {
         cancelBtn.addEventListener('click', this.handleCancelField.bind(this));
         undoBtn.addEventListener('click', this.handleUndoPoint.bind(this));
         fnameInp.addEventListener('change', this.handleFnameInput.bind(this));
-        document.addEventListener('keyup', this.handleKeyUp.bind(this));
 
         this.uiElements = {
             addBtn: addBtn,
@@ -79,36 +71,45 @@ class AddField extends Control {
             fnameInp: fnameInp
         };
 
-        this.draw = new Draw({
-            source: fldSource,
+        ////////////////////////////////////////////////////////////////////////
+        // SELECT FIELDS
+        this.selectedField = null;
+        this.selectedStyle = new Style({
+            fill: new Fill({
+                color: 'rgba(255, 150, 150, 0.5)'
+            }),
+            stroke: new Stroke({
+                color: 'rgba(255, 0, 0, 1.0)'  // rgb+opacity
+            })
+        });
+        this.selectDef = new Select({style: this.selectMethod.bind(this)});
+
+        ////////////////////////////////////////////////////////////////////////
+        // DRAW FIELDS
+        this.fldSource = fldSource;
+        this.drawDef = new Draw({
+            source: this.fldSource,
             type: 'Polygon'
         });
-        this.draw.addEventListener('drawstart', this.handleDrawStart.bind(this));
-        this.draw.addEventListener('drawend', this.handleDrawEnd.bind(this));
+        this.drawDef.addEventListener(
+            'drawstart', this.handleDrawStart.bind(this)
+        );
+        this.drawDef.addEventListener(
+            'drawend', this.handleDrawEnd.bind(this)
+        );
 
+        ////////////////////////////////////////////////////////////////////////
+        // OTHER STUFF
+        document.addEventListener('keyup', this.handleKeysAddField.bind(this));
+        document.addEventListener('keyup', this.handleDeleteField.bind(this));
         this.addFieldActive = false;  // flag to indicate if a field is currently created
         this.interactionRemoved = false // flag to indicate if map interaction has already been canceled (i.e. when user tries to draw a second field-polygon)
         this.newFeature = null;  // last added feature
         this.fName = null;  // value of input for field name
     }
 
-    handleFnameInput(event) {
-        this.fName = event.currentTarget.value;
-    }
-
-    handleKeyUp(event) {
-        if (!this.addFieldActive) {
-            return;
-        }
-        if (event.code == 'Enter') {
-            this.handleFinishField();
-        } else if (event.code == 'Escape') {
-            this.handleCancelField();
-        } else if (event.code == 'Backspace') {
-            this.undoDrawnPoint();
-        }
-    }
-
+    ////////////////////////////////////////////////////////////////////////////
+    // HANDLERS FOR BUTTONS/KEYPRESSES
     handleAddField(event) {
         this.uiElements['fnameInp'].value = '';
         for (const [key, val] of Object.entries(this.uiElements)) {
@@ -120,26 +121,14 @@ class AddField extends Control {
         }
         this.addFieldActive = true;
         document.body.style.cursor = 'crosshair';
-        this.getMap().removeInteraction(selectClick);
-        selectedFeature = null;
-        this.getMap().addInteraction(this.draw);
+        this.getMap().removeInteraction(this.selectDef);
         this.interactionRemoved = false;
-    }
-
-    handleDrawStart(event) {
-        if (this.newFeature != null) {
-            document.body.style.cursor = 'auto';
-            this.getMap().removeInteraction(this.draw);
-            this.interactionRemoved = true;
-        }
-    }
-
-    handleDrawEnd(event) {
-        this.newFeature = event.feature;
+        this.selectedField = null;
+        this.getMap().addInteraction(this.drawDef);
     }
 
     handleUndoPoint(event) {
-        this.undoDrawnPoint();
+        this.drawDef.removeLastPoint();
     }
 
     handleFinishField(event) {
@@ -149,6 +138,7 @@ class AddField extends Control {
         }
         this.stopAddField();
         appConn.sendPolygon(this.newFeature, this.fName);
+        this.newFeature.set('fname', this.fName);
         this.fName = null;
         this.uiElements.fnameInp.placeholder = '';
         this.newFeature = null;
@@ -157,15 +147,27 @@ class AddField extends Control {
     handleCancelField(event) {
         this.stopAddField();
         if (this.newFeature != null) {
-            fldSource.removeFeature(this.newFeature);
+            this.fldSource.removeFeature(this.newFeature);
         }
         this.newFeature = null;
     }
 
-    undoDrawnPoint() {
-        this.draw.removeLastPoint();
+    ////////////////////////////////////////////////////////////////////////////
+    // HANDLERS FOR DRAW START/END
+    handleDrawStart(event) {
+        if (this.newFeature != null) {
+            document.body.style.cursor = 'auto';
+            this.getMap().removeInteraction(this.drawDef);
+            this.interactionRemoved = true;
+        }
     }
 
+    handleDrawEnd(event) {
+        this.newFeature = event.feature;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // COMMON METHOD WHEN DRAWING FIELDS HAS BEEN STOPPED
     stopAddField() {
         for (const [key, val] of Object.entries(this.uiElements)) {
             if (key == 'addBtn') {
@@ -177,49 +179,57 @@ class AddField extends Control {
         this.addFieldActive = false;
         if (!this.interactionRemoved) {
             document.body.style.cursor = 'auto';
-            this.getMap().removeInteraction(this.draw);
+            this.getMap().removeInteraction(this.drawDef);
         }
-        this.getMap().addInteraction(selectClick);
+        this.getMap().addInteraction(this.selectDef);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // KEY-PRESS HANDLERS
+    handleKeysAddField(event) {
+        if (!this.addFieldActive) {
+            return;
+        }
+        if (event.code == 'Enter') {
+            this.handleFinishField();
+        } else if (event.code == 'Escape') {
+            this.handleCancelField();
+        } else if (event.code == 'Backspace') {
+            this.handleUndoPoint();
+        }
+    }
+
+    handleDeleteField(event) {
+        if (this.selectedField != null) {
+            if (event.code == 'Delete') {
+                this.fldSource.removeFeature(this.selectedField);
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // REMAINING METHODS
+    selectMethod(feature) {
+        const color = feature.get('COLOR') || 'rgba(255, 150, 150, 0.5)';
+        this.selectedStyle.getFill().setColor(color);
+        this.selectedField = feature;
+        return this.selectedStyle
+    }
+
+    handleFnameInput(event) {
+        this.fName = event.currentTarget.value;
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ///   SCRIPT STARTS HERE
 ////////////////////////////////////////////////////////////////////////////////
-
 // websocket initialization
 const appConn = new AppConnection();
-
-// feature selection stuff
-var selectedFeature = null;
-const selected = new Style({
-    fill: new Fill({
-        color: 'rgba(255, 150, 150, 0.5)'
-    }),
-    stroke: new Stroke({
-        color: 'rgba(255, 0, 0, 1.0)'  // rgb+opacity
-    })
-});
-function selectStyle(feature) {
-    const color = feature.get('COLOR') || 'rgba(255, 150, 150, 0.5)';
-    selected.getFill().setColor(color);
-    selectedFeature = feature;
-    return selected
-}
-
-function handleDeleteField(event) {
-    if (selectedFeature == null) {
-        return;
-    }
-    if (event.code == 'Delete') {
-        fldSource.removeFeature(selectedFeature);
-    }
-}
-document.addEventListener('keyup', handleDeleteField);
-
 // map creation
-const fMap = new FieldMap();
-fMap.addControl(new AddField());
-fMap.addInteraction(new Select({style: selectStyle}));
+const fMap = new FieldMap(appConn);
 fMap.initializeWMTS();
+const mFields = new ManipulateFields(fMap.fldSource);
+fMap.addCustomControl(mFields);
+fMap.addCustomInteraction(mFields.selectDef);
 fMap.run();

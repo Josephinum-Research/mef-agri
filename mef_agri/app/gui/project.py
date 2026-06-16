@@ -165,6 +165,8 @@ class ProjectTab(QWidget):
             _TEXT.LBL_SELPRJ_PATH.format(pp=self._pd.directory)
         )
         self._tbl_flds.setHorizontalHeaderLabels(self._pd.fields.columns)
+        gdf = self._pd.query_gdf(DB.TBL_FIELDS.NAME)
+        # TODO
         for wi in self._fld_widgets:
             wi.show()
 

@@ -1,17 +1,46 @@
 import TileLayer from "ol/layer/Tile";
 import View from "ol/View";
+import Map from 'ol/Map.js';
+import WMTS, {optionsFromCapabilities} from 'ol/source/WMTS.js';
+import WMTSCapabilities from 'ol/format/WMTSCapabilities.js';
+import { useGeographic } from 'ol/proj';
+import { defaults as defaultControls } from 'ol/control/defaults.js';
+import VectorSource from 'ol/source/Vector';
+import VectorLayer from 'ol/layer/Vector';
+import Style from "ol/style/Style";
+import Text from "ol/style/Text";
+import Fill from "ol/style/Fill";
+import Stroke from "ol/style/Stroke";
 
 export class FieldMap {
-    constructor() {
-        useGeographic();
-        this.wmtsParser = new WMTSCapabilities();
-        this.wmtsUrl = 'https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml'
-        this.wmtsLayer = 'bmaporthofoto30cm';
+    static logMsgPrefix = '(fmap.js) FieldMap';
+
+    constructor(appConn) {
+        this.appConn = appConn;
+        ////////////////////////////////////////////////////////////////////////
+        // WMTS ortho-image
+        this.wmtsUrl = 'https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml';
+        this.wmtsLayerName = 'bmaporthofoto30cm';
         this.wmtsEpsg = 'EPSG:4326';
-        this.wmtsSource = null;
         this.wmtsLayer = null;
+
+        ////////////////////////////////////////////////////////////////////////
+        // FIELDS vector-layer
+        this.labelStyle = new Style({
+            text: new Text({
+                font: '13px Calibri,sans-serif',
+                fill: new Fill({color: '#000'}),
+                stroke: new Stroke({color: '#fff', width: 4})
+            })
+        })
         this.fldSource = new VectorSource({wrapX: false});
-        this.fldLayer = new VectorLayer({source: this.fldSource});
+        this.fldLayer = new VectorLayer({
+            source: this.fldSource,
+            style: this.fieldStyle.bind(this)
+        });
+
+        ////////////////////////////////////////////////////////////////////////
+        // MAP STUFF
         this.initPos = [15.1445, 48.1328];
         this.initZoom = 14;
         this.map = null;
@@ -21,30 +50,42 @@ export class FieldMap {
 
     initializeWMTS() {
         const wmtsSettings = {
-            layer: this.wmtsLayer,
+            layer: this.wmtsLayerName,
             matrixSet: this.wmtsEpsg
         };
-        fetch(this.imgUrl)
+        fetch(this.wmtsUrl)
             .then(function (response) {
                 return response.text();
             })
             .then(function (text) {
-                const result = this.wmtsParser.read(text);
+                const wmtsParser = new WMTSCapabilities();
+                const result = wmtsParser.read(text);
                 const options = optionsFromCapabilities(result, wmtsSettings);
-                this.wmtsSource = new WMTS(options);
-                this.wmtsLayer = new TileLayer({source: this.wmtsSource});
-            });
+                const wmtsSource = new WMTS(options);
+                this.wmtsLayer = new TileLayer({source: wmtsSource});
+                // logging
+                var msg = FieldMap.logMsgPrefix + '.initializeWMTS => ';
+                msg += 'Basemap ortho-image successfully initialized';
+                this.appConn.sendLogMessage(msg);
+            }.bind(this));
     }
 
-    addControl(control) {
+    addCustomControl(control) {
         this.controls.push(control);
     }
 
-    addInteraction(interaction) {
+    addCustomInteraction(interaction) {
         this.interactions.push(interaction);
     }
- 
-    run() {
+
+    fieldStyle(feature) {
+        const textDef = [`${feature.get('fname')}`, ''];
+        this.labelStyle.getText().setText(textDef);
+        return [this.labelStyle];
+    }
+
+    #createMap() {
+        useGeographic();
         const initView = new View({
             center: this.initPos,
             zoom: this.initZoom
@@ -55,8 +96,19 @@ export class FieldMap {
             view: initView,
             controls: defaultControls().extend(this.controls)
         });
-        for (interaction in this.interactions) {
+        for (const interaction of this.interactions) {
             this.map.addInteraction(interaction);
+        }
+    }
+ 
+    run() {
+        if (this.wmtsLayer != null) {
+            this.#createMap();
+            var msg = FieldMap.logMsgPrefix + '.run => ';
+            msg += 'map successfully created';
+            this.appConn.sendLogMessage(msg);
+        } else {
+            setTimeout(this.run.bind(this), 10);
         }
     }
 }

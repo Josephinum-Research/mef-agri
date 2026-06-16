@@ -1,13 +1,18 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTabWidget, QApplication
 
 from .project import ProjectTab
-from .server import WebsocketServer
+from .server import WebsocketServer, Messages
+
+
+def print_log_msgs(msg:Messages.GotLogMsg):
+    print(msg.log_message)
 
 
 class MainWindow(QWidget):
     def __init__(self, wss:WebsocketServer):
         super().__init__()
         self._wss:WebsocketServer = wss
+        self._wss.register_handler(print_log_msgs, Messages.GotLogMsg)
         
         self.setWindowTitle('MEF-Agri')
         self.showMaximized()

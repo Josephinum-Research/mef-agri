@@ -33,30 +33,42 @@ class GotFieldInfo{}
 export class AppConnection {
     constructor () {
         this.ws = new WebSocket('ws://127.0.0.1:33611/');
-        this.ws.addEventListener('open', this.handleOpenConn.bind(this));
-        this.ws.addEventListener('message', this.incomingMessage.bind(this));
-        
+        this.ws.addEventListener('message', this.#incomingMessage.bind(this));
+        this.ws.addEventListener('open', this.#connEstablished.bind(this));
         this.connOpen = false;
-        this.log_recv = [];
     }
 
-    handleOpenConn() {
+    #connEstablished() {
+        var msg = '(conn.js) AppConnection.connEstablished => ';
+        msg += 'Connection successfully established';
+        this.sendLogMessage(msg);
         this.connOpen = true;
     }
 
-    incomingMessage(event) {
-        this.log_recv.push(JSON.parse(event.data));
-    }
+    #incomingMessage(event) {}
 
     sendPolygon(feat, fname) {
-        var mdef = new SendDrawnField(
+        var msg = new SendDrawnField(
             feat.getGeometry().getCoordinates(), fname
         );
-        this.ws.send(JSON.stringify(mdef.message));
+        this.#send(msg);
     }
 
-    sendLogMessage(msg) {
-        mdef = new SendLogMsg(msg)
-        this.ws.send(JSON.stringify(mdef.message));
+    sendLogMessage(logmsg) {
+        var msg = new SendLogMsg(logmsg);
+        this.#send(msg);
+    }
+
+    #sendConnOpen(msg_str) {
+        if (this.connOpen) {
+            this.ws.send(msg_str);
+        } else {
+            setTimeout(this.#sendConnOpen.bind(this), 10, msg_str);
+        }
+    }
+
+    #send(msg) {
+        var msg_str = JSON.stringify(msg.message);
+        this.#sendConnOpen(msg_str);
     }
 }
