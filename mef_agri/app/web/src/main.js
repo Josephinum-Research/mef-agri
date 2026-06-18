@@ -1,5 +1,6 @@
 import './style.css';
 import { AppConnection } from './conn.js';
+import { Messages } from './msgs.js';
 import { FieldMap } from './fmap.js';
 import Control from 'ol/control/Control.js';
 import Draw from 'ol/interaction/Draw.js';
@@ -13,7 +14,7 @@ import Stroke from 'ol/style/Stroke.js';
 ///   UI ELEMENTS TO ADD FIELDS
 ////////////////////////////////////////////////////////////////////////////////
 class ManipulateFields extends Control {
-    constructor(fldSource) {
+    constructor(fldSource, appConn) {
         ////////////////////////////////////////////////////////////////////////
         // UI-ELEMENTS ON MAP
         const addBtn = document.createElement('button');
@@ -106,6 +107,7 @@ class ManipulateFields extends Control {
         this.interactionRemoved = false // flag to indicate if map interaction has already been canceled (i.e. when user tries to draw a second field-polygon)
         this.newFeature = null;  // last added feature
         this.fName = null;  // value of input for field name
+        this.appConn = appConn;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -137,8 +139,14 @@ class ManipulateFields extends Control {
             return;
         }
         this.stopAddField();
-        appConn.sendPolygon(this.newFeature, this.fName);
+        // set property of feature such that label is visible in map
         this.newFeature.set('fname', this.fName);
+        // send field-data to frontend
+        var msg = new Messages.SendDrawnField();
+        msg.fieldName = this.fName;
+        msg.cornerCoords = this.newFeature.getGeometry().getCoordinates();
+        this.appConn.send(msg);
+        // remainin stuff
         this.fName = null;
         this.uiElements.fnameInp.placeholder = '';
         this.newFeature = null;
@@ -229,7 +237,7 @@ const appConn = new AppConnection();
 // map creation
 const fMap = new FieldMap(appConn);
 fMap.initializeWMTS();
-const mFields = new ManipulateFields(fMap.fldSource);
+const mFields = new ManipulateFields(fMap.fldSource, appConn);
 fMap.addCustomControl(mFields);
 fMap.addCustomInteraction(mFields.selectDef);
 fMap.run();

@@ -14,7 +14,7 @@ def init_prj(prj:ProjectData):
 
 
 if __name__ == '__main__':
-    from mef_agri.app.gui.server import Messages
+    from mef_agri.app.gui.conn.server import Messages
     for key, val in Messages.__dict__.items():
         if isclass(val):
             if hasattr(val, 'MTYPE'):

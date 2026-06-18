@@ -28,6 +28,7 @@ class DB:
         NAME = 'fields'
         COL_FIELDNAME = 'field_name'
         COL_GEOM = SQLTable.GEOM_COL_NAME
+        COL_FID = SQLTable.ID_COL_NAME
     class TBL_DAVLBL:
         NAME = 'data_available'
         COL_DID = 'did'

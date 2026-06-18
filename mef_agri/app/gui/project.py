@@ -1,12 +1,14 @@
 import geopandas as gpd
 from PyQt5.QtWidgets import (
     QWidget, QGridLayout, QFileDialog, QPushButton, QHBoxLayout, QFormLayout,
-    QLabel, QLineEdit, QTableWidget, QDialog, QMessageBox
+    QLabel, QLineEdit, QTableWidget, QTableWidgetItem, QDialog, QMessageBox
 )
 from shapely.geometry import Polygon
+from shapely import to_wkt
 
 from .map import MapView
-from .server import WebsocketServer, Messages
+from .conn.server import WebsocketServer
+from .conn.msgs import Messages
 from ...data.project import ProjectData, DB
 from ...utils.misc import search_file
 
@@ -143,18 +145,6 @@ class ProjectTab(QWidget):
         self._lbl_selprj = QLabel(_TEXT.LBL_SELPRJ_NONE, self)
         self._ll.addWidget(self._lbl_selprj, 2, 0, 1, 5)
 
-        # table view of fields
-        self._tbl_flds = QTableWidget(self)
-        self._tbl_flds.setColumnCount(3)
-        self._fld_widgets = [
-            self._tbl_flds
-        ]
-        self._ll.addWidget(self._tbl_flds, 4, 0, 1, 5)
-
-        # hide selected widgets initially
-        for wi in self._fld_widgets:
-            wi.hide()
-
         # add remaining stuff
         self._lm.addLayout(self._ll, 1)
         self._lm.addWidget(MapView(self), 1)
@@ -164,11 +154,17 @@ class ProjectTab(QWidget):
         self._lbl_selprj.setText(
             _TEXT.LBL_SELPRJ_PATH.format(pp=self._pd.directory)
         )
-        self._tbl_flds.setHorizontalHeaderLabels(self._pd.fields.columns)
-        gdf = self._pd.query_gdf(DB.TBL_FIELDS.NAME)
-        # TODO
-        for wi in self._fld_widgets:
-            wi.show()
+        fldInfo = Messages.SendFields()
+        fldInfo.field_names = self._pd.fields[
+            DB.TBL_FIELDS.COL_FIELDNAME
+        ].values.tolist()
+        coords = []
+        fwgs84 = self._pd.fields.to_crs(epsg=4326, inplace=False)
+        for fname in fldInfo.field_names:
+            gdf = fwgs84[fwgs84[DB.TBL_FIELDS.COL_FIELDNAME] == fname]
+            coords.append(gdf.geometry.get_coordinates().values.tolist())
+        fldInfo.coordinates = coords
+        self._wss.broadcast_messages(fldInfo)
 
     def _new_project(self):
         dlg = NewProject()

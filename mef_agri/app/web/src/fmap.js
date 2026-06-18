@@ -11,6 +11,25 @@ import Style from "ol/style/Style";
 import Text from "ol/style/Text";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
+import { Polygon } from "ol/geom";
+import Feature from "ol/Feature";
+import { Messages } from "./msgs";
+
+
+export class FieldLayerStyle {
+    constructor() {
+        this.strokeColor = 'rgb(0, 255, 150)';
+        this.strokeWidth = 4;
+        this.fillColor = 'rgba(0, 255, 150, 0.25)';
+        this.textAlign = 'center';
+        this.textOverflow = true;
+        this.textFont = '16px Calibri,sans-serif';
+        this.textFillColor = 'rgb(0, 0, 0)';
+        this.textStrokeColor = 'rgb(255, 255, 255)';
+        this.textStrokeWidth = 2;
+    }
+}
+
 
 export class FieldMap {
     static logMsgPrefix = '(fmap.js) FieldMap';
@@ -26,17 +45,11 @@ export class FieldMap {
 
         ////////////////////////////////////////////////////////////////////////
         // FIELDS vector-layer
-        this.labelStyle = new Style({
-            text: new Text({
-                font: '13px Calibri,sans-serif',
-                fill: new Fill({color: '#000'}),
-                stroke: new Stroke({color: '#fff', width: 4})
-            })
-        })
+        this.fldStyleOptions = new FieldLayerStyle();
         this.fldSource = new VectorSource({wrapX: false});
         this.fldLayer = new VectorLayer({
             source: this.fldSource,
-            style: this.fieldStyle.bind(this)
+            style: this.#getFieldStyle.bind(this)
         });
 
         ////////////////////////////////////////////////////////////////////////
@@ -64,9 +77,11 @@ export class FieldMap {
                 const wmtsSource = new WMTS(options);
                 this.wmtsLayer = new TileLayer({source: wmtsSource});
                 // logging
-                var msg = FieldMap.logMsgPrefix + '.initializeWMTS => ';
-                msg += 'Basemap ortho-image successfully initialized';
-                this.appConn.sendLogMessage(msg);
+                var logmsg = FieldMap.logMsgPrefix + '.initializeWMTS => ';
+                logmsg += 'Basemap ortho-image successfully initialized';
+                var msg = new Messages.SendLogMsg();
+                msg.logMsg = logmsg;
+                this.appConn.send(msg);
             }.bind(this));
     }
 
@@ -78,10 +93,37 @@ export class FieldMap {
         this.interactions.push(interaction);
     }
 
-    fieldStyle(feature) {
-        const textDef = [`${feature.get('fname')}`, ''];
-        this.labelStyle.getText().setText(textDef);
-        return [this.labelStyle];
+    addFields(msg) {
+        for (let i = 0; i < msg.fieldNames.length; i++) {
+            var feat = new Feature(new Polygon(msg.coordList[i]));
+            feat.set('fname', msg.fieldNames[i]);
+            this.fldSource.addFeature(feat);
+        }
+    }
+
+    #getFieldStyle(feature) {
+        return new Style({
+            stroke: new Stroke({
+                color: this.fldStyleOptions.strokeColor,
+                width: this.fldStyleOptions.strokeWidth
+            }),
+            fill: new Fill({
+                color: this.fldStyleOptions.fillColor
+            }),
+            text: new Text({
+                textAlign: this.fldStyleOptions.textAlign,
+                overflow: this.fldStyleOptions.textOverflow,
+                font: this.fldStyleOptions.textFont,
+                stroke: new Stroke({
+                    color: this.fldStyleOptions.textStrokeColor,
+                    width: this.fldStyleOptions.textStrokeWidth
+                }),
+                fill: new Fill({
+                    color: this.fldStyleOptions.textFillColor
+                }),
+                text: feature.get('fname')
+            })
+        });
     }
 
     #createMap() {
@@ -104,9 +146,11 @@ export class FieldMap {
     run() {
         if (this.wmtsLayer != null) {
             this.#createMap();
-            var msg = FieldMap.logMsgPrefix + '.run => ';
-            msg += 'map successfully created';
-            this.appConn.sendLogMessage(msg);
+            var logmsg = FieldMap.logMsgPrefix + '.run => ';
+            logmsg += 'map successfully created';
+            var msg = new Messages.SendLogMsg();
+            msg.logMsg = logmsg;
+            this.appConn.send(msg);
         } else {
             setTimeout(this.run.bind(this), 10);
         }

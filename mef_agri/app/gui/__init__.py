@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTabWidget, QApplication
 
 from .project import ProjectTab
-from .server import WebsocketServer, Messages
+from .conn.server import WebsocketServer, Messages
 
 
 def print_log_msgs(msg:Messages.GotLogMsg):
