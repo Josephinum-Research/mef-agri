@@ -3,7 +3,6 @@ import View from "ol/View";
 import Map from 'ol/Map.js';
 import WMTS, {optionsFromCapabilities} from 'ol/source/WMTS.js';
 import WMTSCapabilities from 'ol/format/WMTSCapabilities.js';
-import { useGeographic } from 'ol/proj';
 import { defaults as defaultControls } from 'ol/control/defaults.js';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
@@ -14,6 +13,8 @@ import Stroke from "ol/style/Stroke";
 import { Polygon } from "ol/geom";
 import Feature from "ol/Feature";
 import { Messages } from "./msgs";
+import { fromLonLat } from "ol/proj";
+import { OSM } from "ol/source";
 
 
 export class FieldLayerStyle {
@@ -37,10 +38,12 @@ export class FieldMap {
     constructor(appConn) {
         this.appConn = appConn;
         ////////////////////////////////////////////////////////////////////////
+        this.osmLayer = new TileLayer({source: new OSM()});
+
+        ////////////////////////////////////////////////////////////////////////
         // WMTS ortho-image
         this.wmtsUrl = 'https://mapsneu.wien.gv.at/basemapneu/1.0.0/WMTSCapabilities.xml';
         this.wmtsLayerName = 'bmaporthofoto30cm';
-        this.wmtsEpsg = 'EPSG:4326';
         this.wmtsLayer = null;
 
         ////////////////////////////////////////////////////////////////////////
@@ -54,9 +57,10 @@ export class FieldMap {
 
         ////////////////////////////////////////////////////////////////////////
         // MAP STUFF
-        this.initPos = [15.1445, 48.1328];
+        this.initPos = fromLonLat([15.1445, 48.1328]);
         this.initZoom = 14;
         this.map = null;
+        this.mapView = null;
         this.controls = [];
         this.interactions = [];
     }
@@ -64,7 +68,6 @@ export class FieldMap {
     initializeWMTS() {
         const wmtsSettings = {
             layer: this.wmtsLayerName,
-            matrixSet: this.wmtsEpsg
         };
         fetch(this.wmtsUrl)
             .then(function (response) {
@@ -93,14 +96,6 @@ export class FieldMap {
         this.interactions.push(interaction);
     }
 
-    addFields(msg) {
-        for (let i = 0; i < msg.fieldNames.length; i++) {
-            var feat = new Feature(new Polygon(msg.coordList[i]));
-            feat.set('fname', msg.fieldNames[i]);
-            this.fldSource.addFeature(feat);
-        }
-    }
-
     #getFieldStyle(feature) {
         return new Style({
             stroke: new Stroke({
@@ -127,15 +122,15 @@ export class FieldMap {
     }
 
     #createMap() {
-        useGeographic();
-        const initView = new View({
+        this.mapView = new View({
             center: this.initPos,
             zoom: this.initZoom
         })
         this.map = new Map({
             target: 'map',
-            layers: [this.wmtsLayer, this.fldLayer],
-            view: initView,
+            //projection: new Projection('EPSG:' + this.mapEpsg.toString()),
+            layers: [this.osmLayer, this.wmtsLayer, this.fldLayer],
+            view: this.mapView,
             controls: defaultControls().extend(this.controls)
         });
         for (const interaction of this.interactions) {
@@ -154,5 +149,18 @@ export class FieldMap {
         } else {
             setTimeout(this.run.bind(this), 10);
         }
+    }
+
+    static addFields(fieldMap, msg) {
+        fieldMap.fldSource.clear(true);
+        var features = [];
+        for (let i = 0; i < msg.fieldNames.length; i++) {
+            var corners = msg.cornerCoords[i];
+            corners.push(corners[0]);
+            var feat = new Feature(new Polygon([corners]));
+            feat.set('fname', msg.fieldNames[i]);
+            features.push(feat);
+        }
+        fieldMap.fldSource.addFeatures(features);
     }
 }

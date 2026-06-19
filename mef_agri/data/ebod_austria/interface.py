@@ -8,149 +8,161 @@ from copy import deepcopy
 
 from ...utils.gis import latlon2tilexy, tilecoords2latlon, bbox_from_gdf
 from .ebod import EBOD_PROPERTIES, EbodRaster
-from ..interface import DataInterface
+from ..interface import Interface
 
 
-class EbodInterface(DataInterface):
-    DATA_SOURCE_ID = 'soil_ebod'
-    URL_META = 'https://bodenkarte.at/data/bodenkarte-tiles.json'
-    URL_TILES = 'https://bodenkarte.at/data/bodenkarte-tiles/'
-    META_MINZOOM = 'minzoom'
-    META_MAXZOOM = 'maxzoom'
-    ID_EBOD = 'ebod'
-    TILES_FILENAME = 'tiles'
+class EbodInterface(Interface):
+    REQU_DATA_V1 = {
+        'url_meta': 'https://bodenkarte.at/data/bodenkarte-tiles.json',
+        'url_tiles': 'https://bodenkarte.at/data/bodenkarte-tiles/',
+        'key_meta_maxzoom': 'maxzoom',
+        'key_bf': 'bodenform_mpoly',
+        'key_ext': 'extent',
+        'key_feat': 'features',
+        'key_geom': 'geometry',
+        'key_coords': 'coordinates',
+        'key_type': 'type',
+        'key_props': 'properties'
+    }
 
+    def __init__(self):
+        super().__init__()
 
-    def __init__(
-            self, obj_res:float=10.0, zoom:int=15, 
-            exclude_ebod_properties:list[str]=None
-        ) -> None:
+        # properties from parent class
+        self.data_source_id = 'soil_ebod'
+        self.description = """
+            Interface to get data from https://bodenkarte.at
         """
-        Interface to download soil information from 
-        https://bodenkarte.at
+        self.georaster_class = EbodRaster
+        self.static_data = True
+
+        # private attributes
+        self._objres:float = 10.
+        self._excl:list[str] = ['bofo_id', 'kurzbezeichnung', 'gruenlandwert']
+        self._zoom = 15
+        self._rs = self.REQU_DATA_V1
+        self._maxzoom = None
+        self._ebodmd = None
+        self._requgdf = None
+        self._requrstr = None
+        self._aoirstr = None
+
+    ############################################################################
+    # PROPERTIES
+    @property
+    def request_specifications(self) -> dict:
         """
-        super().__init__(obj_res=obj_res)
+        Settable
 
-        self._zoom:int = zoom
-        if exclude_ebod_properties is None:
-            self._excl:list[str] = [
-                'bofo_id', 'kurzbezeichnung', 'gruenlandwert'
-            ]
-        else:
-            self._excl:list[str] = exclude_ebod_properties
-
-        self._meta:dict = {}
-        self._min_zoom:int = 6  # value read from URL_META on 2023-09-07
-        self._max_zoom:int = 15  # value read from URL_META on 2023-09-07
-        try:
-            self._meta = requests.get(self.URL_META).json()
-            self._min_zoom = int(self._meta[self.META_MINZOOM])
-            self._max_zoom = int(self._meta[self.META_MAXZOOM])
-        except:
-            pass
+        :return: Specifications to perform request and extract necessary data from request-response, see ``REQU_DATA_V1`` in :class:`EbodInterface`
+        :rtype: dict
+        """
+        return self._rs
+    
+    @request_specifications.setter
+    def request_specifications(self, value):
+        self._rs = value
 
     @property
     def object_resolution(self) -> float:
-        return self._ores
+        """
+        Settable
+
+        :return: object resolution which is applied when rasterizing the vector tiles, defaults to ``10.`` [m]
+        :rtype: float
+        """
+        return self._objres
     
     @object_resolution.setter
-    def object_resolution(self, val):
-        if isinstance(val, float):
-            self._ores = val
-        elif isinstance(val, int):
-            self._ores = float(val)
-        else:
-            msg = '`object_resolution` has to be provided as `int` or `float`!'
-            raise ValueError(msg)
-        
+    def object_resolution(self, value):
+        self._objres = value
+
     @property
-    def zoom_level(self) -> int:
+    def apply_zoom(self) -> int:
+        """
+        Setter
+
+        Zoom level which should be used to request vector tiles and when 
+        rasterizing them.
+        This value will only be applied if the metadata-request to ebod failes 
+        or `maxzoom` is not available in the requested metadata.
+
+        :return: zoom-level, defaults to ``15``
+        :rtype: int
+        """
         return self._zoom
     
-    @zoom_level.setter
-    def zoom_level(self, val):
-        if isinstance(val, float):
-            self._zoom = int(val)
-        elif isinstance(val, int):
-            self._zoom = val
-        else:
-            msg = '`zoom_level` has to be provided as `int` or `float`!'
-            raise ValueError(msg)
-        
+    @apply_zoom.setter
+    def apply_zoom(self, value):
+        self._zoom = value
+
     @property
-    def exclude_ebod_properties(self) -> list[str]:
+    def exclude_properties(self) -> list[str]:
+        """
+        Setter
+
+        possible values: keys of ``mef_agri.data.ebod_austria.ebod.EBOD_PROPERTIES``
+
+        :return: ebod-properties which should not be used for rasterization, defaults to ``['bofo_id', 'kurzbezeichnung', 'gruenlandwert']``
+        :rtype: list[str]
+        """
         return self._excl
     
-    @exclude_ebod_properties.setter
-    def exclude_ebod_properties(self, val):
-        if isinstance(val, list):
-            notstr = False
-            for entry in val:
-                if isinstance(entry, str) and entry in EBOD_PROPERTIES.keys():
-                    continue
-                notstr = True
-            if notstr:
-                msg = 'Entries of provided list are not strings or not part of '
-                msg += 'available ebod properties!'
-                raise ValueError(msg)
-            self._excl = val
-        else:
-            msg = '`exclude_ebod_properties` has to be a list of available '
-            msg += 'ebod properties (i.e. strings)!'
-            raise ValueError(msg)
+    @exclude_properties.setter
+    def exclude_properties(self, value):
+        self._excl = value
 
-    def add_prj_data(self, aoi, tstart, tstop):
+    @property
+    def ebod_metadata(self) -> dict:
         """
-        Method from parent-class which is called within 
-        :func:`mef_agri.data.project.Project.add_data` to save ebod data
-        in the project folder structure.
+        :return: requested metadata
+        :rtype: dict
+        """
+        return self._ebodmd
+    
+    @property
+    def ebod_data_gdf(self) -> gpd.GeoDataFrame:
+        """
+        Columns of the GeoDataFrame correspond to the ebod-properties specified 
+        in ``mef_agri.data.ebod_austria.ebod.EBOD_DATA``.
+        The rows correspond to the vector features of all tiles which intersect 
+        with the provided area-of-interest.
 
-        :param aoi: area of interest for which data is requested
-        :type aoi: geopandas.GeoDataFrame
-        :param tstart: not used for ebod data
-        :type tstart: datetime.date
-        :param tstop: not used for ebod data
-        :type tstop: datetime.date
+        :return: requested ebod-data
+        :rtype: geopandas.GeoDataFrame
         """
-        tiles = self.get_tile_data(aoi, zoom=self.zoom_level)
-        ebod = EbodRaster.from_vector_tile_geodataframe(
-            tiles, aoi,
-            self.object_resolution,
-            self.exclude_ebod_properties
-        )
-        self.save_ebod_raster(ebod, overwrite=False)
-        return tstart, tstop
+        return self._requgdf
+    
+    @property
+    def ebod_data_raster(self) -> EbodRaster:
+        """
+        :return: rasterized :func:`ebod_data_gdf` - the ebod-properties are the layers of the raster
+        :rtype: EbodRaster
+        """
+        return self._requrstr
+    
+    ############################################################################
+    # METHODS
+    def request_metadata(self):
+        """
+        Request metadata from ebod.
+        """
+        try:
+            self._ebodmd = requests.get(self._rs['url_meta']).json()
+            self._maxzoom = int(self._ebodmd[self._rs['key_meta_maxzoom']])
+        except:
+            self._maxzoom = self.apply_zoom
 
-    def get_prj_data(self, epoch):
+    def request_data(self, aoi:gpd.GeoDataFrame, zoom:int=None) -> None:
         """
-        Method from parent-class which is called within
-        `mef_agri.data.project.Project.get_data` to load ebod data from 
-        the project folder structure
-
-        :param epoch: not used for ebod data
-        :type epoch: datetime.date
-        :return: dictionary containing raster representation of ebod data
-        :rtype: dict[GeoRaster]
-        """
-        soil = EbodRaster()
-        fpath = os.path.join(self.project_directory, self.save_directory)
-        soil.load_geotiff(fpath)
-        return {'ebod-raster': soil}
-
-    def get_tile_data(self, aoi:gpd.GeoDataFrame, zoom:int) -> gpd.GeoDataFrame:
-        """
-        Download data as vector tiles from ebod. The result will be provided as 
-        `geopandas.GeoDataFrame` in the crs defined in `aoi`.
+        Download data as vector tiles from ebod. 
         Vector tiles from ebod are defined according to 
-        https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/
-        and will be converted or collapsed into a GeoDataFrame.
+        https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/.
 
-        :param aoi: defining the area of interest
+        :param aoi: defining the area of interest and crs of resulting ebod data
         :type aoi: gpd.GeoDataFrame
-        :param zoom: zoom level
-        :type zoom: int
-        :return: GeoDataFrame information from vector tiles
-        :rtype: gpd.GeoDataFrame
+        :param zoom: overrides :func:`apply_zoom` or maxzoom from :func:`ebod_metadata` if provided - defaults to None
+        :type zoom: int, optional
         """
         def append_properties(feat, data, coords, tcs, zoom, extent):
             data['geometry'].append(self._plgn2wgs84(
@@ -158,11 +170,15 @@ class EbodInterface(DataInterface):
             ))
             for key, val in EBOD_PROPERTIES.items():
                 insval = np.nan
-                if key in feat['properties'].keys():
-                    insval = feat['properties'][key]
+                if key in feat[self._rs['key_props']].keys():
+                    insval = feat[self._rs['key_props']][key]
                 data[val].append(insval)
             return data
+        
+        if zoom is None:
+            zoom = self._maxzoom
 
+        self._aoirstr = deepcopy(aoi)
         gdfr = deepcopy(aoi)
         tcrs = aoi.crs.to_epsg()
         if not tcrs == 4326:
@@ -177,17 +193,19 @@ class EbodInterface(DataInterface):
         for txi in np.arange(tx1 - 1, tx2 + 2):
             for tyi in np.arange(ty1 - 1, ty2 + 2):
                 vdata = self._request(txi, tyi, zoom)
-                extent = vdata['bodenform_mpoly']['extent']
-                for feat in vdata['bodenform_mpoly']['features']:
-                    geom = feat['geometry']['coordinates']
-                    if feat['geometry']['type'] == 'Polygon':
+                bf = vdata[self._rs['key_bf']]
+                extent = bf[self._rs['key_ext']]
+                for feat in bf[self._rs['key_feat']]:
+                    geom = feat[self._rs['key_geom']]
+                    coords = geom[self._rs['key_coords']]
+                    if geom[self._rs['key_type']] == 'Polygon':
                         data = append_properties(
-                            feat, data, geom[0], [txi, tyi], zoom, extent
+                            feat, data, coords[0], [txi, tyi], zoom, extent
                         )
-                    elif feat['geometry']['type'] == 'MultiPolygon':
-                        for coords in geom:
+                    elif geom[self._rs['key_type']] == 'MultiPolygon':
+                        for coord in coords:
                             data = append_properties(
-                                feat, data, coords[0], [txi, tyi], zoom, extent
+                                feat, data, coord[0], [txi, tyi], zoom, extent
                             )
                     else:
                         # other geometry type which is not considered here until now
@@ -196,22 +214,26 @@ class EbodInterface(DataInterface):
         gdf_tiles = gpd.GeoDataFrame(data, crs=4326)
         if tcrs != 4326:
             gdf_tiles.to_crs(tcrs, inplace=True)
+        self._requgdf = gdf_tiles
 
-        return gdf_tiles
-    
-    def save_tile_data(self, gdf:gpd.GeoDataFrame) -> None:
-        self._check_dirs()
-        spath = os.path.join(
-            self.project_directory, self.save_directory, 
-            self.ID_EBOD + '.geojson'
+    def rasterize(self, objres:float=None) -> None:
+        """
+        Rasterize :func:`ebod_data_gdf`
+
+        :param objres: overrides :func:`object_resolution` if provided, defaults to None
+        :type objres: float, optional
+        """
+        self._requrstr = EbodRaster.from_vector_tile_geodataframe(
+            self.ebod_data_gdf, self._aoirstr, objres, self.exclude_properties
         )
-        gdf.to_file(spath, driver='GeoJSON')
 
-    def save_ebod_raster(self, ebodr:EbodRaster, overwrite:bool=False) -> None:
-        self._check_dirs()
-        ebodr.save_geotiff(
-            os.path.join(self.project_directory, self.save_directory), 
-            overwrite=overwrite
+    @Interface.add_data_task
+    def prj_add_ebod(self):
+        self.request_metadata()
+        self.request_data(self.aoi, self._maxzoom)
+        self.rasterize()
+        self.ebod_data_raster.save_geotiff(
+            self.directory, overwrite=True, compress=False
         )
 
     def _request(self, tx:int, ty:int, zoom:int) -> dict:
@@ -221,7 +243,6 @@ class EbodInterface(DataInterface):
         vdata['tile_coordinates'] = [tx, ty]
         vdata['zoom'] = zoom
         return vdata
-        
     
     @staticmethod
     def _plgn2wgs84(

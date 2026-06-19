@@ -5,7 +5,6 @@ import geopandas as gpd
 import numpy as np
 from importlib import import_module
 from shapely.geometry import Point
-from copy import deepcopy
 from pandas import concat
 from shutil import rmtree
 
@@ -59,7 +58,7 @@ class INCAInterface(Interface):
         """
         Settable
 
-        :return: Specifications to perform request and extract necessary data from request-response
+        :return: Specifications to perform request and extract necessary data from request-response, see ``REQU_DATA_V1`` of :class:`INCAInterface`
         :rtype: dict
         """
         return self._rs

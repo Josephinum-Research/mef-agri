@@ -2,7 +2,6 @@ import json
 from inspect import isclass
 from threading import Thread
 from websockets.sync.server import Server, serve
-from websockets import broadcast
 
 from .msgs import Messages, MsgBaseClass
 
@@ -15,6 +14,7 @@ class Errors:
 class WebsocketServer(Thread):
     def __init__(self, host='localhost', port=33611):
         super().__init__(daemon=True)
+        serve
         self._srvr:Server = serve(self.incoming_messages, host, port)
         self._clients = set()
         self.host = host
@@ -51,6 +51,12 @@ class WebsocketServer(Thread):
         self._hs[msg_class.MTYPE] = {'handler': handler, 'msg_class': msg_class}
 
     def incoming_messages(self, ws):
+        """
+        Handler function for incoming messages
+
+        :param ws: websockets connection object, which holds information on client and messages
+        :type ws: ServerConnection
+        """
         self._clients.add(ws)
         for rmsg in ws:
             msg = json.loads(rmsg)
@@ -70,9 +76,16 @@ class WebsocketServer(Thread):
                 raise Errors.UnknownMsgType(
                     errmsg.format(msg[Messages.KEY_MTYPE])
                 )
+            
+    def send_messages(self, msgs:list[MsgBaseClass] | MsgBaseClass):
+        """
+        Send message via websocket to the web-components
 
-    def broadcast_messages(self, msgs:list[MsgBaseClass] | MsgBaseClass):
+        :param msgs: child class ``mef_agri.app.gui.conn.msgs.MsgBaseClass``
+        :type msgs: list[mef_agri.app.gui.conn.msgs.MsgBaseClass] | mef_agri.app.gui.conn.msgs.MsgBaseClass
+        """
         if not isinstance(msgs, list):
             msgs = [msgs,]
-        for msg in msgs:
-            broadcast(self._clients, json.dumps(msg.message))
+        for ws in self._clients:
+            for msg in msgs:
+                ws.send(msg.message)

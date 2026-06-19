@@ -9,7 +9,7 @@ from multiprocessing import cpu_count
 
 from ..utils.gpkg import Geopackage, SQLTable, ForeignKey, GeometryType
 from .utils import (
-    daterange_consider_existing_dates, merge_dateranges, timerange_from_epochs
+    daterange_consider_existing_dates, merge_dateranges
 )
 from .interface import Interface
 
@@ -29,6 +29,8 @@ class DB:
         COL_FIELDNAME = 'field_name'
         COL_GEOM = SQLTable.GEOM_COL_NAME
         COL_FID = SQLTable.ID_COL_NAME
+        DEL_BY_FIELDNAME = f'DELETE FROM {NAME} WHERE {COL_FIELDNAME}='
+        DEL_BY_FIELDNAME += '\'{fld}\';'
     class TBL_DAVLBL:
         NAME = 'data_available'
         COL_DID = 'did'

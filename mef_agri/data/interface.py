@@ -43,7 +43,11 @@ class Interface(object):
     be passed to the next task in the specified order as ``kwargs``.
     The last task must return a list with epochs (``datetime.date`` or 
     iso-formatted strings ``YYYY-MM-dd``) for which data has been requested and 
-    saved
+    saved (Note: if :func:`static_data` is ``True`` nothing has to be returned).
+    Through the decorator they are only appended to the evaluation order at the 
+    time of initialization.
+    Decorated methods can be used like other normal methods after 
+    initialization - if ``parallel`` is not set to ``True`` in the decorator!
     
     When setting ``parallel`` to ``True`` in this decorator, the corresponding 
     task will be split into sub-processess.
@@ -150,7 +154,11 @@ class Interface(object):
 
         Set it to a fixed value in the constructor of the child-class
 
-        Default value: ``None`` (i.e. only one data type)
+        Default value: ``None`` (i.e. only one data type or data)
+
+        Users can leave it also unspecfied, if types/layers of georaster should 
+        not be divided into different directories. A possible use-case is, if  
+        types/layers should available in the georaster itself.
 
         :return: list of different data types which can be available for one epoch (e.g. weather data with preciptitation, air temperature, ... for each day)
         :rtype: list[str]
@@ -349,6 +357,8 @@ class Interface(object):
                     prc.join()
             else:
                 ret = task['f'](self, **ret)
+                if ret is None:
+                    ret = {}
         return ret
     
     ############################################################################

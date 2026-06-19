@@ -67,6 +67,18 @@ class Messages:
             :rtype: str
             """
             return getattr(self, '_' + self.CONT_FNAME)
+        
+    class GotDeleteField(MsgBaseClass):
+        MTYPE = 'delete_field'
+        CONT_FNAME = 'fname'
+
+        @property
+        def field_name(self) -> str:
+            """
+            :return: name of the field which should be deleted
+            :rtype: str
+            """
+            return getattr(self, '_' + self.CONT_FNAME)
 
     class GotLogMsg(MsgBaseClass):
         MTYPE = 'logmsg'
@@ -96,7 +108,7 @@ class Messages:
         @property
         def coordinates(self) -> list:
             """
-            :return: list of polygon-defining point-coordinate-lists - coordinates have to be defined in WGS84
+            :return: list of polygon-defining point-coordinate-lists - coordinates have to be defined in web-mercator (epsg:3857)
             :rtype: list[list[list[float, float]]]
             """
             return getattr(self, '_' + self.CONT_COORDS)

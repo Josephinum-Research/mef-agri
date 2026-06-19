@@ -1,6 +1,24 @@
 from PyQt5 import QtWidgets, QtGui
 
 
+class CustomTabWidget(QtWidgets.QWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self._init:bool = False
+
+    @property
+    def initialized(self) -> bool:
+        """
+        :return: flag if ``init_tab`` method has been called
+        :rtype: bool
+        """
+        return self._init
+    
+    def init_tab(self):
+        self._init = True
+
+
+
 class ComboBox(QtWidgets.QComboBox):
     """
     Custom combo box class which enables setting a non-selectable placeholder 

@@ -58,13 +58,13 @@ export class Messages {
      * Class to send drawn field/polygons (coordinates and labels) to the 
      * frontend.
      * 
-     * The crs/epsg-code is fixed to WGS84/4326.
+     * The crs/epsg-code is fixed toweb-mercator/3857.
      */
     static SendDrawnField = class extends Messages.SendMessage {
         constructor() {
             super();
             this.msgType = 'drawn_field';
-            this.setCont('epsg', 4326);
+            this.setCont('epsg', 3857);
         }
 
         /**
@@ -85,6 +85,22 @@ export class Messages {
             this.setCont('coords', coords);
         }
     };
+
+    static SendDeleteField = class extends Messages.SendMessage {
+        constructor() {
+            super();
+            this.msgType = 'delete_field';
+        }
+
+        /**
+         * Setter for the field name
+         * 
+         * @param {string} fname - name of the field which should be deleted
+         */
+        set fieldName(fname) {
+            this.setCont('fname', fname);
+        }
+    }
 
     /**
      * Class to send log-messages to frontend
@@ -129,7 +145,7 @@ export class Messages {
      * Class which handles incoming messages containing information about 
      * available fields.
      */
-    static GeoFieldInfo = class extends Messages.GotMessage {
+    static GotFieldInfo = class extends Messages.GotMessage {
         static msgType = 'field_defs';
 
         /**

@@ -1,6 +1,6 @@
 from inspect import isclass
 
-from .task import Task
+from . import Task
 from .. import crops
 from ...models.utils import Units
 

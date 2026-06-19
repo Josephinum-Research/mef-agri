@@ -1,10 +1,9 @@
 import geopandas as gpd
 from PyQt5.QtWidgets import (
     QWidget, QGridLayout, QFileDialog, QPushButton, QHBoxLayout, QFormLayout,
-    QLabel, QLineEdit, QTableWidget, QTableWidgetItem, QDialog, QMessageBox
+    QLabel, QLineEdit, QDialog, QMessageBox
 )
 from shapely.geometry import Polygon
-from shapely import to_wkt
 
 from .map import MapView
 from .conn.server import WebsocketServer
@@ -117,10 +116,13 @@ class NewProject(QDialog):
 class ProjectTab(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
-        # class internal variables
+        # reference to project data/geopackage
         self._pd:ProjectData = None
+
+        # websocket stuff
         self._wss:WebsocketServer = parent.websocket_server
         self._wss.register_handler(self._add_field, Messages.GotDrawnField)
+        self._wss.register_handler(self._del_field, Messages.GotDeleteField)
 
         # initializing the layouts
         self._lm = QHBoxLayout()  # main layout
@@ -150,21 +152,26 @@ class ProjectTab(QWidget):
         self._lm.addWidget(MapView(self), 1)
         self.setLayout(self._lm)
 
+    @property
+    def selected_project(self) -> ProjectData:
+        return self._pd
+
     def _show_prjcont(self):
         self._lbl_selprj.setText(
             _TEXT.LBL_SELPRJ_PATH.format(pp=self._pd.directory)
         )
-        fldInfo = Messages.SendFields()
-        fldInfo.field_names = self._pd.fields[
-            DB.TBL_FIELDS.COL_FIELDNAME
-        ].values.tolist()
-        coords = []
-        fwgs84 = self._pd.fields.to_crs(epsg=4326, inplace=False)
-        for fname in fldInfo.field_names:
-            gdf = fwgs84[fwgs84[DB.TBL_FIELDS.COL_FIELDNAME] == fname]
-            coords.append(gdf.geometry.get_coordinates().values.tolist())
-        fldInfo.coordinates = coords
-        self._wss.broadcast_messages(fldInfo)
+        if len(self._pd.fields) > 0:
+            fldInfo = Messages.SendFields()
+            fldInfo.field_names = self._pd.fields[
+                DB.TBL_FIELDS.COL_FIELDNAME
+            ].values.tolist()
+            coords = []
+            f3857 = self._pd.fields.to_crs(epsg=3857, inplace=False)
+            for fname in fldInfo.field_names:
+                gdf = f3857[f3857[DB.TBL_FIELDS.COL_FIELDNAME] == fname]
+                coords.append(gdf.geometry.get_coordinates().values.tolist())
+            fldInfo.coordinates = coords
+            self._wss.send_messages(fldInfo)
 
     def _new_project(self):
         dlg = NewProject()
@@ -202,3 +209,12 @@ class ProjectTab(QWidget):
             crs=msg.epsg
         )
         self._pd.insert_from_gdf(DB.TBL_FIELDS.NAME, gdf)
+
+    def _del_field(self, msg:Messages.GotDeleteField):
+        if self._pd is None:
+            _ErrorDialogs.no_project_selected()
+            return
+        
+        self._pd.execute(
+            DB.TBL_FIELDS.DEL_BY_FIELDNAME.format(fld=msg.field_name)
+        )

@@ -210,6 +210,9 @@ class ManipulateFields extends Control {
     handleDeleteField(event) {
         if (this.selectedField != null) {
             if (event.code == 'Delete') {
+                var msg = new Messages.SendDeleteField();
+                msg.fieldName = this.selectedField.get('fname');
+                this.appConn.send(msg);
                 this.fldSource.removeFeature(this.selectedField);
             }
         }
@@ -232,10 +235,9 @@ class ManipulateFields extends Control {
 ////////////////////////////////////////////////////////////////////////////////
 ///   SCRIPT STARTS HERE
 ////////////////////////////////////////////////////////////////////////////////
-// websocket initialization
 const appConn = new AppConnection();
-// map creation
 const fMap = new FieldMap(appConn);
+appConn.registerHandler(Messages.GotFieldInfo, FieldMap.addFields, fMap);
 fMap.initializeWMTS();
 const mFields = new ManipulateFields(fMap.fldSource, appConn);
 fMap.addCustomControl(mFields);
