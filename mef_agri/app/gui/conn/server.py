@@ -1,4 +1,6 @@
 import json
+import time
+from threading import Thread
 from inspect import isclass
 from threading import Thread
 from websockets.sync.server import Server, serve
@@ -86,6 +88,29 @@ class WebsocketServer(Thread):
         """
         if not isinstance(msgs, list):
             msgs = [msgs,]
-        for ws in self._clients:
-            for msg in msgs:
-                ws.send(msg.message)
+        if self._clients:
+            for ws in self._clients:
+                for msg in msgs:
+                    ws.send(msg.message)
+        else:
+            tf = Thread(
+                target=WebsocketServer.send_wait_for_client, 
+                args=(self, msgs),
+                daemon=True
+            )
+            tf.start()
+
+
+    @staticmethod
+    def send_wait_for_client(
+        wss:WebsocketServer, msgs:list[MsgBaseClass] | MsgBaseClass
+    ):
+        i = 0
+        while(True):
+            time.sleep(0.1)
+            if wss._clients:
+                wss.send_messages(msgs)
+                break
+            i += 1
+            if i > 100:
+                break

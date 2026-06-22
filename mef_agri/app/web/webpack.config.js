@@ -1,8 +1,11 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+// TODO have a look at the following link
+// https://stackoverflow.com/questions/39798095/multiple-html-files-using-webpack
+
 module.exports = {
-    entry: './src/main.js',
+    entry: './src/tab_prj.js',
 
     output: {
         path: path.resolve(__dirname, 'dist'),

@@ -4,8 +4,7 @@ from PyQt5.QtWidgets import (
 
 from .project import ProjectTab
 from .data import DataTab
-from .conn.server import WebsocketServer, Messages
-from ...data.project import ProjectData
+from .conn.server import Messages
 
 
 def print_log_msgs(msg:Messages.GotLogMsg):
@@ -29,11 +28,14 @@ class _ErrorDialogs:
 
 
 class MainWindow(QWidget):
-    def __init__(self, wss:WebsocketServer):
+    def __init__(self, store):
         super().__init__()
-        self._wss:WebsocketServer = wss
-        self._wss.register_handler(print_log_msgs, Messages.GotLogMsg)
-        
+        from .. import AppStore
+        self._store:AppStore = store
+        self._store.websocket_server.register_handler(
+            print_log_msgs, Messages.GotLogMsg
+        )
+
         # initial ui stuff
         self.setWindowTitle('MEF-Agri')
         self.showMaximized()
@@ -42,8 +44,8 @@ class MainWindow(QWidget):
         # creating the main-tab-widget with tabs
         self._tabs = QTabWidget()
         self._tabs.tabBarClicked.connect(self.init_tabs)
-        self._tab_prj = ProjectTab(self)
-        self._tab_data = DataTab(self)
+        self._tab_prj = ProjectTab(self, self._store)
+        self._tab_data = DataTab(self, self._store)
         self._tabs.addTab(self._tab_prj, 'project')
         self._tabs.addTab(self._tab_data, 'data')
 
@@ -51,13 +53,8 @@ class MainWindow(QWidget):
         self._l.addWidget(self._tabs)
         self.setLayout(self._l)
 
-    @property
-    def websocket_server(self) -> WebsocketServer:
-        return self._wss
-    
     def init_tabs(self):
-        if self._tab_prj.selected_project is None:
+        if self._store.project_data is None:
             return
         if not self._tab_data.initialized:
             self._tab_data.init_tab()
-    

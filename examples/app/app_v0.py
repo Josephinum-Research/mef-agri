@@ -1,6 +1,8 @@
-from mef_agri.app.gui import run_app
-from mef_agri.data.project import ProjectData
+import os
+
+from mef_agri.app import run_app
 
 
 if __name__ == '__main__':
-    run_app()
+    pdir = os.path.join('/', 'home', 'aet', 'devel', 'projects', 'test')
+    run_app(project_path=pdir)

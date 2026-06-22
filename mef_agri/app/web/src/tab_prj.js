@@ -1,4 +1,4 @@
-import './style.css';
+import './tab_prj.css';
 import { AppConnection } from './conn.js';
 import { Messages } from './msgs.js';
 import { FieldMap } from './fmap.js';

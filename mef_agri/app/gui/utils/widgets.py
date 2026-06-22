@@ -1,10 +1,13 @@
 from PyQt5 import QtWidgets, QtGui
 
+from ..utils.store import AppStore
+
 
 class CustomTabWidget(QtWidgets.QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, store):
         super().__init__(parent)
         self._init:bool = False
+        self._store:AppStore = store
 
     @property
     def initialized(self) -> bool:
@@ -13,6 +16,14 @@ class CustomTabWidget(QtWidgets.QWidget):
         :rtype: bool
         """
         return self._init
+    
+    @property
+    def store(self) -> AppStore:
+        """
+        :return: app-store which contains app-wide-required stuff
+        :rtype: AppStore
+        """
+        return self._store
     
     def init_tab(self):
         self._init = True
