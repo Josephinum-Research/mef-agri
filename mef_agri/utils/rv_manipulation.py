@@ -2,19 +2,45 @@ import numpy as np
 from geopandas import GeoDataFrame
 
 from .raster import GeoRaster
-from .misc import set_attributes
 
 
 class IntersectionBaseClass(object):
-    def __init__(self, rstr:GeoRaster, **kwargs) -> None:
-        self.nodata_value = np.nan
-        self.fraction = 1.0
-        set_attributes(self, kwargs)
+    def __init__(self, rstr:GeoRaster) -> None:
+        self._nd = np.nan
+        self._fr = 1.0
 
         self._rstr:GeoRaster = rstr
         self._ixnan:np.ndarray = None
         self._ixins:np.ndarray = None
         self._wghts:np.ndarray = None
+
+    @property
+    def nodata_value(self) -> int | float:
+        """
+        Settable
+
+        :return: nodata-value which is applied for pixels which do not intersect, defaults to ``np.nan``
+        :rtype: int | float
+        """
+        return self._nd
+    
+    @nodata_value.setter
+    def nodata_value(self, value):
+        self._nd = value
+
+    @property
+    def fraction(self) -> float:
+        """
+        Settable
+
+        :return: fraction which corresponds to the intersection percentage being used as threshold to decide if two entities intersect or not, defaults to 1.0 (full intersection)
+        :rtype: float
+        """
+        return self._fr
+    
+    @fraction.setter
+    def fraction(self, value):
+        self._fr = value
 
     @property
     def processed_raster(self) -> np.ndarray:
@@ -66,7 +92,7 @@ class IntersectionBaseClass(object):
 
 
 class RasterVectorIntersection(IntersectionBaseClass):
-    def __init__(self, geom, rstr:GeoRaster, **kwargs) -> None:
+    def __init__(self, geom, rstr:GeoRaster) -> None:
         """
         Class which performs the intersection of a `GeoRaster` object with a 
         vector/geometry object.
@@ -76,7 +102,7 @@ class RasterVectorIntersection(IntersectionBaseClass):
         :param rstr: raster which will be intersected with `geom`
         :type rstr: GeoRaster
         """
-        super().__init__(rstr, **kwargs)
+        super().__init__(rstr)
         self._geom = geom
         self._clsss:np.ndarray = None
 
@@ -90,7 +116,7 @@ class RasterVectorIntersection(IntersectionBaseClass):
         corresponding geoemetry.
 
         :return: array containing labels for pixels which are inside the provided geometry
-        :rtype: np.ndarray
+        :rtype: (1, rows, cols) numpy.ndarray
         """
         return self._clsss
     
@@ -115,7 +141,7 @@ class RasterVectorIntersection(IntersectionBaseClass):
         self._clsss = np.zeros((1, nr, nc), dtype=int)
         fldlbl = 1
         for _ in self._rstr:
-            pixl = self._rstr.current_polygon
+            pixl = self._rstr.current_geometry
             # compute intersection and corresponding area for the decision
             iprc = self._geom.intersection(pixl).area / pixl.area
             if isinstance(self._geom, GeoDataFrame):
@@ -146,7 +172,7 @@ def georaster2geodataframe(
 
     data = []
     for di in rstr:
-        drow = di.tolist() + [rstr.current_polygon]
+        drow = di.tolist() + [rstr.current_geometry]
         data.append(drow)
     return GeoDataFrame(
         data=data, columns=column_labels + [column_geom], geometry=column_geom

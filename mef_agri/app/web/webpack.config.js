@@ -5,8 +5,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 // https://stackoverflow.com/questions/39798095/multiple-html-files-using-webpack
 
 module.exports = {
-    entry: './src/tab_prj.js',
-
+    entry: [
+        './src/main.js',
+    ],
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
@@ -21,6 +22,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
+            filename: 'index.html',
             template: './src/index.html',
         }),
     ],

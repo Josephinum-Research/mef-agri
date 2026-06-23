@@ -167,7 +167,7 @@ class GeoRaster(object):
         )
 
     @property
-    def current_polygon(self) -> Polygon:
+    def current_geometry(self) -> Polygon:
         ret = None
         if self.raster_element is None:
             ret = Polygon((
@@ -805,10 +805,10 @@ class GeoRaster(object):
         if self.raster is not None:
             if self.layer_index == 0:
                 ret = self.raster[:, self.current_row, self.current_column]
-            elif self.channel_index == 2:
+            elif self.layer_index == 2:
                 ret = self.raster[self.current_row, self.current_column, :]
             else:
-                raise ValueError('Invalid channel index!')
+                raise ValueError('Invalid layer index!')
 
         return ret
     

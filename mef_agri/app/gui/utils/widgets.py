@@ -28,6 +28,9 @@ class CustomTabWidget(QtWidgets.QWidget):
     def init_tab(self):
         self._init = True
 
+    def tab_clicked(self):
+        pass
+
 
 
 class ComboBox(QtWidgets.QComboBox):

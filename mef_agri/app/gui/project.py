@@ -125,32 +125,29 @@ class ProjectTab(CustomTabWidget):
         )
 
         # initializing the layouts
-        self._lm = QHBoxLayout()  # main layout
-        self._ll = QGridLayout()  # left layout where user is interacting
+        self._l = QGridLayout()  # left layout where user is interacting
         for ci in range(5):
-            self._ll.setColumnStretch(ci, 1)
-        self._ll.setRowStretch(0, 1)  # area to select existing project or create a new one
-        self._ll.setRowStretch(1, 1)  # empty space
-        self._ll.setRowStretch(2, 1)  # area where selected project path is shown
-        self._ll.setRowStretch(3, 1)  # empty space
-        self._ll.setRowStretch(4, 6)  # area where fields are listed
+            self._l.setColumnStretch(ci, 1)
+        self._l.setRowStretch(0, 1)  # area to select existing project or create a new one
+        self._l.setRowStretch(1, 1)  # empty space
+        self._l.setRowStretch(2, 1)  # area where selected project path is shown
+        self._l.setRowStretch(3, 1)  # empty space
+        self._l.setRowStretch(4, 6)  # area where fields are listed
 
         # button to select existing project
         self._btn_selprj = QPushButton(_TEXT.BTN_SELPRJ, self)
         self._btn_selprj.clicked.connect(self._sel_project)
-        self._ll.addWidget(self._btn_selprj, 0, 1)
+        self._l.addWidget(self._btn_selprj, 0, 1)
         self._btn_newprj = QPushButton(_TEXT.BTN_NEWPRJ, self)
         self._btn_newprj.clicked.connect(self._new_project)
-        self._ll.addWidget(self._btn_newprj, 0, 3)
+        self._l.addWidget(self._btn_newprj, 0, 3)
 
         # show path of selected project
         self._lbl_selprj = QLabel(_TEXT.LBL_SELPRJ_NONE, self)
-        self._ll.addWidget(self._lbl_selprj, 2, 0, 1, 5)
+        self._l.addWidget(self._lbl_selprj, 2, 0, 1, 5)
 
         # add remaining stuff
-        self._lm.addLayout(self._ll, 1)
-        self._lm.addWidget(MapView(self), 1)
-        self.setLayout(self._lm)
+        self.setLayout(self._l)
 
         # check if a project is manually provided by the user
         if self.store.project_path is not None:

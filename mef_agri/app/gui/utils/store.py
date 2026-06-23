@@ -1,5 +1,6 @@
 import os
 from inspect import isclass
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 from ...gui.conn.server import WebsocketServer
 from ....data.interface import Interface
@@ -12,6 +13,7 @@ class AppStore(object):
         self._dis:list[Interface] = None
         self._prj:ProjectData = None
         self._pp:str = None
+        self._map:QWebEngineView = None
 
     @property
     def websocket_server(self) -> WebsocketServer:
@@ -24,6 +26,18 @@ class AppStore(object):
     @websocket_server.setter
     def websocket_server(self, wss):
         self._wss = wss
+
+    @property
+    def map_view(self) -> QWebEngineView:
+        """
+        :return: openlayers map
+        :rtype: QWebEngineView
+        """
+        return self._map
+    
+    @map_view.setter
+    def map_view(self, mview):
+        self._map = mview
 
     @property
     def project_path(self) -> str:

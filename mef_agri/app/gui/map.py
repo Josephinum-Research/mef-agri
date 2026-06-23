@@ -25,8 +25,11 @@ class MapView(QWebEngineView):
             QWebEngineSettings.LocalContentCanAccessRemoteUrls, True
         )
 
+    def load_html(self, html_file:str) -> None:
+        if not html_file[-5:] == '.html':
+            html_file += '.html'
         # load html
         html = os.path.join(
-            os.path.split(__file__)[0], os.pardir, 'web', 'dist', 'index.html'
+            os.path.split(__file__)[0], os.pardir, 'web', 'dist', html_file
         )
         self.load(QUrl.fromLocalFile(html))
