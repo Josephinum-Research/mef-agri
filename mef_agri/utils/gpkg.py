@@ -864,7 +864,10 @@ class Geopackage(object):
             raise ValueError(ERRORS.GDF_NO_UCOLS)
 
         # processing
-        next_fid = len(egdf)
+        if len(egdf) > 0:
+            next_fid = (int(egdf[SQLTable.ID_COL_NAME].max()) + 1)
+        else:
+            next_fid = 1
         ins = 'INSERT INTO {} ('.format(table)
         ins += ', '.join(ncols) + ') VALUES '
         insert_data = False

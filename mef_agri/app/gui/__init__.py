@@ -53,13 +53,20 @@ class MainWindow(QWidget):
         # final ui stuff
         self._l.addWidget(self._tabs, 1)
         self._store.map_view = MapView(self)
-        self._store.map_view.load_html('tab_prj')
+        self._store.map_view.load_html('index')
         self._l.addWidget(self._store.map_view, 1)
         self.setLayout(self._l)
 
     def init_tabs(self, index):
-        if index == self._tabs.indexOf(self._tab_data):
+        msg = Messages.SendActiveTab()
+
+        if index == self._tabs.indexOf(self._tab_prj):
+            msg.tab_name = 'project'
+        elif index == self._tabs.indexOf(self._tab_data):
             if self._store.project_data is None:
                 return
+            msg.tab_name = 'data'
             if not self._tab_data.initialized:
                 self._tab_data.init_tab()
+                
+        self._store.websocket_server.send_messages(msg)

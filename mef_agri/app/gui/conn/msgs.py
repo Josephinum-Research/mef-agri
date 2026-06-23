@@ -116,3 +116,19 @@ class Messages:
         @coordinates.setter
         def coordinates(self, value):
             setattr(self, '_' + self.CONT_COORDS, value)
+
+    class SendActiveTab(MsgBaseClass):
+        MTYPE = 'active_tab'
+        CONT_TABNAME = 'tabname'
+
+        @property
+        def tab_name(self) -> str:
+            """
+            :return: name of the currently active tab
+            :rtype: str
+            """
+            return getattr(self, '_' + self.CONT_TABNAME)
+        
+        @tab_name.setter
+        def tab_name(self, value):
+            setattr(self, '_' + self.CONT_TABNAME, value)

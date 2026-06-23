@@ -162,4 +162,15 @@ export class Messages {
             return this.getCont('coords');
         }
     }
+
+    static GotActiveTab = class extends Messages.GotMessage {
+        static msgType = 'active_tab';
+
+        /**
+         * @returns {string} - name of the currently active tab
+         */
+        get activeTab() {
+            return this.getCont('tabname');
+        }
+    }
 }

@@ -15,6 +15,7 @@ import Feature from "ol/Feature";
 import { Messages } from "./msgs";
 import { fromLonLat } from "ol/proj";
 import { OSM } from "ol/source";
+import { extend as extendExtent } from "ol/extent";
 
 
 export class FieldLayerStyle {
@@ -152,15 +153,28 @@ export class FieldMap {
     }
 
     static addFields(fieldMap, msg) {
-        fieldMap.fldSource.clear(true);
-        var features = [];
-        for (let i = 0; i < msg.fieldNames.length; i++) {
-            var corners = msg.cornerCoords[i];
-            corners.push(corners[0]);
-            var feat = new Feature(new Polygon([corners]));
-            feat.set('fname', msg.fieldNames[i]);
-            features.push(feat);
+        if (fieldMap.map != null) {
+            fieldMap.fldSource.clear(true);
+            var features = [];
+            var extent = null;
+            for (let i = 0; i < msg.fieldNames.length; i++) {
+                var corners = msg.cornerCoords[i];
+                corners.push(corners[0]);
+                var feat = new Feature(new Polygon([corners]));
+                feat.set('fname', msg.fieldNames[i]);
+                features.push(feat);
+                if (extent == null) {
+                    extent = feat.getGeometry().getExtent();
+                } else {
+                    extent = extendExtent(
+                        extent, feat.getGeometry().getExtent()
+                    );
+                }
+            }
+            fieldMap.fldSource.addFeatures(features);
+            fieldMap.map.getView().fit(extent);
+        } else {
+            setTimeout(FieldMap.addFields(fieldMap, msg), 10);
         }
-        fieldMap.fldSource.addFeatures(features);
     }
 }
