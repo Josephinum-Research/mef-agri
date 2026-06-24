@@ -138,6 +138,10 @@ class ProjectData(Geopackage):
     in :func:`add_data` and :func:`get_data`.
     """
     DATA_DIRECTORY = 'data'
+    ADD_DATA_UI_PROPS = [
+        'processed_field', 'processed_interface', 'progress', 'add_data_error', 
+        'add_data_success'
+    ]
 
     def __init__(self, project_dir, gpkg_name):
         ddir = os.path.join(project_dir, self.DATA_DIRECTORY)
@@ -155,6 +159,14 @@ class ProjectData(Geopackage):
             _tda.name: _tda,
             _tde.name: _tde
         }
+
+        # variables representing state in add_data
+        self._pfld:str = None
+        self._pintf:str = None
+        self._prgr:str = None
+        self._aderr:str = None
+        self._adsucc:bool = True
+        self._gui_funcs:dict = {}
 
     @property
     def directory(self) -> str:
@@ -203,11 +215,114 @@ class ProjectData(Geopackage):
         :rtype: int
         """
         return self._nprcs
-
+    
     @n_processes.setter
     def n_processes(self, value):
         self._nprcs = value
         self._pids = None
+    
+    ############################################################################
+    # properties which can interact with gui
+    @property
+    def processed_field(self) -> str:
+        """
+        :return: currently processed field in :func:`add_data`
+        :rtype: str
+        """
+        return self._pfld
+    
+    @processed_field.setter
+    def processed_field(self, fname):
+        self._loop_funcs(self._gui_funcs['processed_field'], fname)
+        self._pfld = fname
+
+    @property
+    def processed_interface(self) -> str:
+        """
+        :return: currently processed data-interface in :func:`add_data`
+        :rtype: str
+        """
+        return self._pintf
+    
+    @processed_interface.setter
+    def processed_interface(self, iname):
+        self._loop_funcs(self._gui_funcs['processed_interface'], iname)
+        self._pintf = iname
+
+    @property
+    def progress(self) -> str:
+        """
+        :return: current progress in the currently processed data-inteface in :func:`add_data`
+        :rtype: str
+        """
+        return self._prgr
+    
+    @progress.setter
+    def progress(self, pstate):
+        self._loop_funcs(self._gui_funcs['progress'], pstate)
+        self._prgr = pstate
+
+    @property
+    def add_data_error(self) -> str:
+        """
+        :return: error within currently processed field and data-interface
+        :rtype: str
+        """
+        return self._aderr
+    
+    @add_data_error.setter
+    def add_data_error(self, err):
+        self._loop_funcs(self._gui_funcs['add_data_error'], err)
+        self._aderr = err
+
+    @property
+    def add_data_success(self) -> bool:
+        """
+        :return: flag indicating that processing has been succesfull for current field and data-interface
+        :rtype: bool
+        """
+        return self._adsucs
+    
+    @add_data_success.setter
+    def add_data_success(self, succ):
+        self._loop_funcs(self._gui_funcs['add_data_success'], succ)
+        self._adsucc = succ
+
+    ############################################################################
+    # METHODS
+    def add_data_interaction(self, prop:property | str, func, obj=None):
+        """
+        Register handlers if one of the following properties is changed
+
+        * :func:`processed_field`
+        * :func:`processed_interface`
+        * :func:`progress`
+        * :func:`add_data_error`
+        * :func:`add_data_success`
+
+        ``prop`` can be provided as string (e.g. ``'progress'``) or as 
+        property (e.g. ``ProjectData.progress``).
+
+        :param prop: specify at which property-change ``func`` will be called
+        :type prop: property | str
+        :param func: function which should be called when ``prop`` changes
+        :type func: function or method
+        :param obj: object reference if ``func`` is a method, defaults to None
+        :type obj: object, optional
+        """
+        if isinstance(prop, property):
+            prop = prop.__name__
+        if not isinstance(prop, str):
+            raise ValueError(
+                '`prop` has to be of type `property` or `str`!'
+            )
+        if not prop in self.ADD_DATA_UI_PROPS:
+            raise ValueError(
+                'Provided `prop` not available as property in `ProjectData`'
+            )
+        if not prop in self._gui_funcs.keys():
+            self._gui_funcs[prop] = []
+        self._gui_funcs[prop].append({'func': func, 'obj': obj})
 
     def add_data_interface(self, data_intf:Interface) -> None:
         """
@@ -268,104 +383,117 @@ class ProjectData(Geopackage):
         
         # get data from interfaces
         for did in dids:
+            self.processed_interface = did
             di = self._dis[did]
+            di.connect_project_progress(self)
             dspath = os.path.join(
                 self._pdir, self.DATA_DIRECTORY, di.data_source_id
             )
             for field in fields:
-                print(did + ' -> ' + field)  # TODO think on how to change this to interact with GUI
-
-                # prepare paths
-                fpath = os.path.join(dspath, field)
-                if not os.path.exists(os.path.join(self._pdir, fpath)):
-                    os.mkdir(os.path.join(self._pdir, fpath))
-
-                # prepare geometry stuff
-                aoi = self.fields[
-                    self.fields[DB.TBL_FIELDS.COL_FIELDNAME] == field
-                ]
-
-                ret = self.query(
-                    DB.TBL_DAVLBL.Q_DATERANGES.format(did=did, fld=field)
-                )
-                # process static data
-                if di.static_data:
-                    if len(ret) > 0:
-                        return
-                    di.prj_add_data(fpath, aoi)
-                    insda = f'INSERT INTO {DB.TBL_DAVLBL.NAME} '
-                    insda += f'({DB.TBL_DAVLBL.COL_DID}, '
-                    insda += f'{DB.TBL_DAVLBL.COL_FIELD}) VALUES ({did}, '
-                    insda += f'{field});'
-                    insde = DB.TBL_DEPOCHS.INSERT_START
-                    insde += DB.TBL_DEPOCHS.INSERT_TUPLE.format(
-                        did=did, fld=field, epoch=date.today().isoformat()
+                self.processed_field = field
+                try:
+                    self._process_intf_field(
+                        did, di, field, dspath, tstart, tstop
                     )
-                    self.execute(insda)
-                    self.execute(insde)
-                    return
+                    self.add_data_success = True
+                    self.add_data_error = 'no error'
+                except Exception as exc:
+                    self.add_data_success = False
+                    self.add_data_error = str(exc)
 
-                # prepare timeranges for requesting dynamic data
-                trngs = []
-                for tpl in ret.itertuples():
-                    trngs.append([
-                        date.fromisoformat(tpl.tstart), 
-                        date.fromisoformat(tpl.tstop)
-                    ])
-                trngs_requ = daterange_consider_existing_dates(
-                    [tstart, tstop], trngs
-                )
+    def _process_intf_field(self, did, di, field, dspath, tstart, tstop):
+        # prepare paths
+        fpath = os.path.join(dspath, field)
+        if not os.path.exists(os.path.join(self._pdir, fpath)):
+            os.mkdir(os.path.join(self._pdir, fpath))
 
-                # process data interfaces
-                epochs_new = []
-                for trng in trngs_requ:
-                    try:
-                        epochs_new += di.prj_add_data(fpath, aoi, trng)
-                    except Exception as exc:
-                        print(exc)
-                        break
+        # prepare geometry stuff
+        aoi = self.fields[
+            self.fields[DB.TBL_FIELDS.COL_FIELDNAME] == field
+        ]
 
-                # check if saved data and epochs_new are consistent
-                # create sql-commands for .gpkg
-                oneday = timedelta(days=1)
-                insdeps, do_ins_deps = DB.TBL_DEPOCHS.INSERT_START, False
-                trngs_new = []
-                for trng in trngs_requ:
-                    day = trng[0]
-                    epochs = []
-                    while day <= trng[1]:
-                        epdir = os.path.join(fpath, day.isoformat())
-                        c1 = os.path.isdir(epdir)
-                        c2 = day in epochs_new
-                        if c1:
-                            if c2:
-                                do_ins_deps = True
-                                insdeps += DB.TBL_DEPOCHS.INSERT_TUPLE.format(
-                                    did=did, fld=field, epoch=day.isoformat()
-                                ) + ', '
-                                epochs.append(day)
-                            else:
-                                shutil.rmtree(epdir)
-                        day += oneday
-                    if epochs:
-                        trngs_new.append([epochs[0], epochs[-1]])
+        ret = self.query(
+            DB.TBL_DAVLBL.Q_DATERANGES.format(did=did, fld=field)
+        )
+        # process static data
+        if di.static_data:
+            if len(ret) > 0:
+                return
+            di.prj_add_data(fpath, aoi)
+            insda = f'INSERT INTO {DB.TBL_DAVLBL.NAME} '
+            insda += f'({DB.TBL_DAVLBL.COL_DID}, '
+            insda += f'{DB.TBL_DAVLBL.COL_FIELD}) VALUES ({did}, '
+            insda += f'{field});'
+            insde = DB.TBL_DEPOCHS.INSERT_START
+            insde += DB.TBL_DEPOCHS.INSERT_TUPLE.format(
+                did=did, fld=field, epoch=date.today().isoformat()
+            )
+            self.execute(insda)
+            self.execute(insde)
+            return
 
-                # write epochs with available data to .gpkg
-                if do_ins_deps:
-                    self.execute(insdeps[:-2] + ';')
+        # prepare timeranges for requesting dynamic data
+        trngs = []
+        for tpl in ret.itertuples():
+            trngs.append([
+                date.fromisoformat(tpl.tstart), 
+                date.fromisoformat(tpl.tstop)
+            ])
+        trngs_requ = daterange_consider_existing_dates(
+            [tstart, tstop], trngs
+        )
 
-                # update timeranges and write them to .gpkg
-                trngs_new = merge_dateranges(trngs + trngs_new)
-                sql_ins = DB.TBL_DAVLBL.INSERT_START
-                for trng in trngs_new:
-                    sql_ins += DB.TBL_DAVLBL.INSERT_TUPLE.format(
-                        did=did, fld=field, tstart=trng[0].isoformat(),
-                        tstop=trng[1].isoformat()
-                    ) + ', '
-                self.execute(DB.TBL_DAVLBL.DEL_BY_DID_FLD.format(
-                    did=did, fld=field
-                ))
-                self.execute(sql_ins[:-2] + ';')
+        # process data interfaces
+        epochs_new = []
+        for trng in trngs_requ:
+            try:
+                epochs_new += di.prj_add_data(fpath, aoi, trng)
+            except Exception as exc:
+                print(exc)
+                break
+
+        # check if saved data and epochs_new are consistent
+        # create sql-commands for .gpkg
+        oneday = timedelta(days=1)
+        insdeps, do_ins_deps = DB.TBL_DEPOCHS.INSERT_START, False
+        trngs_new = []
+        for trng in trngs_requ:
+            day = trng[0]
+            epochs = []
+            while day <= trng[1]:
+                epdir = os.path.join(fpath, day.isoformat())
+                c1 = os.path.isdir(epdir)
+                c2 = day in epochs_new
+                if c1:
+                    if c2:
+                        do_ins_deps = True
+                        insdeps += DB.TBL_DEPOCHS.INSERT_TUPLE.format(
+                            did=did, fld=field, epoch=day.isoformat()
+                        ) + ', '
+                        epochs.append(day)
+                    else:
+                        shutil.rmtree(epdir)
+                day += oneday
+            if epochs:
+                trngs_new.append([epochs[0], epochs[-1]])
+
+        # write epochs with available data to .gpkg
+        if do_ins_deps:
+            self.execute(insdeps[:-2] + ';')
+
+        # update timeranges and write them to .gpkg
+        trngs_new = merge_dateranges(trngs + trngs_new)
+        sql_ins = DB.TBL_DAVLBL.INSERT_START
+        for trng in trngs_new:
+            sql_ins += DB.TBL_DAVLBL.INSERT_TUPLE.format(
+                did=did, fld=field, tstart=trng[0].isoformat(),
+                tstop=trng[1].isoformat()
+            ) + ', '
+        self.execute(DB.TBL_DAVLBL.DEL_BY_DID_FLD.format(
+            did=did, fld=field
+        ))
+        self.execute(sql_ins[:-2] + ';')
+                
 
     def get_data(self, tstart:date, tstop:date=None, dids=None, fields=None):
         """
@@ -434,7 +562,9 @@ class ProjectData(Geopackage):
                                     os.path.join(ddir, dtype)
                                 )
         return ret
-                            
+
+    ############################################################################
+    # static/private methods                
     @staticmethod
     def _prepare_list(provided:list[str] | str | None, all_values:list[str]):
             if provided is None:
@@ -443,3 +573,12 @@ class ProjectData(Geopackage):
                 return [provided]
             else:
                 return provided
+            
+    @staticmethod
+    def _loop_funcs(fdefs, arg):
+        for fdef in fdefs:
+            if fdef['obj'] is None:
+                fdef['func'](arg)
+            else:
+                fdef['func'](fdef['obj'], arg)
+            

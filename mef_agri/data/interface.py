@@ -17,6 +17,7 @@ class Worker(Process):
     """
     QFLAG_MESSAGE = '__MESSAGE__'
     QFLAG_FINISHED = '__FINISHED__'
+    QFLAG_PROGRESS = '__PROGRESS__'
 
     def __init__(self, task, settings):
         super().__init__(daemon=True)
@@ -97,6 +98,9 @@ class Interface(object):
         self._ep:date = None  # epoch for which data should be derived
         self._nprcs:int = max(cpu_count() // 2, 2)  # number of cores to use for tasks
         self._pids:list[str] = None  # process ids
+        self._log:list[str] = []
+        self._prgr:str = None
+        self._prj = None
         
         # private variables which are related to execution
         self._init:bool = False  # flag if class is initialized
@@ -275,7 +279,40 @@ class Interface(object):
         return self._tr
     
     ############################################################################
+    # OTHER PROPERTIES
+    @property
+    def log(self) -> list[str]:
+        """
+        :return: log messages (can be cleared if setting :func:`log` to ``None``)
+        :rtype: list[str]
+        """
+        return self._log
+    
+    @log.setter
+    def log(self, value):
+        if value is None:
+            self._log = []
+    
+    @property
+    def progress(self) -> str:
+        """
+        :return: string indicating current progress :func:`prj_add_data` (e.g. currently processed epoch)
+        :rtype: str
+        """
+        return self._prgr
+    
+    @progress.setter
+    def progress(self, value):
+        if isinstance(value, str):
+            if self._prj is not None:
+                self._prj.progress = value
+            self._prgr = value
+
+    ############################################################################
     # METHODS
+    def connect_project_progress(self, prj):
+        self._prj = prj
+
     def prj_add_data(
             self, ddir:str, aoi:GeoDataFrame, trange:list[date]=None
         ) -> list[date]:
@@ -349,7 +386,9 @@ class Interface(object):
                         if not (False in list(finish_flags.values())):
                             break
                     elif key == Worker.QFLAG_MESSAGE:
-                        print(val)
+                        self.log.append(val)
+                    elif key == Worker.QFLAG_PROGRESS:
+                        self.progress = val
                     else:
                         ret[key] = val
                 

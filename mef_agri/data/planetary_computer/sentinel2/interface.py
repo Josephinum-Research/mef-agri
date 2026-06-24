@@ -144,7 +144,7 @@ class Sentinel2Interface(Interface):
         ]
 
         catalog = Client.open(self._rs['url'], modifier=sign_inplace)
-        search = self._catalog.search(
+        search = catalog.search(
             collections=[self._rs['collection'],],
             bbox=bbox_from_gdf(rgdf),
             datetime=trng[0].isoformat() + '/' + trng[1].isoformat()
@@ -175,7 +175,7 @@ class Sentinel2Interface(Interface):
                     continue
                 dates.append(prd_date)
 
-                print('-) processing image for ' + prd_date)  # TODO
+                self.progress = 'processing image for ' + prd_date
                 hitem = harmonization(item)
                 aoi_ser = GeoSeries([aoi.geometry.values[0]], crs=aoi.crs)
 
@@ -252,15 +252,15 @@ class Sentinel2Interface(Interface):
                 ))
 
             except Exception as exc:
-                print(exc)
+                self.log.append(str(exc))
                 if str(exc) == 'No information found in metadata for band SCL!':
                     msg = 'Ignoring image for current date and further '
                     msg += 'process the other dates.'
-                    print(msg)
+                    self.log.append(msg)
                 else:
                     msg = 'Stop looping over further dates!'
                     self.add_prj_data_error = True
-                    print(msg)
+                    self.log.append(msg)
                     break
         
         return imgs

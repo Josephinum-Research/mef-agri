@@ -171,6 +171,7 @@ class INCAInterface(Interface):
     # TASKS
     @Interface.add_data_task(order=1)
     def prepare_inca_grid_historical(self, **kwargs):
+        self.progress = 'requesting data from inca-grid-historical'
         gdf = self.get_inca_grid_historical()
         ret = {}
 
@@ -215,6 +216,7 @@ class INCAInterface(Interface):
                 'grmodule': IncaGridDaily.__module__
             }
 
+        self.progress = 'prepared inca-grid-historical'
         return ret
     
     @Interface.add_data_task(order=2, parallel=True)
@@ -253,8 +255,8 @@ class INCAInterface(Interface):
             epoch = tsday[0].date()
             tsday = [ts.isoformat() for ts in tsday]
             q.put([
-                Worker.QFLAG_MESSAGE, 
-                'INCA-Interface: processing epoch {} in process {}'.format(
+                Worker.QFLAG_PROGRESS, 
+                'processing epoch {} in process {}'.format(
                     epoch.isoformat(), kwargs['pid']
                 )
             ])
@@ -293,4 +295,6 @@ class INCAInterface(Interface):
         epochs = []
         for pid in self.process_ids:
             epochs += kwargs[pid + '_epochs']
+        
+        self.progress = 'finished processing inca-grid-historical'
         return [datetime.date.fromisoformat(ep) for ep in epochs]

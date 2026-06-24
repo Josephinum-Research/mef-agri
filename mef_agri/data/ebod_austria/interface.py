@@ -229,12 +229,16 @@ class EbodInterface(Interface):
 
     @Interface.add_data_task
     def prj_add_ebod(self):
+        self.progress = 'starting requests'
+
         self.request_metadata()
         self.request_data(self.aoi, self._maxzoom)
         self.rasterize()
         self.ebod_data_raster.save_geotiff(
             self.directory, overwrite=True, compress=False
         )
+
+        self.progress = 'successfully saved ebod-data'
 
     def _request(self, tx:int, ty:int, zoom:int) -> dict:
         url = self.URL_TILES + '{}/{}/{}.pbf'.format(zoom, tx, ty)
