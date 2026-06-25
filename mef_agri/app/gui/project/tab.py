@@ -1,15 +1,15 @@
 import geopandas as gpd
 from PyQt5.QtWidgets import (
-    QGridLayout, QFileDialog, QPushButton, QHBoxLayout, QFormLayout,
-    QLabel, QLineEdit, QDialog, QMessageBox
+    QGridLayout, QFileDialog, QPushButton, QFormLayout,QLabel, QLineEdit, 
+    QDialog, QMessageBox
 )
 from shapely.geometry import Polygon
 
-from .map import MapView
-from .utils.widgets import CustomTabWidget
-from .conn.msgs import Messages
-from ...data.project import ProjectData, DB
-from ...utils.misc import search_file
+from ..map import MapView
+from ..utils.widgets import CustomTabWidget
+from ..conn.msgs import Messages
+from ....data.project import ProjectData, DB
+from ....utils.misc import search_file
 
 class _TEXT:
     BTN_SELPRJ = 'select project-directory'

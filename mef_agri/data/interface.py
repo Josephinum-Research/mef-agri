@@ -432,7 +432,8 @@ class Interface(object):
                         msg = 'No order provided but more than one '
                         msg += '`add_data_task` is specified!'
                         raise Interface.Errors.OrderNotSpecified(msg)
-                    obj._add_tasks[str(order)] = {'f': func, 'mp': parallel}
+                    ixkey = '1' if order is None else str(order)
+                    obj._add_tasks[ixkey] = {'f': func, 'mp': parallel}
             return wrapper
         return decorator
     

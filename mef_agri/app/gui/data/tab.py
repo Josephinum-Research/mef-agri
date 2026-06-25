@@ -1,10 +1,12 @@
+import threading
 from PyQt5.QtWidgets import (
-    QLabel, QGridLayout, QDateEdit, QComboBox, QPushButton, QScrollArea
+    QLabel, QGridLayout, QDateEdit, QComboBox, QPushButton, QScrollArea, 
 )
-from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtCore import Qt, QDate, QObject, QThread, pyqtSignal, pyqtSlot
+from datetime import date
 
-from .utils.widgets import CustomTabWidget
-from ...data.project import DB, ProjectData
+from ..utils.widgets import CustomTabWidget
+from ....data.project import DB, ProjectData
 
 
 class _TEXT:
@@ -50,6 +52,17 @@ class _STYLE:
             background-color: rgb(0, 255, 150);
         }
     """
+
+
+class Worker(QObject):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.update_text = pyqtSignal(str)
+
+    @pyqtSlot()
+    def prj_add_data(self):
+        pass
+
 
 
 class DataTab(CustomTabWidget):
@@ -116,6 +129,8 @@ class DataTab(CustomTabWidget):
         self._d2_add.setDate(QDate.currentDate())
         self._d2_add.userDateChanged.connect(self._last_epoch_add)
         self._l.addWidget(self._d2_add, 2, 1)
+        self._ep1_add = self._d1_add.date().toString('yyyy-MM-dd')
+        self._ep2_add = self._d2_add.date().toString('yyyy-MM-dd')
 
         #dropdowns
         self._dd_fld = QComboBox()
@@ -138,6 +153,7 @@ class DataTab(CustomTabWidget):
         self._btn_add = QPushButton()
         self._btn_add.setText(_TEXT.BTN_ADD_TEXT)
         self._btn_add.setStyleSheet(_STYLE.BTN_ADD)
+        self._btn_add.clicked.connect(self._add_data)
         self._l.addWidget(self._btn_add, 2, 4)
 
         # project and data-interface output
@@ -260,3 +276,15 @@ class DataTab(CustomTabWidget):
             self._dids = list(self.store.project_data.interfaces.keys())
         else:
             self._dids = self._dd_data.currentText()
+
+    def _add_data(self):
+        tad = threading.Thread(
+            target=self.store.project_data.add_data, 
+            args=(
+                date.fromisoformat(self._ep1_add),
+                date.fromisoformat(self._ep2_add),
+            ),
+            kwargs={'dids': self._dids,'fields': self._flds},
+            daemon=True
+        )
+        tad.start()
