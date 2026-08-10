@@ -23,6 +23,14 @@ class _TEXT:
 
 
 class _TasksItem(QTreeWidgetItem):
+    """
+    Base class for tasks-tree items.
+
+    constructor arguments
+
+    * **data** (*tuple | list*) - iterable which contains a ``str`` for each column of the ``QTreeWidgetItem``
+
+    """
     def __init__(self, data):
         super().__init__(data)
         self.setFlags(self.flags() | Qt.ItemFlag.ItemIsEditable)
@@ -45,6 +53,15 @@ class _TasksItem(QTreeWidgetItem):
 # TREE NODES/ITEMS
 ################################################################################
 class TasksYear(_TasksItem):
+    """
+    Tasks-tree item which represents the years. 
+    A right-click opens the :class:`YearMenu`.
+
+    constructor arguments
+
+    * **year** (*int | str, optional*) - year which should be visualized (if ``None``, ``TasksYear.HINT_YEAR`` will be used)
+
+    """
     HINT_YEAR = '< YYYY >'
 
     def __init__(self, year:int|str=None):
@@ -73,11 +90,24 @@ class TasksYear(_TasksItem):
 
 
 class TasksTask(_TasksItem):
+    """
+    Tasks-tree item which represents a whole task.
+    A right-click opens a child class of :class:`TaskMenu`.
+    These child classes are located in ``mef_agri.app.gui.tasks.menus``.
+    """
     HINT_DATE = '< YYYY-MM-DD >'
 
     def __init__(
             self, task_name:str, task_module:str, task_date:dt.date|str=None
         ):
+        """
+        :param task_name: name of the task (second column of item - not editable), which has to be also equal to the name of a child-class of :class:`mef_agri.farming.tasks.Task`
+        :type task_name: str
+        :param task_module: module containing child class of :class:`mef_agri.farming.tasks.Task`
+        :type task_module: str
+        :param task_date: date when task has been started (first column of item - not editable but set when providing the begin-date of the task), defaults to None
+        :type task_date: datetime.date | str, optional
+        """
         self._fname:str = None
 
         if task_date is None:
@@ -91,6 +121,10 @@ class TasksTask(_TasksItem):
 
     @property
     def field_name(self) -> str:
+        """
+        :return: name of the currently selected field
+        :rtype: str
+        """
         return self._fname
     
     @field_name.setter
@@ -99,13 +133,24 @@ class TasksTask(_TasksItem):
 
     @property
     def task_obj(self) -> Task:
+        """
+        :return: task object which is loaded from the given ``task_name`` and ``task_module`` in the constructor
+        :rtype: Task
+        """
         return self._task
     
     @property
     def task_module(self) -> str:
+        """
+        :return: module which contains the task
+        :rtype: str
+        """
         return self._tmodule
 
     def setup_task(self) -> bool:
+        """
+        TODO
+        """
         for ix1 in range(self.childCount()):
             taskcont = self.child(ix1)
             if isinstance(taskcont, TasksInfo):
@@ -139,10 +184,20 @@ class TasksTask(_TasksItem):
     
 
 class TasksInfo(_TasksItem):
+    """
+    Class which represents tasks-tree items specifying temporal information for 
+    a task (i.e. begin- and end-date as well as begin- and end-time).
+    """
     HINT_DATE = '< YYYY-MM-DD >'
     HINT_TIME = '< hh:mm >'
     
     def __init__(self, info_name:str, info_value:str):
+        """
+        :param info_name: name of the task information (second column - not editable)
+        :type info_name: str
+        :param info_value: value of the task information (third column - editable), i.e iso-formatted date and time strings
+        :type info_value: str
+        """
         super().__init__(['', info_name, info_value, ''])
         self.editable_cols = (2,)
 
@@ -168,7 +223,14 @@ class TasksInfo(_TasksItem):
 
 
 class TasksAppl(_TasksItem):
+    """
+    Class which represents the tasks-tree items containing the application names
+    """
     def __init__(self, appl_name:str):
+        """
+        :param appl_name: name of the application being equal to the corresponding class in ``mef_agri.farming.tasks`` (second column - not editable)
+        :type appl_name: str
+        """
         super().__init__(['', appl_name, '', ''])
 
     @property
@@ -207,7 +269,16 @@ class TasksApplDescrVal(_TasksItem):
 # CONTEXT MENUS FOR TREE NODES/ITEMS
 ################################################################################
 class YearMenu(QMenu):
+    """
+    Menu which appears when right-clicking a :class:`TasksYear` item.
+    It contains a point for adding a new :class:`TasksYear` item as well as 
+    tasks being available in ``mef_agri.app.gui.tasks._available_tasks``.
+    """
     def __init__(self, tree:QTreeWidget):
+        """
+        :param tree: tasks-tree currently visible in the app
+        :type tree: QTreeWidget
+        """
         super().__init__()
         self._tree:QTreeWidget = tree
         self._iy:TasksYear = None
@@ -250,9 +321,20 @@ class YearMenu(QMenu):
         self._fname = fname
 
     def _add_year(self):
+        """
+        Method which is called when user chooses to add a new year in the 
+        context menu.
+        A new :class:`TasksYear` item will be added to the tree.
+        """
         self._tree.addTopLevelItem(TasksYear())
 
     def _add_task(self):
+        """
+        Method which is called when the user chooses to add a new 
+        :class:`TasksTask` item to the currently active field and year.
+        Additionally four :class:`TasksInfo` items will be appended to the new 
+        task for begin- and end-date as well as begin- and end-time.
+        """
         task = TasksTask(
             getattr(self.sender(), '_task_name'),
             getattr(self.sender(), '_task_module')
@@ -267,7 +349,16 @@ class YearMenu(QMenu):
 
 
 class TaskMenu(QMenu):
+    """
+    Context menu which appears when right-clicking on a :class:`TasksTask` item. 
+    It contains the applications which can be added to a task (see 
+    :func:`mef_agri.farming.tasks.Task.valid_applications`).
+    """
     def __init__(self, tree:QTreeWidget):
+        """
+        :param tree: tasks-tree currently visible in the app
+        :type tree: QTreeWidget
+        """
         super().__init__()
         self._tree:QTreeWidget = tree
         self._it:TasksTask = None

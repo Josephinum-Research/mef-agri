@@ -48,6 +48,17 @@ class DBIntegration(object):
 # APPLICATION
 ################################################################################
 class Application(object):
+    """
+    This class represents applications which are part of a :class:`Task`. 
+    The reason for splitting applications from tasks is, that in some cases more 
+    than one application is performed within one task (e.g. application of two 
+    types of fertilizers, two crop protection products or combined sowing and 
+    rotary harrow).
+
+    An application is composed of numeric values :class:`NumericValue` (e.g. 
+    amount of sown seeds in [kg/ha]) and descriptive values 
+    :class:`DescriptiveValue` (e.g. names of sown crop and cultivar).
+    """
     ##########################   NESTED-CLASSES   ##############################
     class NumericValue(object):
         def __init__(self):
@@ -247,6 +258,14 @@ class Task(GeoRaster):
     Basic class for agricultural tasks. In **mef_agri**, tasks are represented 
     as :class:`mef_agri.utils.raster.GeoRaster`, thus also enabling the usage of 
     application maps as input information for task data. 
+
+    A task is composed of several applications :class:`Application` where the 
+    corresponding numeric values :class:`Application.NumericValue` represent the 
+    layers of the task/georaster where layer-ids are composed of the application 
+    name and the name of the numeric value (i.e. the ``name`` attributes of 
+    :class:`Application` and :class:`Application.NumericValue`)
+    The descriptive values :class:`Application.DescriptiveValue` are stored in 
+    the metadata file of the georaster.
     """
     META_APPL_KEY = 'applications'
     META_APPL_NAME = 'application'
