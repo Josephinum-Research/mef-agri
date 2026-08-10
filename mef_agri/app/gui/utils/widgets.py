@@ -1,13 +1,45 @@
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import (
+    QWidget, QComboBox, QVBoxLayout, QLabel, QStylePainter, 
+    QStyleOptionComboBox, QStyle, QLayout
+)
+from PyQt5.QtCore import Qt
 
 from ..utils.store import AppStore
 
 
-class CustomTabWidget(QtWidgets.QWidget):
+class _TEXT:
+    LBL_INIT = 'no project selected!'
+
+
+class BaseTab(QWidget):
     def __init__(self, parent, store):
         super().__init__(parent)
-        self._init:bool = False
         self._store:AppStore = store
+
+    @property
+    def store(self) -> AppStore:
+        """
+        :return: app-store which contains app-wide-required stuff
+        :rtype: AppStore
+        """
+        return self._store
+
+
+class NonProjectTab(BaseTab):
+    def __init__(self, parent, store):
+        super().__init__(parent, store)
+        # internal variables
+        self._init:bool = False
+        self._l_main:QLayout = None
+
+        # initial layout/appearance
+        self._l_init = QVBoxLayout()
+        self._lbl_init = QLabel(_TEXT.LBL_INIT)
+        self._lbl_init.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._l_init.addWidget(self._lbl_init)
+
+        self.setLayout(self._l_init)
 
     @property
     def initialized(self) -> bool:
@@ -18,22 +50,28 @@ class CustomTabWidget(QtWidgets.QWidget):
         return self._init
     
     @property
-    def store(self) -> AppStore:
+    def layout_main(self) -> QLayout:
         """
-        :return: app-store which contains app-wide-required stuff
-        :rtype: AppStore
+        Settable
+
+        :return: main layout of tab which is visible after project has been selected
+        :rtype: QLayout
         """
-        return self._store
+        return self._l_main
+
+    @layout_main.setter
+    def layout_main(self, layout):
+        self._l_main = layout
     
     def init_tab(self):
         self._init = True
+        self._lbl_init.setVisible(False)
+        if self._l_main is not None:
+            self._l_init.addLayout(self._l_main)
 
-    def tab_clicked(self):
-        pass
 
 
-
-class ComboBox(QtWidgets.QComboBox):
+class ComboBox(QComboBox):
     """
     Custom combo box class which enables setting a non-selectable placeholder 
     text.
@@ -45,14 +83,20 @@ class ComboBox(QtWidgets.QComboBox):
     * https://code.qt.io/cgit/qt/qtbase.git/tree/src/widgets/widgets/qcombobox.cpp?h=5.15.2#n3173
     
     """
+    def __init__(self, placeholder_text:str=None, parent=None):
+        super().__init__(parent)
+        if placeholder_text is not None:
+            self.setPlaceholderText(placeholder_text)
+            self.setCurrentIndex(-1)
+
     def paintEvent(self, event):
-        painter = QtWidgets.QStylePainter(self)
+        painter = QStylePainter(self)
         painter.setPen(self.palette().color(QtGui.QPalette.Text))
 
         # draw the combobox frame, focusrect and selected etc.
-        opt = QtWidgets.QStyleOptionComboBox()
+        opt = QStyleOptionComboBox()
         self.initStyleOption(opt)
-        painter.drawComplexControl(QtWidgets.QStyle.CC_ComboBox, opt)
+        painter.drawComplexControl(QStyle.CC_ComboBox, opt)
 
         if self.currentIndex() < 0:
             opt.palette.setBrush(
@@ -63,4 +107,4 @@ class ComboBox(QtWidgets.QComboBox):
                 opt.currentText = self.placeholderText()
 
         # draw the icon and text
-        painter.drawControl(QtWidgets.QStyle.CE_ComboBoxLabel, opt)
+        painter.drawControl(QStyle.CE_ComboBoxLabel, opt)

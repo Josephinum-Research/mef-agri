@@ -4,14 +4,14 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 from ...gui.conn.server import WebsocketServer
 from ....data.interface import Interface
-from ....data.project import ProjectData
+from ..project import ProjectDataGUI
 
 
 class AppStore(object):
     def __init__(self):
         self._wss:WebsocketServer = None
         self._dis:list[Interface] = None
-        self._prj:ProjectData = None
+        self._prj:ProjectDataGUI = None
         self._pp:str = None
         self._map:QWebEngineView = None
 
@@ -53,7 +53,7 @@ class AppStore(object):
             self._pp = path
     
     @property
-    def project_data(self) -> ProjectData:
+    def project_data(self) -> ProjectDataGUI:
         """
         :return: object for project-db access and data-handling
         :rtype: ProjectData

@@ -1,37 +1,47 @@
-from .task import Task
+from numpy import ndarray
+
+from . import Task, Application
+from ...models.utils import Units
 
 
-class Harvest(Task):
-    """
-    Inherits from :class:`mef_agri.farming.tasks.task.Task`.
-
-    The harvest task indicates the end of the vegetation period in the model 
-    evaluation part of **mef_agri**. Yield biomass is removed from the field 
-    and :func:`residues_removed` indicates how much of the remaining biomass 
-    (i.e. aboveground biomass minus yield biomass) is removed from the field 
-    and not brought into the soil.
-
-    There are no restrictions on the provided values in the applicaton map 
-    layers (i.e. ``layer_ids`` property of 
-    :class:`mef_agri.utils.raster.GeoRaster`). Anything can be added such as 
-    achieved yield or moisture.
-    """
+class CYield(Application):
     def __init__(self):
         super().__init__()
-        self._meta['residues_removed'] = 0.0
+        self._cyld = Application.NumericValue()
+        self._cyld.name = 'yield'
+        self._cyld.description = """
+crop yield (mass per area)
+        """
+        self._cyld.valid_units = [Units.t_ha, Units.kg_ha]
+        self._resr = Application.NumericValue()
+        self._resr.name = 'residues-removed'
+        self._resr.description = """
+fraction of above-ground biomass which is removed from the field after harvest
+        """
+        self._resr.valid_units = [Units.frac,]
 
     @property
-    def residues_removed(self) -> float:
-        """
-        :return: fraction of crop residues which are removed from the field (e.g. through using straw) - if not set, the default value is zero (i.e. nothing is removed)
-        :rtype: float
-        """
-        return self._meta['residues_removed']
+    def name(self):
+        return 'crop-yield'
     
-    @residues_removed.setter
-    def residues_removed(self, val):
-        if isinstance(val, float) or isinstance(val, int):
-            self._meta['residues_removed'] = float(val)
-        else:
-            msg = '`residues_removed` has to be a numeric/scalar value!'
-            raise ValueError(msg)
+    @property
+    def crop_yield(self) -> Application.NumericValue:
+        """
+        :return: definition of crop yield
+        :rtype: Application.NumericValue
+        """
+        return self._cyld
+    
+    @property
+    def residues_removed(self) -> Application.NumericValue:
+        """
+        :return: definition of removed residues after harvest
+        :rtype: Application.NumericValue
+        """
+        return self._resr
+    
+
+class Harvest(Task):
+    @property
+    def valid_applications(self):
+        return [CYield,]

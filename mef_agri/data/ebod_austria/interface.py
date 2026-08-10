@@ -223,11 +223,13 @@ class EbodInterface(Interface):
         :param objres: overrides :func:`object_resolution` if provided, defaults to None
         :type objres: float, optional
         """
+        if objres is None:
+            objres = self.object_resolution
         self._requrstr = EbodRaster.from_vector_tile_geodataframe(
             self.ebod_data_gdf, self._aoirstr, objres, self.exclude_properties
         )
 
-    @Interface.add_data_task
+    @Interface.add_data_task()
     def prj_add_ebod(self):
         self.progress = 'starting requests'
 
@@ -241,7 +243,9 @@ class EbodInterface(Interface):
         self.progress = 'successfully saved ebod-data'
 
     def _request(self, tx:int, ty:int, zoom:int) -> dict:
-        url = self.URL_TILES + '{}/{}/{}.pbf'.format(zoom, tx, ty)
+        url = self.REQU_DATA_V1['url_tiles'] + '{}/{}/{}.pbf'.format(
+            zoom, tx, ty
+        )
         pbf = requests.get(url).content
         vdata = mvt.decode(pbf)
         vdata['tile_coordinates'] = [tx, ty]

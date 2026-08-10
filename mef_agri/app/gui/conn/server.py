@@ -52,6 +52,16 @@ class WebsocketServer(Thread):
         """
         self._hs[msg_class.MTYPE] = {'handler': handler, 'msg_class': msg_class}
 
+    def deregister_handler(self, msg_class):
+        """
+        Deregister handler for provided msg_class.
+
+        :param msg_class: message class/definition (i.e. nested classes in :class:`Messages`)
+        :type msg_class: class
+        """
+        if msg_class.MTYPE in self._hs.keys():
+            del self._hs[msg_class.MTYPE]
+
     def incoming_messages(self, ws):
         """
         Handler function for incoming messages

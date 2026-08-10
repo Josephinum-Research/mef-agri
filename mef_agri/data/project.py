@@ -163,7 +163,6 @@ class ProjectData(Geopackage):
         self._prgr:str = None
         self._aderr:str = None
         self._adsucc:bool = True
-        self._gui_funcs:dict = {}
 
     @property
     def directory(self) -> str:
@@ -341,13 +340,13 @@ class ProjectData(Geopackage):
         
         # get data from interfaces
         for did in dids:
-            self.processed_interface = did
             di = self._dis[did]
             di.connect_project_progress(self)
             dspath = os.path.join(
                 self._pdir, self.DATA_DIRECTORY, di.data_source_id
             )
             for field in fields:
+                self.processed_interface = did
                 self.processed_field = field
                 try:
                     self._process_intf_field(
@@ -358,6 +357,9 @@ class ProjectData(Geopackage):
                 except Exception as exc:
                     self.add_data_success = False
                     self.add_data_error = str(exc)
+                    errmsg = '(project.py) error at interface `{}` '
+                    errmsg += 'and field `{}`: {} - {}'
+                    print(errmsg.format(did, field, type(exc).__name__, exc))
 
     def _process_intf_field(self, did, di, field, dspath, tstart, tstop):
         # prepare paths
@@ -377,11 +379,12 @@ class ProjectData(Geopackage):
         if di.static_data:
             if len(ret) > 0:
                 return
+            print('(project.py) execution of ' + did)
             di.prj_add_data(fpath, aoi)
             insda = f'INSERT INTO {DB.TBL_DAVLBL.NAME} '
             insda += f'({DB.TBL_DAVLBL.COL_DID}, '
-            insda += f'{DB.TBL_DAVLBL.COL_FIELD}) VALUES ({did}, '
-            insda += f'{field});'
+            insda += f'{DB.TBL_DAVLBL.COL_FIELD}) VALUES (\'{did}\', '
+            insda += f'\'{field}\');'
             insde = DB.TBL_DEPOCHS.INSERT_START
             insde += DB.TBL_DEPOCHS.INSERT_TUPLE.format(
                 did=did, fld=field, epoch=date.today().isoformat()
@@ -405,12 +408,22 @@ class ProjectData(Geopackage):
         epochs_new = []
         for trng in trngs_requ:
             try:
-                print('interface execution')
+                print('(project.py) execution of ' + did)
                 epochs_new += di.prj_add_data(fpath, aoi, trng)
             except Exception as exc:
-                print('error')
-                print(exc)
+                print('(project.py) error in timerange {}-{}: {} - {}'.format(
+                    trng[0], trng[1], type(exc).__name__, exc
+                ))
                 break
+
+        # ensure, that `epochs_new` consists datetime.date elements
+        for ix in range(len(epochs_new)):
+            if not isinstance(epochs_new[ix], (str, date)):
+                msg = 'Returned epochs from interface `{}` are not of type '
+                msg += '`str` (iso-formatted date) or `datetime.date`!'
+                raise ValueError(msg.format(did))
+            if isinstance(epochs_new[ix], str):
+                epochs_new[ix] = date.fromisoformat(epochs_new[ix])
 
         # check if saved data and epochs_new are consistent
         # create sql-commands for .gpkg

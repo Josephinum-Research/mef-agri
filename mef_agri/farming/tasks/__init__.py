@@ -1,18 +1,267 @@
 import datetime
 import numpy as np
+import json
 
 from ...utils.raster import GeoRaster
 from ...utils.misc import PixelUnits
 
 
+class DBIntegration(object):
+    COL_FIELD = 'field'
+    COL_EPOCH = 'epoch'
+    COL_TNAME = 'task'
+
+    def __init__(self, table_name:str):
+        self._tname:str = table_name
+
+    @property
+    def sql_table_exists(self) -> str:
+        sql = 'SELECT name FROM sqlite_master WHERE type=\'table\' AND '
+        sql += f'name=\'{self._tname}\';'
+        return sql
+
+    @property
+    def sql_create(self) -> str:
+        sql = f'CREATE TABLE {self._tname} ({self.COL_FIELD} TEXT, '
+        sql += f'{self.COL_EPOCH} TEXT, {self.COL_TNAME} TEXT, PRIMARY KEY '
+        sql += f'({self.COL_FIELD}, {self.COL_EPOCH}, {self.COL_TNAME}));'
+        return sql
+    
+    def sql_insert(self, task:Task, field:str) -> str:
+        sql = f'INSERT INTO {self._tname} '
+        sql += f'({self.COL_FIELD}, {self.COL_EPOCH}, {self.COL_TNAME}) VALUES '
+        sql += self.sql_insert_tuple(task, field) + ';'
+        return sql
+    
+    def sql_query(self, field:str) -> str:
+        sql = f'SELECT * FROM {self._tname} WHERE {self.COL_FIELD}=\'{field}\' '
+        sql += f'ORDER BY {self.COL_EPOCH} ASC;'
+        return sql
+    
+    def sql_insert_tuple(self, task:Task, field:str) -> str:
+        sql = f'(\'{field}\', \'{task.date_begin.isoformat()}\', '
+        sql += f'\'{task.__class__.__name__}\')'
+        return sql
+
+
+################################################################################
+# APPLICATION
+################################################################################
+class Application(object):
+    ##########################   NESTED-CLASSES   ##############################
+    class NumericValue(object):
+        def __init__(self):
+            self._name:str = None
+            self._val:float | np.ndarray = None
+            self._unit:str = None
+            self._uv:list[str] = None
+            self._descr:str = None
+
+        @property
+        def name(self) -> str:
+            """
+            :return: name of the numeric application value
+            :rtype: str
+            """
+            return self._name
+        
+        @name.setter
+        def name(self, name):
+            self._name = name
+
+        @property
+        def description(self) -> str:
+            """
+            :return: description of the numeric value
+            :rtype: str
+            """
+            if self._descr is None:
+                return self.name
+            else:
+                return self._descr
+        
+        @description.setter
+        def description(self, descr):
+            self._descr = descr
+
+        @property
+        def valid_units(self) -> list[str]:
+            """
+            :return: valid values for :func:`unit`
+            :rtype: list[str]
+            """
+            return self._uv
+        
+        @valid_units.setter
+        def valid_units(self, valunits):
+            self._uv = valunits
+        
+        @property
+        def unit(self) -> str:
+            """
+            :return: unit of the application value (see :class:`mef_agri.models.utils.__UNITS__`)
+            :rtype: str
+            """
+            return self._unit
+        
+        @unit.setter
+        def unit(self, unit):
+            if self.valid_units is not None:
+                if not unit in self.valid_units:
+                    msg = 'Unit has to be one of the following values: '
+                    msg += ', '.join(self.valid_units)
+                    raise ValueError(msg)
+            self._unit = unit
+    
+        @property
+        def value(self) -> float | np.ndarray:
+            """
+            :return: application value itself (numeric value if uniform application, numpy.ndarray if application map)
+            :rtype: float | numpy.ndarray
+            """
+            return self._val
+        
+        @value.setter
+        def value(self, value):
+            if isinstance(value, (int, float)):
+                self._val = float(value)
+            elif isinstance(value, np.ndarray):
+                self._val = value
+            else:
+                msg = '`value` has to be a numeric value (i.e. uniform '
+                msg += 'application) or a `numpy.ndarray` representing an '
+                msg += 'application map!'
+                raise ValueError(msg)
+
+    class DescriptiveValue(object):
+        def __init__(self):
+            self._name:str = None
+            self._value:str = None
+            self._descr:str = None
+
+        @property
+        def name(self) -> str:
+            """
+            :return: name of the descriptive value of the application
+            :rtype: str
+            """
+            return self._name
+
+        @name.setter
+        def name(self, name):
+            self._name = name
+
+        @property
+        def description(self) -> str:
+            """
+            :return: detailed description of the descriptive value
+            :rtype: str
+            """
+            if self._descr is None:
+                return self.name
+            else:
+                return self._descr
+        
+        @description.setter
+        def description(self, descr):
+            self._descr = descr
+
+        @property
+        def value(self) -> str:
+            """
+            :return: descriptive value of the application (can be also provided as ``dict``, which will be serialized to a json-string)
+            :rtype: str
+            """
+            return self._value
+        
+        @value.setter
+        def value(self, val):
+            if isinstance(val, dict):
+                val = json.dumps(val)
+            self._value = val
+
+    #####################   Application-Class-stuff   ##########################
+    def __init__(self):
+        self._props = self.get_properties()
+
+    @property
+    def name(self) -> str:
+        """
+        :return: name of the application
+        :rtype: str
+        """
+        msg = '`name` of application has to be defined in child class!'
+        raise NotImplementedError(msg)
+
+    @property
+    def numeric_values(self) -> list[NumericValue]:
+        """
+        :return: all properties being instances of :class:`NumericValue`
+        :rtype: list[NumericValue]
+        """
+        return self._loop_props(self.NumericValue)
+
+    @property
+    def descriptive_values(self) -> list[DescriptiveValue]:
+        """
+        :return: all properties being instances of :class:`DescriptiveValue`
+        :rtype: list[DescriptiveValue]
+        """
+        return self._loop_props(self.DescriptiveValue)
+
+    def _loop_props(self, cls) -> list:
+        ret = []
+        for prop in self._props:
+            if prop in ('name', 'numeric_values', 'descriptive_values'):
+                continue
+            attr = getattr(self, prop)
+            if isinstance(attr, cls):
+                ret.append(attr)
+        return ret
+
+    @classmethod
+    def get_properties(cls) -> list:
+        """
+        Classmethod
+        
+        :return: names of all methods decorated with ``@property``
+        :rtype: list
+        """
+        props = []
+        def loop_cls(cls):
+            if cls.__name__ == Application.__name__:
+                return
+            for key, val in vars(cls).items():
+                if isinstance(val, property):
+                    props.append(key)
+            loop_cls(cls.__base__)
+        loop_cls(cls)
+        return props
+
+
+################################################################################
+# TASK
+################################################################################
 class Task(GeoRaster):
     """
     Basic class for agricultural tasks. In **mef_agri**, tasks are represented 
     as :class:`mef_agri.utils.raster.GeoRaster`, thus also enabling the usage of 
     application maps as input information for task data. 
     """
+    META_APPL_KEY = 'applications'
+    META_APPL_NAME = 'application'
+    META_APPL_MODULE = 'application_module'
+    META_APPL_NVALS = 'numeric_values'
+    META_APPL_NVALS_UNIT = 'unit'
+    META_APPL_NVALS_LID = 'layer_id'
+    META_APPL_NVALS_FROM = 'derived_from'
+    META_APPL_DVALS = 'descriptive_values'
+    META_APPL_DVALS_VALUE = 'value'
+
     def __init__(self):
         super().__init__()
+        self._apps:list[Application] = []
+        self._avshape:tuple = None
         self._meta['date_begin'] = None
         self._meta['date_end'] = None
         self._meta['time_begin'] = None
@@ -85,103 +334,104 @@ class Task(GeoRaster):
         self._meta['time_end'] = self._check_time(val).isoformat()
 
     @property
-    def application_map(self) -> np.ndarray:
+    def applications(self) -> list[Application]:
         """
-        :return: application map as raster data (equal to ``GeoRaster.raster``)
-        :rtype: numpy.ndarray
+        :return: applications which belong to the task (i.e. added with :func:`add_application`)
+        :rtype: list[Application]
         """
-        return self.raster
-    
-    def specify_application(
-            self, appl_val:float | np.ndarray, appl_name:str | list[str],
-            appl_unit:str | list[str], appl_ix:int=None
-        ) -> None:
-        """
-        This method sets the following properties of 
-        :class:`mef_agri.utils.raster.GeoRaster`
+        return self._apps
 
-        * ``raster`` (if it is a numeric value, the raster will have the shape ``(1, 1, 1)``)
-        * ``raster_shape`` (determined from ``appl_val``)
-        * ``units`` (provided value/array will be converted to ``numpy.float32``, i.e. only numeric values are supported)
-        * ``nodata_value`` (will be set to ``np.nan``)
-        * ``layer_index`` (if not already manually set)
-        * ``layer_ids`` (from provided application names ``appl_name``)
-        * ``layer_info`` (a dictionary with the provided physical unit(s) in ``appl_unit`` will be available for each ``layer_id``)
-
-        The georeference has to be manually set (i.e. the properties 
-        ``crs``, ``bounds``, ``transformation``).
-        For unit definitions see :class:`mef_agri.models.utils.__UNITS__`
-
-        :param appl_val: application value - if it is a numeric value, uniform treatment will be assumed - otherwise it has to be a 3-dim `numpy.ndarray` (even when there is only one treatment - see `mef_agri.utils.raster.GeoRaster`)
-        :type appl_val: float | numpy.ndarray
-        :param appl_name: name of the application value(s)
-        :type appl_name: str | list[str]
-        :param appl_unit: unit of the application value(s)
-        :type appl_unit: str | list[str]
-        :param appl_ix: index specifying the dimension of the channels of the application values (if numpy.ndarray), defaults to None
-        :type appl_ix: int, optional
+    @property
+    def valid_applications(self) -> tuple | list:
         """
-        if isinstance(appl_val, float) or isinstance(appl_val, int):
-            self.raster = np.array([[[appl_val]]], dtype=np.float32)
-            self.raster_shape = (1, 1, 1)
-            self.layer_index = 0
-        elif isinstance(appl_val, np.ndarray):
-            self.raster = appl_val.astype(np.float32)
-            self.raster_shape = appl_val.shape
-            if self.layer_index is None:
-                if appl_ix is None:
-                    msg = 'The index specifying the dimension of the channels of '
-                    msg += 'the application raster has to be provided (either by '
-                    msg += 'setting `Task.layer_index` attribute or by providing '
-                    msg += 'the `appl_ix` argument of the '
-                    msg += '`Task.specify_application` method)!'
-                    raise ValueError(msg)
-                self.layer_index = appl_ix
-        else:
-            msg = '`appl_val` has to be a number/scalar or numpy.ndarray!'
+        :return: tuple/list of application classes which instances can be added to the current task
+        :rtype: tuple | list
+        """
+        msg = '`valid_applications` have to be defined in child class!'
+        raise NotImplementedError(msg)
+
+    def add_application(self, appl:Application):
+        if not (appl.__class__ in self.valid_applications):
+            msg = 'Provided application is not an instance from '
+            msg += '`valid_applications`!'
             raise ValueError(msg)
+        for val in appl.numeric_values:
+            c1 = isinstance(val.value, np.ndarray)
+            if (self._avshape is None) and c1:
+                self._avshape = val.value.shape
+            if c1 and (val.value.shape != self._avshape):
+                msg = 'Shapes of provided application maps do not match >>> '
+                msg += '{} != {}'.format(self._avshape, appl.value.shape)
+                raise ValueError(msg)
+        self._apps.append(appl)
+
+    def set_up_task(self):
+        if self.layer_index is None:
+            msg = '`layer_index` not provided yet but it is necessary to set '
+            msg += 'up the task/georaster!'
+            raise ValueError(msg)
+        if not self.META_APPL_KEY in self._meta.keys():
+            self._meta[self.META_APPL_KEY] = {}
+        
+        for appl in self._apps:
+            applinfo = {
+                self.META_APPL_NAME: appl.__class__.__name__,
+                self.META_APPL_MODULE: appl.__class__.__module__,
+                self.META_APPL_NVALS: {},
+                self.META_APPL_DVALS: {}
+            }
+
+            # processing numeric values of current application
+            # i.e. becoming GeoRaster-layers
+            for numval in appl.numeric_values:
+                # processing layer-id
+                lid = appl.name + ' -> ' + numval.name
+                if lid in self.layer_ids:
+                    msg = f'Application-name {appl.name} with value '
+                    msg += f'{numval.name} already present in `layer_ids`!'
+                    raise ValueError(msg)
+                self.layer_ids.append(lid)
+
+                # create layer from numeric value
+                valfrom = 'from-application-map'
+                if isinstance(numval.value, float):
+                    valfrom = 'from-numeric-value'
+                    if self._avshape is None:
+                        layer = np.array([[[numval.value]]], dtype=np.float32)
+                    else:
+                        layer = np.ones(
+                            self._avshape, dtype=np.float32
+                        ) * numval.value
+                else:
+                    layer = numval.value
+
+                if self.raster is None:
+                    self.raster = layer
+                else:
+                    self.raster = np.concatenate(
+                        (self.raster, layer), axis=self.layer_index
+                    )
+                
+                # save information about numeric value to metadata
+                # to reconstruct the corresponding application
+                applinfo[self.META_APPL_NVALS][numval.name] = {
+                    self.META_APPL_NVALS_LID: lid,
+                    self.META_APPL_NVALS_UNIT: numval.unit,
+                    self.META_APPL_NVALS_FROM: valfrom
+                }
+
+            # processing descriptive values of current application
+            # i.e. being integrated into GeoRaster-metadata
+            for descrval in appl.descriptive_values:
+                applinfo[self.META_APPL_DVALS][descrval.name] = descrval.value
+                
+            # save metadata
+            self._meta[self.META_APPL_KEY][appl.name] = applinfo
+                
+
+        # final settings
         self.units = PixelUnits.FLOAT32
         self.nodata_value = np.nan
-        
-        if isinstance(appl_name, str):
-            appl_name = [appl_name,]
-        if isinstance(appl_unit, str):
-            appl_unit = [
-                appl_unit for i in range(self.raster_shape[self.layer_index])
-            ]
-        if len(appl_name) != self.raster_shape[self.layer_index]:
-            msg = 'number of application names has to match the number of '
-            msg += 'applications, i.e. number of layers in `appl_val`!'
-            raise ValueError(msg)
-        if len(appl_unit) != self.raster_shape[self.layer_index]:
-            msg = 'number of application units has to match the number of '
-            msg += 'applications, i.e. number of layers in `appl_val`!'
-            raise ValueError(msg)
-        
-        self.layer_ids = appl_name
-        li = {}
-        for ikey, ival in zip(appl_name, appl_unit):
-            li[ikey] = ival
-        self.layer_infos['units'] = li
-    
-    @classmethod
-    def get_properties(cls) -> list:
-        """
-        Classmethod
-        
-        :return: names of all methods decorated with ``@property``
-        :rtype: list
-        """
-        props = []
-        def loop_cls(cls):
-            if cls.__name__ == GeoRaster.__name__:
-                return
-            for key, val in vars(cls).items():
-                if isinstance(val, property):
-                    props.append(key)
-            loop_cls(cls.__base__)
-        loop_cls(cls)
-        return props
 
     @staticmethod
     def _check_date(val) -> datetime.date:

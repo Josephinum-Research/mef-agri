@@ -6,9 +6,10 @@ from PyQt5.QtWidgets import (
 from shapely.geometry import Polygon
 
 from ..map import MapView
-from ..utils.widgets import CustomTabWidget
+from ..utils.widgets import BaseTab
 from ..conn.msgs import Messages
-from ....data.project import ProjectData, DB
+from ....data.project import DB
+from ..project import ProjectDataGUI
 from ....utils.misc import search_file
 
 class _TEXT:
@@ -113,7 +114,7 @@ class NewProject(QDialog):
         return super().exec()
 
 
-class ProjectTab(CustomTabWidget):
+class ProjectTab(BaseTab):
     def __init__(self, parent, store):
         super().__init__(parent, store)
         # websocket stuff
@@ -151,7 +152,7 @@ class ProjectTab(CustomTabWidget):
 
         # check if a project is manually provided by the user
         if self.store.project_path is not None:
-            self.store.project_data = ProjectData(
+            self.store.project_data = ProjectDataGUI(
                 self._store.project_path,
                 search_file(self._store.project_path, '.gpkg')
             )
@@ -184,7 +185,7 @@ class ProjectTab(CustomTabWidget):
                 _ErrorDialogs.gpkg_exists_in_pdir()
                 return
             
-            self.store.project_data = ProjectData(
+            self.store.project_data = ProjectDataGUI(
                 dlg.project_directory, dlg.project_dbname
             )
             self.store.project_data.initialize()
@@ -198,7 +199,7 @@ class ProjectTab(CustomTabWidget):
             _ErrorDialogs.no_gpkg_in_pdir()
             return
         
-        self.store.project_data = ProjectData(pdir, dbn)
+        self.store.project_data = ProjectDataGUI(pdir, dbn)
         self._show_prjcont()
 
     def _add_field(self, msg:Messages.GotDrawnField):

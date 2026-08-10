@@ -223,7 +223,7 @@ export class ManipulateFields extends Control {
         const color = feature.get('COLOR') || 'rgba(255, 150, 150, 0.5)';
         this.selectedStyle.getFill().setColor(color);
         this.selectedField = feature;
-        return this.selectedStyle
+        return this.selectedStyle;
     }
 
     handleFnameInput(event) {

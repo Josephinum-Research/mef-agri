@@ -622,9 +622,8 @@ class Geopackage(object):
         self._curs.execute(self._SQL_SRS)
         self._curs.execute(self._SQL_CONT)
         self._curs.execute(self._SQL_GEOM)
-        print(self._curs.fetchall())
-        print('\nCreated mandatory tables\n')
-        
+        print('\n(gpkg.py) Created mandatory tables\n')
+        print(f'\n(gpkg.py) with response {self._curs.fetchall()}')
         print('-----------------------------------------------------------')
         # mandatory srs data
         # https://opengeospatial.github.io/e-learning/geopackage/text/contents.html
@@ -646,9 +645,8 @@ class Geopackage(object):
             '\'' + pyproj.CRS.from_epsg(4326).to_wkt() + '\'',
             '\'WGS 84 - World Geodetic Datum 1984, used in GPS\''
         ))
-        print(self._curs.fetchall())
-        print('\nInserted mandatory coordinate reference systems\n')
-        
+        print('\n(gpkg.py) Inserted mandatory coordinate reference systems\n')
+        print(f'\n(gpkg.py) with response {self._curs.fetchall()}')
         print('-----------------------------------------------------------')
 
     @DB.connect
@@ -673,8 +671,8 @@ class Geopackage(object):
                 '\'---\''
             )
             self._curs.execute(sql)
-            print(self._curs.fetchall())
-            print('\ninserted srs {}\n'.format(self.CRS_EPSG))
+            print('\n(gpkg.py) inserted srs {}\n'.format(self.CRS_EPSG))
+            print(f'\n(gpkg.py) with response {self._curs.fetchall()}')
             print('-----------------------------------------------------------')
 
         for table in self.tables.values():
@@ -689,8 +687,8 @@ class Geopackage(object):
                 ))
             print(table.sql_create())
             self._curs.execute(table.sql_create())
-            print(self._curs.fetchall())
-            print('\ncreated table {} and its dependencies\n'.format(table.name))
+            print('\n(gpkg.py) created table {} and its dependencies\n'.format(table.name))
+            print(f'\n(gpkg.py) with response {self._curs.fetchall()}')
             print('-----------------------------------------------------------')
 
     @DB.connect
@@ -707,8 +705,8 @@ class Geopackage(object):
         """
         sql = self.tables[table].sql_insert(**kwargs)
         self._curs.execute(sql)
-        print(self._curs.fetchall())
-        print('\ninserted data into {}'.format(table))
+        print('\n(gpkg.py) inserted data into {}'.format(table))
+        print(f'\n(gpkg.py) with response {self._curs.fetchall()}')
         print('-----------------------------------------------------------')
 
     @DB.connect
@@ -724,7 +722,8 @@ class Geopackage(object):
         :type sql: str
         """
         self._curs.execute(sql)
-        print(self._curs.fetchall())
+        msg = f'(gpkg.py) executed sql with response: {self._curs.fetchall()}'
+        print(msg)
 
     @DB.connect
     @DB.close

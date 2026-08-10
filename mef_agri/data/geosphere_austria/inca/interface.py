@@ -294,7 +294,10 @@ class INCAInterface(Interface):
         # return processed epochs
         epochs = []
         for pid in self.process_ids:
-            epochs += kwargs[pid + '_epochs']
+            pe = pid + '_epochs'
+            if not pe in kwargs.keys():
+                continue
+            epochs += kwargs[pe]
         
         self.progress = 'finished processing inca-grid-historical'
         return [datetime.date.fromisoformat(ep) for ep in epochs]

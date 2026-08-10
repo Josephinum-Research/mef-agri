@@ -2,8 +2,9 @@ from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QTabWidget, QMessageBox
 )
 
-from .project import ProjectTab
-from .data import DataTab
+from .project.tab import ProjectTab
+from .data.tab import DataTab
+from .tasks.tab import TasksTab
 from .conn.server import Messages
 from .map import MapView
 
@@ -28,6 +29,12 @@ class _ErrorDialogs:
         dlg.exec()
 
 
+class _TEXT:
+    TAB_PRJ = 'project'
+    TAB_DATA = 'data'
+    TAB_TASK = 'tasks'
+
+
 class MainWindow(QWidget):
     def __init__(self, store):
         super().__init__()
@@ -47,8 +54,10 @@ class MainWindow(QWidget):
         self._tabs.tabBarClicked.connect(self.init_tabs)
         self._tab_prj = ProjectTab(self, self._store)
         self._tab_data = DataTab(self, self._store)
-        self._tabs.addTab(self._tab_prj, 'project')
-        self._tabs.addTab(self._tab_data, 'data')
+        self._tab_task = TasksTab(self, self._store)
+        self._tabs.addTab(self._tab_prj, _TEXT.TAB_PRJ)
+        self._tabs.addTab(self._tab_data, _TEXT.TAB_DATA)
+        self._tabs.addTab(self._tab_task, _TEXT.TAB_TASK)
 
         # final ui stuff
         self._l.addWidget(self._tabs, 1)
@@ -61,12 +70,18 @@ class MainWindow(QWidget):
         msg = Messages.SendActiveTab()
 
         if index == self._tabs.indexOf(self._tab_prj):
-            msg.tab_name = 'project'
+            msg.tab_name = _TEXT.TAB_PRJ
         elif index == self._tabs.indexOf(self._tab_data):
-            if self._store.project_data is None:
-                return
-            msg.tab_name = 'data'
-            if not self._tab_data.initialized:
-                self._tab_data.init_tab()
-                
+            msg = self._init_non_prj_tab(msg, self._tab_data, _TEXT.TAB_DATA)
+        elif index == self._tabs.indexOf(self._tab_task):
+            msg = self._init_non_prj_tab(msg, self._tab_task, _TEXT.TAB_TASK)
+
         self._store.websocket_server.send_messages(msg)
+
+    def _init_non_prj_tab(self, msg, tab, tabname):
+        if self._store.project_data is None:
+            return msg
+        msg.tab_name = tabname
+        if not tab.initialized:
+            tab.init_tab()
+        return msg

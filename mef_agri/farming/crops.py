@@ -1,98 +1,81 @@
-from functools import wraps
-
-from ..utils.misc import get_decorated_methods
+import json
 
 
-def cultivar(func):
-    """
-    Decorator to specify cultivars in child classes of :class:`crop`
-    """
-    @wraps(func)
-    def wrapper(obj):
-        if not func.__name__ in obj._cs:
-            obj._cs.append(func.__name__)
-            setattr(obj, func.__name__ + '__info__', {})
-        return func(obj)
-    return wrapper
+class DBIntegration(object):
+    COL_CROP = 'crop'
+    COL_CULTIVAR = 'cultivar'
+    COL_PARAMS = 'parameters'
 
-
-class Crop(object):
-    """
-    Crop base class. If specifying a new crop, the corresponding class has to 
-    inherit from this one.
-    Cultivars are introduced as methods decorated with :func:`cultivar` which
-    adds an attribute composed of the method's name and the string 
-    ``'__info__'`` (e.g. for the generic cultivar, the attribute is named 
-    ``'generic__info__'``). 
-    The cultivar methods have to return this attribute being an empty dictionary 
-    by default. 
-    If there are cultivar informations or parameters available from external 
-    data sources, these can be added to these dictionaries. 
-    """
-    def __init__(self):
-        self._cs = []
-        dms = get_decorated_methods(
-            self, ['@cultivar'], iterate_super_class=Crop
-        )
-        for dm in dms:
-            getattr(self, dm)()
+    def __init__(self, table_name:str):
+        self._tname:str = table_name
 
     @property
-    def cultivars(self) -> list[str]:
-        """
-        :return: list of available cultivars
-        :rtype: list[str]
-        """
-        return self._cs
+    def sql_table_exists(self) -> str:
+        sql = 'SELECT name FROM sqlite_master WHERE type=\'table\' AND '
+        sql += f'name=\'{self._tname}\';'
+        return sql
 
+    @property
+    def sql_create(self) -> str:
+        sql = f'CREATE TABLE {self._tname} ({self.COL_CROP} TEXT, '
+        sql += f'{self.COL_CULTIVAR} TEXT, {self.COL_PARAMS} TEXT, '
+        sql += f'PRIMARY KEY ({self.COL_CROP}, {self.COL_CULTIVAR}));'
+        return sql
+    
+    @property
+    def sql_insert_defaults(self) -> str:
+        sql = f'INSERT INTO {self._tname} '
+        sql += f'({self.COL_CROP}, {self.COL_CULTIVAR}, {self.COL_PARAMS}) '
+        sql += 'VALUES '
+        for cult in self.default_cultivars():
+            sql += self.sql_insert_tuple(
+                cult['crop'], cult['cultivar'], cult['params']
+            )
+            sql += ', '
+        return sql[:-2] + ';'
+    
+    @property
+    def sql_query_all(self) -> str:
+        sql = f'SELECT * FROM {self._tname};'
+        return sql
 
-class winter_wheat(Crop):
-    def __init__(self):
-        super().__init__()
+    def sql_insert(self, crop:str, cult:str, params:str | dict) -> str:
+        sql = f'INSERT INTO {self._tname} '
+        sql += f'({self.COL_CROP}, {self.COL_CULTIVAR}, {self.COL_PARAMS}) '
+        sql += 'VALUES ' + self.sql_insert_tuple(crop, cult, params) + ';'
+        return sql
 
-    @cultivar
-    def generic(self):
-        """
-        Unspecified cultivar triggering the usage of default values for crop
-        input parameters in the evaluation of models
-        """
-        return self.generic__info__
-
-
-class winter_barley(Crop):
-    def __init__(self):
-        super().__init__()
-
-    @cultivar
-    def generic(self):
-        """
-        Unspecified cultivar triggering the usage of default values for crop
-        input parameters in the evaluation of models
-        """
-        return self.generic__info__
-
-
-class maize(Crop):
-    def __init__(self):
-        super().__init__()
-
-    @cultivar
-    def generic(self):
-        """
-        Unspecified cultivar triggering the usage of default values for crop
-        input parameters in the evaluation of models
-        """
-        return self.generic__info__
-
-
-class soybean(Crop):
-    def __init__(self):
-        super().__init__()
-
-    @cultivar
-    def generic(self):
-        """
-        Unspecified cultivar triggering the usage of default values for crop
-        input parameters in the evaluation of models
-        """
-        return self.generic__info__
+    def sql_insert_tuple(self, crop:str, cult:str, params:str | dict) -> str:
+        if isinstance(params, str):
+            try:
+                json.loads(params)
+            except:
+                msg = 'Provided parameters cannot be parsed to dictionary!'
+                raise ValueError(msg)
+        else:
+            params = json.dumps(params)
+        return f'(\'{crop}\', \'{cult}\', \'{params}\')'
+    
+    def default_cultivars(self) -> list[dict]:
+        return [
+            {
+                'crop': 'winter_wheat',
+                'cultivar': 'generic',
+                'params': {}
+            },
+            {
+                'crop': 'winter_barley',
+                'cultivar': 'generic',
+                'params': {}
+            },
+            {
+                'crop': 'maize',
+                'cultivar': 'generic',
+                'params': {}
+            },
+            {
+                'crop': 'soybean',
+                'cultivar': 'generic',
+                'params': {}
+            }
+        ]

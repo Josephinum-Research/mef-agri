@@ -143,8 +143,6 @@ class Sentinel2Interface(Interface):
             datetime(*tstart.timetuple()[:6]), datetime(*tstop.timetuple()[:6])
         ]
 
-        print('s2-intf >>> step2')
-
         catalog = Client.open(self._rs['url'], modifier=sign_inplace)
         search = catalog.search(
             collections=[self._rs['collection'],],
@@ -155,8 +153,6 @@ class Sentinel2Interface(Interface):
         # iterate over requested items (each loop corresponds to an satellite 
         # image for a specific date)
         imgs, dates = [], []
-
-        print('s2-intf >>> step3')
 
         for item in items:
             try:
@@ -172,8 +168,6 @@ class Sentinel2Interface(Interface):
                 if not prd_plgn.contains(aoi_plgn):
                     continue
 
-                print('s2-intf >>> step4')
-
                 # check if there is already a saved image for a specfic date (can 
                 # happen if aoi is in the intersection area of two temporal 
                 # consecutive geotiffs)
@@ -186,14 +180,12 @@ class Sentinel2Interface(Interface):
                 hitem = harmonization(item)
                 aoi_ser = GeoSeries([aoi.geometry.values[0]], crs=aoi.crs)
 
-                print('s2-intf >>> step5')
-
                 ################################################################
                 # fetch all image data resulting in a xarray dataset `ds_refl`
                 rbands = self._bd['reflectance'] + self._bd['data']
                 ds_data = odc_stac.load(
                     items=[hitem,], bands=rbands, geopolygon=aoi_ser, 
-                    resolution=self._ores, anchor=AnchorEnum.EDGE, chunks={}
+                    resolution=self._objres, anchor=AnchorEnum.EDGE, chunks={}
                 )
 
                 # map to reflectance values
@@ -214,8 +206,6 @@ class Sentinel2Interface(Interface):
                 })
                 ds_refl = ds_data.copy()
 
-                print('s2-intf >>> step6')
-
                 for key in ds_refl.data_vars:
                     if key in self._bd['reflectance']:
                         band:DataArray = ds_refl[key]
@@ -230,8 +220,6 @@ class Sentinel2Interface(Interface):
                             lambda x: x > 0, other=0.
                         )
                         ds_refl[key] = band_harmonized
-
-                print('s2-intf >>> step7')
 
                 ################################################################
                 # fetch common and granule metadata and save angle data to 
@@ -262,29 +250,25 @@ class Sentinel2Interface(Interface):
                 ################################################################
                 # create georaster from xarray dataset
                 imgs.append(ImageSentinel2.from_xrdataset(
-                    merge([ds_refl, ds_meta]), aoi.crs.to_epsg()
+                    merge([ds_refl, ds_meta], join='outer'), aoi.crs.to_epsg()
                 ))
 
             except Exception as exc:
-                self.log.append(str(exc))
-                if str(exc) == 'No information found in metadata for band SCL!':
-                    msg = 'Ignoring image for current date and further '
-                    msg += 'process the other dates.'
-                    self.log.append(msg)
-                else:
-                    msg = 'Stop looping over further dates!'
-                    self.add_prj_data_error = True
-                    self.log.append(msg)
-                    break
+                errmsg = '(sentinel2/interface.py) - error on {} >>> {} - {}'
+                errmsg = errmsg.format(prd_date, type(exc).__name__, exc)
+                self.log.append(errmsg)
+                print(errmsg)
         
         return imgs
     
     @Interface.add_data_task()
     def prj_add_images(self):
-        print('s2-intf >>> step1')
         imgs = self.request_images(self.aoi, *self.timerange)
+        epochs = []
         for img in imgs:
             ipath = os.path.join(self.directory, img.epoch.isoformat())
             if not os.path.exists(ipath):
                 os.mkdir(ipath)
             img.save_geotiff(ipath, overwrite=True, compress=False)
+            epochs.append(img.metadata[img.META_IMG_DATE])
+        return epochs

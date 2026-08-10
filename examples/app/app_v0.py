@@ -9,10 +9,10 @@ from mef_agri.data.ebod_austria.interface import EbodInterface
 
 
 if __name__ == '__main__':
-    #pdir = os.path.join(
-    #    '/', 'home', 'andreas', 'development', 'projects', 'ettlinger'
-    #)
-    pdir = os.path.join('/', 'home', 'aet', 'devel', 'projects', 'test')
+    pdir = os.path.join(
+        '/', 'home', 'andreas', 'development', 'projects', 'ettlinger'
+    )
+    #pdir = os.path.join('/', 'home', 'aet', 'devel', 'projects', 'test')
     run_app(
         project_path=pdir,
         data_interfaces=[Sentinel2Interface, INCAInterface, EbodInterface]

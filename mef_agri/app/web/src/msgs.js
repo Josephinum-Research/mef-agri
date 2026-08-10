@@ -86,6 +86,26 @@ export class Messages {
         }
     };
 
+    static SendSelectedField = class extends Messages.SendMessage {
+        constructor() {
+            super();
+            this.msgType = 'selected_field';
+        }
+
+        /**
+         * Setter for the field name.
+         * 
+         * @param {string} fname - name of the drawn field/polygon
+         */
+        set fieldName(fname) {
+            this.setCont('fname', fname);
+        }
+    }
+
+    /**
+     * Class to send the name of the field which should be deleted from the 
+     * database.
+     */
     static SendDeleteField = class extends Messages.SendMessage {
         constructor() {
             super();

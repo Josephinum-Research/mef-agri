@@ -68,6 +68,18 @@ class Messages:
             """
             return getattr(self, '_' + self.CONT_FNAME)
         
+    class GotSelectedField(MsgBaseClass):
+        MTYPE = 'selected_field'
+        CONT_FNAME = 'fname'
+
+        @property
+        def field_name(self) -> str:
+            """
+            :return: name of the selected field
+            :rtype: str
+            """
+            return getattr(self, '_' + self.CONT_FNAME)
+        
     class GotDeleteField(MsgBaseClass):
         MTYPE = 'delete_field'
         CONT_FNAME = 'fname'

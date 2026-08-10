@@ -1,3 +1,4 @@
+import json
 
 
 class Fertilizer(object):
@@ -7,6 +8,7 @@ class Fertilizer(object):
     fractions (i.e. range of possible values is [0, 1]).
     """
     def __init__(self):
+        self._name = 'TBD'
         self._no3 = 0.0
         self._nh4 = 0.0
         self._cao = 0.0
@@ -18,12 +20,16 @@ class Fertilizer(object):
         self._zn = 0.0
 
     @property
-    def N_total(self) -> float:
+    def name(self) -> str:
         """
-        :return: overall fraction of nitrogen within a specified amount of fertilizer (NO3 + NH4)
-        :rtype: float
+        :return: name of fertilizer
+        :rtype: str
         """
-        return self._no3 + self._nh4
+        return self._name
+    
+    @name.setter
+    def name(self, name):
+        self._name = name
 
     @property
     def NO3(self) -> float:
@@ -144,60 +150,91 @@ class Fertilizer(object):
     def Zn(self, value:float):
         self._zn = value
 
+    def get_dict_repr(self) -> dict:
+        di = {}
+        for prop in self.get_properties():
+            di[prop] = getattr(self, prop)
+        return di
+
+    @classmethod
+    def get_properties(cls) -> list:
+        """
+        Classmethod
+        
+        :return: names of all methods decorated with ``@property``
+        :rtype: list
+        """
+        props = []
+        for key, val in vars(cls).items():
+            if isinstance(val, property):
+                props.append(key)
+        return props
     
-NAC = Fertilizer()
-NAC.NO3 = 0.135
-NAC.NH4 = 0.135
-NAC.CaO = 0.115
-NAC.CaO_sol = 0.065
+    @classmethod
+    def from_json(cls, jstr:str):
+        di = json.loads(jstr)
+        fert = cls()
+        for key, val in di:
+            setattr(fert, key, val)
+        return fert
+    
 
+class DBIntegration(object):
+    COL_FERT_NAME = 'fname'
+    COL_FERT_DEF = 'fdef'
 
-Complex_15_15_15_8S_Zn = Fertilizer()
-Complex_15_15_15_8S_Zn.NO3 = 0.06
-Complex_15_15_15_8S_Zn.NH4 = 0.09
-Complex_15_15_15_8S_Zn.P2O5 = 0.15
-Complex_15_15_15_8S_Zn.P2O5_sol = 0.135
-Complex_15_15_15_8S_Zn.K2O_sol = 0.15
-Complex_15_15_15_8S_Zn.SO3_sol = 0.08
-Complex_15_15_15_8S_Zn.Zn = 1e-4
+    def __init__(self, table_name:str):
+        self._tname:str = table_name
 
+    @property
+    def sql_table_exists(self) -> str:
+        sql = 'SELECT name FROM sqlite_master WHERE type=\'table\' AND '
+        sql += f'name=\'{self._tname}\';'
+        return sql
 
-Petiso = Fertilizer()
-Petiso.NH4 = 0.12
-Petiso.NO3 = 0.12
-Petiso.SO3 = 0.12
-Petiso.SO3_sol = 0.12
-Petiso.CaO = 0.09
-Petiso.CaO_sol = 0.09
+    @property
+    def sql_create(self) -> str:
+        sql = f'CREATE TABLE {self._tname} ({self.COL_FERT_NAME} TEXT, '
+        sql += f'{self.COL_FERT_DEF} TEXT, PRIMARY KEY ({self.COL_FERT_NAME}));'
+        return sql
 
+    @property
+    def sql_insert_defaults(self) -> str:
+        sql = f'INSERT INTO {self._tname} '
+        sql += f'({self.COL_FERT_NAME}, {self.COL_FERT_DEF}) VALUES '
+        for fert in self.default_fertilizers():
+            sql += self.sql_insert_tuple(fert) + ', '
+        return sql[:-2] + ';'
+    
+    def sql_insert(self, fert:Fertilizer) -> str:
+        sql = f'INSERT INTO {self._tname} '
+        sql += f'({self.COL_FERT_NAME}, {self.COL_FERT_DEF}) VALUES '
+        return sql + self.sql_insert_tuple(fert) + ';'
 
-Ensin = Fertilizer()
-Ensin.NO3 = 0.075
-Ensin.NH4 = 0.185
-Ensin.SO3 = 0.325
-Ensin.SO3_sol = 0.325
+    def sql_insert_tuple(self, fert:Fertilizer) -> str:
+        fstr = json.dumps(fert.get_dict_repr())
+        return f'(\'{fert.name}\', \'{fstr}\')'
 
+    def default_fertilizers(self) -> list[Fertilizer]:
+        nac = Fertilizer()
+        nac.name = 'NAC'
+        nac.NO3 = 0.135
+        nac.NH4 = 0.135
+        nac.CaO = 0.115
+        nac.CaO_sol = 0.065
 
-DusLAS = Fertilizer()
-DusLAS.NO3 = 0.12
-DusLAS.NH4 = 0.12
-DusLAS.SO3 = 0.15
-DusLAS.CaO = 0.11
+        complex_01 = Fertilizer()
+        complex_01.name = 'Complex 15/15/15 + 8S + Zn'
+        complex_01.NO3 = 0.06
+        complex_01.NH4 = 0.09
+        complex_01.P2O5 = 0.15
+        complex_01.P2O5_sol = 0.135
+        complex_01.K2O_sol = 0.15
+        complex_01.SO3_sol = 0.08
+        complex_01.Zn = 1e-4
 
+        urea = Fertilizer()
+        urea.name = 'Urea 30N'
+        urea.NH4 = 0.3
 
-Cultan_17N = Fertilizer()
-Cultan_17N.NH4 = 0.17
-Cultan_17N.NO3 = 0.0
-
-Urea_SSA = Fertilizer()
-Urea_SSA.NH4 = 0.3
-
-DAP = Fertilizer()
-DAP.NH4 = 0.18
-DAP.P2O5 = 0.46
-
-Alzon_SSA = Fertilizer()
-Alzon_SSA.NH4 = 0.38
-
-DAP_SSA_NAC = Fertilizer()
-DAP_SSA_NAC.NH4 = 0.21
+        return [nac, complex_01, urea]
