@@ -243,6 +243,9 @@ class TasksAppl(_TasksItem):
 
 
 class TasksApplNumVal(_TasksItem):
+    """
+    Class which represents the tasks-tree items of numeric application values
+    """
     def __init__(self, vname:str, value=None, vunit:str=None):
         data = ['', vname, '', '']
         super().__init__(data)
