@@ -9,7 +9,7 @@ from PyQt5.QtGui import (
 )
 import datetime as dt
 
-from . import YearMenu, TaskMenu, TasksYear, TasksTask
+from . import YearMenu, NumValMenu, TasksYear, TasksTask, TasksApplNumVal
 from .menus import SowingMenu, HarvestMenu, MinFertMenu
 from ..utils.widgets import NonProjectTab
 from ..conn.msgs import Messages
@@ -142,7 +142,7 @@ class TasksTab(NonProjectTab):
         :type position: QPoint
         """
         item = self._tree.itemAt(position)
-        if not isinstance(item, (TasksYear, TasksTask)):
+        if not isinstance(item, (TasksYear, TasksTask, TasksApplNumVal)):
             return
         
         if isinstance(item, TasksYear):
@@ -167,6 +167,10 @@ class TasksTab(NonProjectTab):
             
             tmenu.task_item = item
             tmenu.exec_(QCursor.pos())
+        elif isinstance(item, TasksApplNumVal):
+            vmenu = NumValMenu()
+            vmenu.numval_item = item
+            vmenu.exec_(QCursor.pos())
 
     def _item_changed(self, item:QTreeWidgetItem, column:int):
         """

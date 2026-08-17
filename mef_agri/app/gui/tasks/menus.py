@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QTreeWidget, QComboBox
+from PyQt5.QtWidgets import QTreeWidget
+from PyQt5.QtCore import QTimer
 from pandas import DataFrame
 
-from . import TasksTask, TasksAppl, TasksApplInfo, TaskMenu
+from . import TasksAppl, TaskMenu, TasksApplDescrVal
 from ..utils.widgets import ComboBox
 from ....farming.tasks.sowing import SowingApplication
 from ....farming.crops import DBIntegration as CDBI
@@ -12,17 +13,28 @@ class _TEXT:
     SOW_CROP_HINT = 'select crop'
 
 class SowingMenu(TaskMenu):
-    def __init__(self, tree):
+    """
+    Context menu containing applications which can be added to a sowing task.
+    """
+    def __init__(self, tree:QTreeWidget):
+        """
+        :param tree: tasks-tree currently visible in the app
+        :type tree: QTreeWidget
+        """
         super().__init__(tree)
         self._cults:DataFrame = None
-        self._crop_item:TasksApplInfo = None
-        self._cult_item:TasksApplInfo = None
-        self._pars_item:TasksApplInfo = None
+        self._crop_item:TasksApplDescrVal = None
+        self._cult_item:TasksApplDescrVal = None
+        self._pars_item:TasksApplDescrVal = None
         self._crop_sel:ComboBox = None
         self._cult_sel:ComboBox = None
 
     @property
     def available_cultivars(self) -> DataFrame:
+        """
+        :return: cultivar information from project database
+        :rtype: pandas.DataFrame
+        """
         return self._cults
     
     @available_cultivars.setter
@@ -41,31 +53,34 @@ class SowingMenu(TaskMenu):
     def handle_descriptive_values(
             self, appl_item:TasksAppl, appl_obj:SowingApplication
         ):
-        self._crop_item = TasksApplInfo(appl_obj.crop.name)
+        self._crop_item = TasksApplDescrVal(self._tree, appl_obj.crop.name)
         self._crop_item.editable_cols = ()
-        self._cult_item = TasksApplInfo(appl_obj.cultivar.name)
+        self._crop_item.value.default = _TEXT.SOW_CROP_HINT
+        self._cult_item = TasksApplDescrVal(self._tree, appl_obj.cultivar.name)
         self._cult_item.editable_cols = ()
-        self._pars_item = TasksApplInfo(appl_obj.parameters.name)
-        self._pars_item.editable_cols = ()
+        self._cult_item.value.default = _TEXT.SOW_CULT_HINT
+        self._pars_item = TasksApplDescrVal(self._tree, appl_obj.parameters.name)
+        self._pars_item.editable_cols = (2,)
         appl_item.addChildren(
             [self._crop_item, self._cult_item, self._pars_item]
         )
-        # NOTE important!!! => adding widgets in tree must be done after
-        # NOTE important!!! => adding the items to its parents in the tree
-        self._tree.setItemWidget(self._crop_item, 2, self._crop_sel)
-        self._tree.setItemWidget(self._cult_item, 2, self._cult_sel)
+        self._crop_item.value.widget = self._crop_sel
+        self._crop_item.value.widget_getter = self._crop_sel.currentText
+        self._crop_item.value.widget_setter = self._crop_sel.setCurrentText
+        self._cult_item.value.widget = self._cult_sel
+        self._cult_item.value.widget_getter = self._cult_sel.currentText
+        self._cult_item.value.widget_setter = self._cult_sel.setCurrentText
         return appl_item
 
     def _crop_selected(self, crop):
         if not crop:
             return
-        if not(self._crop_item.text(2)):
+        if not(self._crop_item.value()):
             self._crop_item.setText(2, crop)
         elif crop == self._crop_item.text(2):
             return
 
-        self._crop_item.setText(2, crop)
-        self._cult_item.setText(2, '')
+        self._crop_item.value(value=crop)
         if self._cult_sel is not None:
             self._cult_sel.clear()
         self._cult_sel.addItems(
@@ -85,17 +100,15 @@ class SowingMenu(TaskMenu):
         elif cultivar == self._selcult:
             return
 
-        self._cult_item.setText(2, cultivar)
-        print(self._crop_item.text(2))
-        print(self._cult_item.text(2))
-        cparams = self._cults[
-            (self._cults[CDBI.COL_CROP] == self._crop_item.text(2)) & 
-            (self._cults[CDBI.COL_CULTIVAR] == self._cult_item.text(2))
+        self._cult_item.value(value=cultivar)
+        self._cparams = self._cults[
+            (self._cults[CDBI.COL_CROP] == self._crop_item.value()) & 
+            (self._cults[CDBI.COL_CULTIVAR] == self._cult_item.value())
         ][CDBI.COL_PARAMS].values[0]
-        self._pars_item.setText(
-            2, self._crop_item.value + ' - ' + self._cult_item.value
-        )
+        QTimer.singleShot(100, self._update_params)
 
+    def _update_params(self):
+        self._pars_item.value(value=self._cparams)
 
 class HarvestMenu(TaskMenu):
     def __init__(self, tree):
