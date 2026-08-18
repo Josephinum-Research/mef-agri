@@ -1,6 +1,3 @@
-import json
-from numpy import ndarray
-
 from . import Task, Application
 from ...models.utils import Units
 

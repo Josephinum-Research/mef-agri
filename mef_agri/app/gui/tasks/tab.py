@@ -13,7 +13,7 @@ from . import YearMenu, NumValMenu, TasksYear, TasksTask, TasksApplNumVal
 from .menus import SowingMenu, HarvestMenu, MinFertMenu
 from ..utils.widgets import NonProjectTab
 from ..conn.msgs import Messages
-from ....farming.tasks import DBIntegration as DBTasks
+from ....farming.tasks import Task, DBIntegration as DBTasks
 from ....farming.tasks import sowing, harvest, fertilization
 from ....farming import crops, fertilizers
 
@@ -205,15 +205,16 @@ class TasksTab(NonProjectTab):
         """
         Method which is called when clicking the save-button.
         """
-        for ix1 in range(self._tree.topLevelItemCount()):
-            item:TasksYear = self._tree.topLevelItem(ix1)
+        for i1 in range(self._tree.topLevelItemCount()):
+            item:TasksYear = self._tree.topLevelItem(i1)
             if item.year == None:
                 continue
-            for ix2 in range(item.childCount()):
-                task:TasksTask = item.child(ix2)
-                tset = task.setup_task()
-                if tset:
-                    print('success')
-                else:
-                    print('missing information')
-                # TODO save task in db and in data-directory if created by user
+            for i2 in range(item.childCount()):
+                titem:TasksTask = item.child(i2)
+                if titem.from_db:
+                    continue
+                task:Task = titem.setup_task_obj()
+                self.store.project_data.execute(
+                    self._tdbi.sql_insert(task, titem.field_name)
+                )
+                # TODO save task in data-directory

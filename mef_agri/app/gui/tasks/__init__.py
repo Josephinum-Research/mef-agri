@@ -4,8 +4,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QTimer
 import datetime as dt
 from importlib import import_module
+from copy import deepcopy
 
-from ....farming.tasks import Task, Application, sowing, fertilization, harvest
+from ....farming.tasks import (
+    Task, Application, DBIntegration as TDBI, sowing, fertilization, harvest
+)
 from ..utils.widgets import ComboBox
 
 
@@ -126,6 +129,7 @@ class TasksTask(_TasksItem):
         self._tmodule:str = task_module
         self._task:Task = getattr(import_module(task_module), task_name)()
         self._new_task_date:str = None
+        self._db:bool = False
 
     @property
     def field_name(self) -> str:
@@ -171,6 +175,18 @@ class TasksTask(_TasksItem):
             return
         self._new_task_date = date
         QTimer.singleShot(100, self._update_task_date)
+
+    @property
+    def from_db(self) -> bool:
+        """
+        :return: flag, if task has been loaded from project-database
+        :rtype: bool
+        """
+        return self._db
+    
+    @from_db.setter
+    def from_db(self, val):
+        self._db = val
     
     def _edit_date(self, item:TasksTask, column:int):
         if not isinstance(item, TasksTask):
@@ -189,41 +205,33 @@ class TasksTask(_TasksItem):
     def _update_task_date(self):
         self.setText(0, self._new_task_date)
 
-    def setup_task(self) -> bool:
+    def setup_task_obj(self) -> Task:
         """
-        TODO
-        """
-        #for ix1 in range(self.childCount()):
-        #    taskcont = self.child(ix1)
-        #    if isinstance(taskcont, TasksInfo):
-        #        if taskcont.value is None:
-        #            continue
-        #        try:
-        #            setattr(self.task_obj, taskcont.name, taskcont.value)
-        #        except:
-        #            return False
-        #    elif isinstance(taskcont, TasksAppl):
-        #        appl:Application = getattr(
-        #            import_module(self._tmodule), taskcont.name
-        #        )()
-        #        for ix2 in range(taskcont.childCount()):
-        #            ainfo:TasksApplInfo = taskcont.child(ix2)
-        #            aval = getattr(appl, ainfo.name)
-        #            if isinstance(aval, Application.NumericValue):
-        #                # TODO consider path to application map as `ainfo.value`
-        #                try:
-        #                    getattr(appl, ainfo.name).value = float(ainfo.value)
-        #                except:
-        #                    return False
-        #                getattr(appl, ainfo.name).unit = ainfo.info
-        #            elif isinstance(aval, Application.DescriptiveValue):
-        #                getattr(appl, ainfo.name).value = ainfo.value
-        #        self.task_obj.add_application(appl)
+        Setting up a copy of :func:`task_obj` from the content of the tasks-tree
 
-    def save_task(self):
-        # TODO
-        pass
-    
+        :return: set up task ready for saving
+        :rtype: Task
+        """
+        task = deepcopy(self.task_obj)
+        for i1 in range(self.childCount()):
+            item = self.child(i1)
+            if isinstance(item, TasksInfo):
+                if item.value is None:
+                    continue
+                setattr(task, item.name, item.value)
+            elif isinstance(item, TasksAppl):
+                appl:Application = getattr(
+                    import_module(self.task_module), item.name
+                )()
+                for i2 in range(item.childCount()):
+                    vitem = item.child(i2)
+                    setattr(getattr(appl, vitem.name), 'value', vitem.value())
+                    if isinstance(vitem, TasksApplNumVal):
+                        setattr( getattr(appl, vitem.name), 'unit', vitem.unit)
+                task.add_application(appl)
+        task.set_up_task()
+        return task
+
 
 class TasksInfo(_TasksItem):
     """

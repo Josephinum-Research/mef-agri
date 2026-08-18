@@ -1,44 +1,154 @@
 import datetime
 import numpy as np
 import json
+import os
 
 from ...utils.raster import GeoRaster
 from ...utils.misc import PixelUnits
+from ...data.project import ProjectData
+
+
+class ProjectTasksExtension(object):
+    """
+    Class which extends :class:`mef_agri.data.project.ProjectData` to add and 
+    get tasks-data.
+    """
+    TASK_DIRECTORY = 'tasks'
+
+    def __init__(self, prj:ProjectData):
+        """
+        :param prj: instande of project-data(base)
+        :type prj: mef_agri.data.project.ProjectData
+        """
+        self._tdir = os.path.join(prj.directory, self.TASK_DIRECTORY)
+        if not os.path.exists(self._tdir):
+            os.mkdir(self._tdir)
+
+    def save_task(self, field_name:str, task:Task) -> None:
+        """
+        Save a task in the project directory
+
+        :param field_name: name of the field
+        :type field_name: str
+        :param task: task object
+        :type task: Task
+        :raises ValueError: if task data is already available for provided ``field_name`` and ``task.date_begin``
+        """
+        fdir = os.path.join(self._tdir, field_name)
+        if not os.path.exists(fdir):
+            os.mkdir(fdir)
+        
+        dstr = task.date_begin.isoformat()
+        ddir = os.path.join(fdir, dstr)
+        if not os.path.exists(ddir):
+            os.mkdir(ddir)
+
+        tname = task.__class__.__name__
+        sdir = os.path.join(ddir, tname)
+        if os.path.exists(sdir):
+            msg = f'A `{tname}`-task is already available for field '
+            msg += f'`{field_name}` at `{dstr}`!'
+            raise ValueError(msg)
+        
+        task.save_geotiff(sdir)
+
+    def get_tasks(
+            self, tstart:datetime.date, tstop:datetime.date=None, 
+            field_name:str=None
+        ) -> dict:
+        """
+        TODO
+
+        :param tstart: _description_
+        :type tstart: datetime.date
+        :param tstop: _description_, defaults to None
+        :type tstop: datetime.date, optional
+        :param field_name: _description_, defaults to None
+        :type field_name: str, optional
+        :return: _description_
+        :rtype: dict
+        """
+        pass
 
 
 class DBIntegration(object):
+    """
+    Class which provides sql-commands to integrate a table into a database 
+    containing tasks-information.
+    """
     COL_FIELD = 'field'
     COL_EPOCH = 'epoch'
     COL_TNAME = 'task'
 
     def __init__(self, table_name:str):
+        """
+        :param table_name: name of the table
+        :type table_name: str
+        """
         self._tname:str = table_name
 
     @property
     def sql_table_exists(self) -> str:
+        """
+        :return: name of the tasks-table in the database, if it exists
+        :rtype: str
+        """
         sql = 'SELECT name FROM sqlite_master WHERE type=\'table\' AND '
         sql += f'name=\'{self._tname}\';'
         return sql
 
     @property
     def sql_create(self) -> str:
+        """
+        :return: sql-command to create the tasks-table
+        :rtype: str
+        """
         sql = f'CREATE TABLE {self._tname} ({self.COL_FIELD} TEXT, '
         sql += f'{self.COL_EPOCH} TEXT, {self.COL_TNAME} TEXT, PRIMARY KEY '
         sql += f'({self.COL_FIELD}, {self.COL_EPOCH}, {self.COL_TNAME}));'
         return sql
     
     def sql_insert(self, task:Task, field:str) -> str:
+        """
+        Returns the sql-command to insert a task into the tasks-table
+
+        :param task: task-object
+        :type task: mef_agri.farming.tasks.Task
+        :param field: name of the field
+        :type field: str
+        :return: sql-command
+        :rtype: str
+        """
         sql = f'INSERT INTO {self._tname} '
         sql += f'({self.COL_FIELD}, {self.COL_EPOCH}, {self.COL_TNAME}) VALUES '
         sql += self.sql_insert_tuple(task, field) + ';'
         return sql
     
     def sql_query(self, field:str) -> str:
+        """
+        Returns sql-command to query all tasks for a specified field.
+
+        :param field: name of the field
+        :type field: str
+        :return: sql-command
+        :rtype: str
+        """
         sql = f'SELECT * FROM {self._tname} WHERE {self.COL_FIELD}=\'{field}\' '
         sql += f'ORDER BY {self.COL_EPOCH} ASC;'
         return sql
     
     def sql_insert_tuple(self, task:Task, field:str) -> str:
+        """
+        Returns a string containing a sql-valid tuple to be inserted into the 
+        tasks-table.
+
+        :param task: task object
+        :type task: mef_agri.farming.tasks.Task
+        :param field: name of the field
+        :type field: str
+        :return: string containing the tuple
+        :rtype: str
+        """
         sql = f'(\'{field}\', \'{task.date_begin.isoformat()}\', '
         sql += f'\'{task.__class__.__name__}\')'
         return sql
@@ -446,7 +556,6 @@ class Task(GeoRaster):
                 
             # save metadata
             self._meta[self.META_APPL_KEY][appl.name] = applinfo
-                
 
         # final settings
         self.units = PixelUnits.FLOAT32
