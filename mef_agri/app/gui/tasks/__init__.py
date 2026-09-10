@@ -103,7 +103,6 @@ class TasksTask(_TasksItem):
 
     def __init__(
             self, tree:QTreeWidget, task_name:str, task_module:str, 
-            task_date:dt.date|str=None
         ):
         """
         :param tree: currently visible tasks-tree
@@ -112,18 +111,11 @@ class TasksTask(_TasksItem):
         :type task_name: str
         :param task_module: module containing child class of :class:`mef_agri.farming.tasks.Task`
         :type task_module: str
-        :param task_date: date when task has been started (first column of item - not editable but set when providing the begin-date of the task), defaults to None
-        :type task_date: datetime.date | str, optional
         """
         self._fname:str = None
         self._tree:QTreeWidget = tree
         self._tree.itemChanged.connect(self._edit_date)
-
-        if task_date is None:
-            task_date = self.HINT_DATE
-        elif isinstance(task_date, dt.date):
-            task_date = task_date.isoformat()
-        super().__init__([task_date, task_name, '', ''])
+        super().__init__([self.HINT_DATE, task_name, '', ''])
         self.editable_cols = (0,)
 
         self._tmodule:str = task_module
@@ -225,9 +217,18 @@ class TasksTask(_TasksItem):
                 )()
                 for i2 in range(item.childCount()):
                     vitem = item.child(i2)
-                    setattr(getattr(appl, vitem.name), 'value', vitem.value())
+                    if isinstance(vitem, TasksApplDescrVal):
+                        setattr(
+                            getattr(appl, vitem.name), 'value', vitem.value()
+                        )
                     if isinstance(vitem, TasksApplNumVal):
-                        setattr( getattr(appl, vitem.name), 'unit', vitem.unit)
+                        if isinstance(vitem.value, 'str'):
+                            # TODO val = appl.map_from_file(vitem.value)
+                            pass
+                        else:
+                            val = vitem.value
+                        setattr(getattr(appl, vitem.name), 'value', val)
+                        setattr(getattr(appl, vitem.name), 'unit', vitem.unit)
                 task.add_application(appl)
         task.set_up_task()
         return task
@@ -326,43 +327,14 @@ class TasksApplNumVal(_TasksItem):
     """
     Class which represents the tasks-tree items of numeric application values
     """
-    class Unit(object):
-        def __init__(self, tree:QTreeWidget, item:TasksApplNumVal, col:int):
-            self._t = tree
-            self._i = item
-            self._ic = col
-            self._sel:ComboBox = ComboBox(_TEXT.APPL_UNIT_HINT)
-            self._wset:bool = False
-
-        def set_valid_units(self, vu):
-            self._sel.addItems(vu)
-            self._t.setItemWidget(self._i, self._ic, self._sel)
-            self._wset = True
-
-        def __call__(self, unit:str=None) -> None | str:
-            """
-            :param unit: unit which will be set accordingly if provided, defaults to None
-            :type unit: str, optional
-            :return: unit if ``unit`` is not provided as argument
-            :rtype: None | str
-            """
-            if unit is None:
-                u = self._sel.currentText()
-                if u == _TEXT.APPL_UNIT_HINT:
-                    return None
-                else:
-                    return u
-            else:
-                self._sel.setCurrentText(unit)
-                if not self._wset:
-                    self._t.setItemWidget(self._i, self._ic, self._sel)
-
-    def __init__(self, tree:QWidget, vname:str, value:str|float=None):
+    def __init__(self, tree:QTreeWidget, vname:str, valid_units:list[str]):
         data = ['', vname, '', '']
-        if value is not None:
-            data[2] = str(value)
         super().__init__(data)
-        self._u:TasksApplNumVal.Unit = self.Unit(tree, self, 3)
+        self._tree:QTreeWidget = tree
+        self._vu:list[str] = valid_units
+        self._usel:ComboBox = ComboBox(_TEXT.APPL_UNIT_HINT)
+        self._usel.addItems(valid_units)
+        self._tree.setItemWidget(self, 3, self._usel)
         self.editable_cols = (2,)
 
     @property
@@ -372,23 +344,50 @@ class TasksApplNumVal(_TasksItem):
         :rtype: str
         """
         return self.text(1)
+    
+    @property
+    def valid_units(self) -> list[str]:
+        """
+        :return: valid units provided to constructor
+        :rtype: list[str]
+        """
+        return self._vu
 
     @property
-    def value(self) -> TasksApplNumVal.Value:
+    def value(self) -> str | float:
         """
         :return: value itself (number or path to application map)
         :rtype: str | float
         """
         return self.text(2)
+    
+    @value.setter
+    def value(self, val):
+        if not isinstance(val, (str, float, int)):
+            msg = f'Provided value for `TasksApplNumVal.value` has to be of '
+            msg += 'type `str` (i.e. a path to an application map) or `float`!'
+            raise ValueError(msg)
+        self.setText(2, val)
 
     @property
-    def unit(self) -> TasksApplNumVal.Unit:
+    def unit(self) -> str:
         """
         :return: unit of the numeric value
         :rtype: str
         """
-        return self._u
-
+        u = self._usel.currentText()
+        if u == _TEXT.APPL_UNIT_HINT:
+            return None
+        else:
+            return u
+        
+    @unit.setter
+    def unit(self, unit):
+        if not unit in self.valid_units:
+            msg = f'Provided unit `{unit}` is not available in '
+            msg += '`TasksApplNumVal.valid_units`!'
+            raise ValueError(msg)
+        self._usel.setCurrentText(unit)
 
 class TasksApplDescrVal(_TasksItem):
     """
@@ -454,6 +453,13 @@ class TasksApplDescrVal(_TasksItem):
         
         def __call__(self, value:str=None) -> None | str:
             """
+            TasksApplDescrVal.Value is callable and can be used as getter (i.e. 
+            not providing ``value``) or setter for the underlying descriptive 
+            value.
+            The reason is to avoid using a property/getter like 
+            ``descr_val.value.value``.
+            
+
             :param value: descriptive value which will be set accordingly if provided, defaults to None
             :type value: str, optional
             :return: descriptive value if ``value`` is not provided
@@ -616,7 +622,6 @@ class TaskMenu(QMenu):
             adda.triggered.connect(self._add_application)
 
     def _add_application(self):
-        # TODO integrate application map selection through context menu on the corresponding numeric value
         appl_name = getattr(self.sender(), '_appl_name')
         appl_obj:Application = getattr(
             import_module(self.task_item.task_obj.task_module), appl_name

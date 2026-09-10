@@ -3,6 +3,15 @@ from ...models.utils import Units
 
 
 class SowingApplication(Application):
+    """
+    Base class for sowing-related applications.
+    It contains properties which are common for all sowing applications
+
+    * :func:`crop`
+    * :func:`cultivar`
+    * :func:`parameters`
+
+    """
     def __init__(self):
         super().__init__()
         self._crop = Application.DescriptiveValue()
@@ -49,6 +58,11 @@ initial states or parameters)
 
 
 class SowingAmount(SowingApplication):
+    """
+    Sowing application variant, where the amount is provided in mass of seed per 
+    area.
+    """
+
     def __init__(self):
         super().__init__()
         self._amnt = Application.NumericValue()
@@ -74,12 +88,17 @@ sowing amount in (bio)mass per area
 
 
 class SowingDensity(SowingApplication):
+    """
+    Sowing application variant, where the sown amount is determined from the 
+    thousand grain weight and sowing density (i.e. number of seeds/grains per 
+    area).
+    """
     def __init__(self):
         super().__init__()
         self._dens = Application.NumericValue()
         self._dens.name = 'density'
         self._dens.description = """
-sowing density in plants per area
+sowing density in number of seeds/grains/plants per area
         """
         self._dens.valid_units = (Units.n_m2, Units.n_ha)
         self._tgw = Application.NumericValue()

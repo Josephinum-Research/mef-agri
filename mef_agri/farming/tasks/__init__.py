@@ -339,6 +339,11 @@ class Application(object):
             if isinstance(attr, cls):
                 ret.append(attr)
         return ret
+    
+    @staticmethod
+    def map_from_file(self, fp:str) -> np.ndarray:
+        # TODO
+        pass
 
     @classmethod
     def get_properties(cls) -> list:
@@ -480,6 +485,14 @@ class Task(GeoRaster):
         raise NotImplementedError(msg)
 
     def add_application(self, appl:Application):
+        """
+        Add an :class:`Application` to the task. 
+
+        :param appl: application which should be added to a task
+        :type appl: Application
+        :raises ValueError: if ``appl`` is not in :func:`valid_applications` (defined in the child-class definition of :class:`Task`)
+        :raises ValueError: if numeric values in ``appl`` which represent an application map have different shape
+        """
         if not (appl.__class__ in self.valid_applications):
             msg = 'Provided application is not an instance from '
             msg += '`valid_applications`!'
@@ -495,6 +508,24 @@ class Task(GeoRaster):
         self._apps.append(appl)
 
     def set_up_task(self):
+        """
+        Processing the provided applications (see :func:`add_application`) to 
+        create appropriate georaster information.
+        Numeric values of applications are converted to layers of the georaster.
+        The shape of the layers results in the following cases
+
+        * if all numeric values from all applications are float values, the resulting raster will have (1, 1, n_numvals)
+        * if at least one numeric value represents an application map with shape (n, m), then the raster will have (n, m, n_numvals); scalar numeric values will be simply upscaled by creating a (n, m) raster wher all values are equal
+
+        Important note: numeric values which represent an application map and 
+        which should be added to a task have to exhibit the same shape (ensured 
+        in :func:`add_application`).
+        :func:`units` is set to :class:`mef_agri.utils.misc.PixelUnits`.FLOAT32 
+        and :func:`nodata_value` to ``numpy.nan``.
+
+        :raises ValueError: if :func:`layer_index` has not been provided yet
+        :raises ValueError: if there are redundant applications and/or numeric values
+        """
         if self.layer_index is None:
             msg = '`layer_index` not provided yet but it is necessary to set '
             msg += 'up the task/georaster!'
@@ -566,8 +597,7 @@ class Task(GeoRaster):
         if isinstance(val, datetime.datetime):
             return val.date()
         elif isinstance(val, str):
-            dt = datetime.datetime.fromisoformat(val)
-            return dt.date()
+            return datetime.date.fromisoformat(val)
         elif isinstance(val, datetime.date):
             return val
         else:
@@ -579,8 +609,7 @@ class Task(GeoRaster):
         if isinstance(val, datetime.datetime):
             return val.time()
         elif isinstance(val, str):
-            dt = datetime.datetime.fromisoformat(val)
-            return dt.time()
+            return datetime.time.fromisoformat(val)
         elif isinstance(val, datetime.time):
             return val
         else:

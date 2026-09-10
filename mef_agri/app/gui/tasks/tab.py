@@ -13,7 +13,9 @@ from . import YearMenu, NumValMenu, TasksYear, TasksTask, TasksApplNumVal
 from .menus import SowingMenu, HarvestMenu, MinFertMenu
 from ..utils.widgets import NonProjectTab
 from ..conn.msgs import Messages
-from ....farming.tasks import Task, DBIntegration as DBTasks
+from ....farming.tasks import (
+    Task, ProjectTasksExtension, DBIntegration as DBTasks
+)
 from ....farming.tasks import sowing, harvest, fertilization
 from ....farming import crops, fertilizers
 
@@ -127,6 +129,9 @@ class TasksTab(NonProjectTab):
         if len(tasks) == 0 and self._tree.topLevelItemCount() == 0:
             self._tree.addTopLevelItem(TasksYear(dt.date.today().year))
         else:
+            ####################################################################
+            # TODO create tree from db entries and tasks in data directory
+            ####################################################################
             pass
 
     def _add_item(self, position:QPoint):
@@ -152,7 +157,9 @@ class TasksTab(NonProjectTab):
         elif isinstance(item, TasksTask):
             tname = item.task_obj.__class__.__name__
 
-            # NOTE #############################################################
+################################################################################
+# NOTE #########################################################################
+################################################################################
             # add further tasks here if necessary
             if tname == sowing.Sowing.__name__:
                 tmenu = SowingMenu(self._tree)
@@ -163,7 +170,9 @@ class TasksTab(NonProjectTab):
                 tmenu = HarvestMenu(self._tree)
             elif tname == fertilization.MineralFertilization.__name__:
                 tmenu = MinFertMenu(self._tree)
-            # NOTE #############################################################
+################################################################################
+# NOTE #########################################################################
+################################################################################
             
             tmenu.task_item = item
             tmenu.exec_(QCursor.pos())
@@ -203,18 +212,21 @@ class TasksTab(NonProjectTab):
 
     def _save_changes(self):
         """
-        Method which is called when clicking the save-button.
+        Method which is called when clicking the save-button. 
+        Information from the tasks-tree is saved to the project-databse and to 
+        the project's data directory.
         """
+        prj_tasks = ProjectTasksExtension(self.store.project_data)
         for i1 in range(self._tree.topLevelItemCount()):
-            item:TasksYear = self._tree.topLevelItem(i1)
-            if item.year == None:
+            yitem:TasksYear = self._tree.topLevelItem(i1)
+            if yitem.year == None:
                 continue
-            for i2 in range(item.childCount()):
-                titem:TasksTask = item.child(i2)
+            for i2 in range(yitem.childCount()):
+                titem:TasksTask = yitem.child(i2)
                 if titem.from_db:
                     continue
                 task:Task = titem.setup_task_obj()
                 self.store.project_data.execute(
                     self._tdbi.sql_insert(task, titem.field_name)
                 )
-                # TODO save task in data-directory
+                prj_tasks.save_task(titem.field_name, task)

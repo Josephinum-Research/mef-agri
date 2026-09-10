@@ -53,6 +53,18 @@ class SowingMenu(TaskMenu):
     def handle_descriptive_values(
             self, appl_item:TasksAppl, appl_obj:SowingApplication
         ):
+        """
+        Mapping the descriptive values of a :class:`SowingApplication` being
+        the crop and cultivar names as well as crop-parameters to tasks-tree 
+        nodes/items which are added to ``appl_item`` as childs
+
+        :param appl_item: tasks-tree item representing the application
+        :type appl_item: TasksAppl
+        :param appl_obj: instance of :class:`SowingApplication`
+        :type appl_obj: SowingApplication
+        :return: ``appl_item`` with additional children being the descriptive values
+        :rtype: TasksAppl
+        """
         self._crop_item = TasksApplDescrVal(self._tree, appl_obj.crop.name)
         self._crop_item.editable_cols = ()
         self._crop_item.value.default = _TEXT.SOW_CROP_HINT
@@ -95,9 +107,9 @@ class SowingMenu(TaskMenu):
     def _cult_selected(self, cultivar):
         if not cultivar:
             return
-        if not(self._cult_item.text(2)):
+        if not(self._cult_item.value()):
             self._cult_item.setText(2, cultivar)
-        elif cultivar == self._selcult:
+        elif cultivar == self._cult_item.text(2):
             return
 
         self._cult_item.value(value=cultivar)
