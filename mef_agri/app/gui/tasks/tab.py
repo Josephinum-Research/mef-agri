@@ -28,6 +28,22 @@ class _TEXT:
     BTN_SAVE = 'save'
 
 
+class _ErrorDialogs:
+    @staticmethod
+    def task2db_error(task:str, exc:str|Exception):
+        from ...gui import _CustomErrorDialog
+        msg = f'Error when writing task `{task}` to project-database: {exc}'
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+    @staticmethod
+    def task2folder_error(task:str, exc:str|Exception):
+        from ...gui import _CustomErrorDialog
+        msg = f'Error when writing task `{task}` to folder/file: {exc}'
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+
 class TasksTab(NonProjectTab):
     """
     Tab which provides access to the tasks related to the selected field.
@@ -223,10 +239,27 @@ class TasksTab(NonProjectTab):
                 continue
             for i2 in range(yitem.childCount()):
                 titem:TasksTask = yitem.child(i2)
+                titem.field_name = self._active_field
                 if titem.from_db:
                     continue
                 task:Task = titem.setup_task_obj()
-                self.store.project_data.execute(
-                    self._tdbi.sql_insert(task, titem.field_name)
-                )
-                prj_tasks.save_task(titem.field_name, task)
+
+                try:
+                    self.store.project_data.execute(
+                        self._tdbi.sql_insert(task, titem.field_name)
+                    )
+                except Exception as exc:
+                    raise exc
+                    #_ErrorDialogs.task2db_error(task.__class__.__name__, exc)
+                    #return
+
+                try:
+                    prj_tasks.save_task(titem.field_name, task)
+                except Exception as exc:
+                    self.store.project_data.execute(
+                        self._tdbi.sql_delete(task, titem.field_name)
+                    )
+                    raise exc
+                    #_ErrorDialogs.task2folder_error(
+                    #    task.__class__.__name__, exc
+                    #)

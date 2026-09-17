@@ -1,9 +1,8 @@
 from PyQt5.QtWidgets import (
-    QLabel, QGridLayout, QDateEdit, QComboBox, QPushButton, QScrollArea, 
-    QApplication, QTextEdit
+    QLabel, QGridLayout, QDateEdit, QComboBox, QPushButton, QTextEdit
 )
 from PyQt5.QtCore import (
-    Qt, QDate, QObject, QThread, pyqtSignal, pyqtSlot, QCoreApplication
+    Qt, QDate, QObject, QThread, pyqtSignal, pyqtSlot
 )
 from datetime import date
 

@@ -2,10 +2,11 @@ import datetime
 import numpy as np
 import json
 import os
+from geopandas import GeoDataFrame
 
-from ...utils.raster import GeoRaster
+from ...utils.raster import GeoRaster, bbox_from_gdf
 from ...utils.misc import PixelUnits
-from ...data.project import ProjectData
+from ...data.project import ProjectData, DB
 
 
 class ProjectTasksExtension(object):
@@ -20,6 +21,7 @@ class ProjectTasksExtension(object):
         :param prj: instande of project-data(base)
         :type prj: mef_agri.data.project.ProjectData
         """
+        self._prj:ProjectData = prj
         self._tdir = os.path.join(prj.directory, self.TASK_DIRECTORY)
         if not os.path.exists(self._tdir):
             os.mkdir(self._tdir)
@@ -50,6 +52,13 @@ class ProjectTasksExtension(object):
             msg += f'`{field_name}` at `{dstr}`!'
             raise ValueError(msg)
         
+        os.mkdir(sdir)
+        if not task.set_up:
+            task.layer_index = 0
+            field = self._prj.fields[
+                self._prj.fields[DB.TBL_FIELDS.COL_FIELDNAME] == field_name
+            ]
+            task.set_up_task(field)
         task.save_geotiff(sdir)
 
     def get_tasks(
@@ -123,6 +132,12 @@ class DBIntegration(object):
         sql += f'({self.COL_FIELD}, {self.COL_EPOCH}, {self.COL_TNAME}) VALUES '
         sql += self.sql_insert_tuple(task, field) + ';'
         return sql
+
+    def sql_delete(self, task:Task, field:str) -> str:
+        sql = f'DELETE FROM {self._tname} WHERE {self.COL_FIELD}=\'{field}\' '
+        sql += f'AND {self.COL_EPOCH}=\'{task.date_begin.isoformat()}\' AND '
+        sql += f'{self.COL_TNAME}=\'{task.__class__.__name__}\';'
+        return sql
     
     def sql_query(self, field:str) -> str:
         """
@@ -177,10 +192,15 @@ class Application(object):
             self._unit:str = None
             self._uv:list[str] = None
             self._descr:str = None
+            self._ores:float = None
+            self._epsg:int = None
+            self._bbox:tuple = None
 
         @property
         def name(self) -> str:
             """
+            settable
+
             :return: name of the numeric application value
             :rtype: str
             """
@@ -193,6 +213,8 @@ class Application(object):
         @property
         def description(self) -> str:
             """
+            settable
+            
             :return: description of the numeric value
             :rtype: str
             """
@@ -208,6 +230,8 @@ class Application(object):
         @property
         def valid_units(self) -> list[str]:
             """
+            settable
+            
             :return: valid values for :func:`unit`
             :rtype: list[str]
             """
@@ -220,6 +244,8 @@ class Application(object):
         @property
         def unit(self) -> str:
             """
+            settable
+            
             :return: unit of the application value (see :class:`mef_agri.models.utils.__UNITS__`)
             :rtype: str
             """
@@ -237,6 +263,8 @@ class Application(object):
         @property
         def value(self) -> float | np.ndarray:
             """
+            settable
+            
             :return: application value itself (numeric value if uniform application, numpy.ndarray if application map)
             :rtype: float | numpy.ndarray
             """
@@ -253,6 +281,48 @@ class Application(object):
                 msg += 'application) or a `numpy.ndarray` representing an '
                 msg += 'application map!'
                 raise ValueError(msg)
+
+        @property
+        def obj_resolution(self) -> float:
+            """
+            settable
+            
+            :return: object resolution (i.e pixel dimension) in [m] if :func:`value` is a numpy.ndarray (otherwise ``None``)
+            :rtype: float
+            """
+            return self._ores
+
+        @obj_resolution.setter
+        def obj_resolution(self, val):
+            self._ores = val
+
+        @property
+        def crs(self) -> int:
+            """
+            settable
+
+            :return: epsg-code of crs if :func:`value` is a numpy.ndarray (otherwise ``None``)
+            :rtype: int
+            """
+            return self._epsg
+
+        @crs.setter
+        def crs(self, val):
+            self._epsg = val
+
+        @property
+        def bbox(self) -> tuple:
+            """
+            settable
+
+            :return: bounding-box (x_min, y_min, x_max, y_max), if :func:`value` is a numpy.ndarray (otherwise ``None``)
+            :rtype: tuple
+            """
+            return self._bbox
+
+        @bbox.setter
+        def bbbox(self, val):
+            self._bbox = val
 
     class DescriptiveValue(object):
         def __init__(self):
@@ -304,6 +374,10 @@ class Application(object):
     #####################   Application-Class-stuff   ##########################
     def __init__(self):
         self._props = self.get_properties()
+        self._nvals:list = None
+        self._nnvs:list[str] = None
+        self._dvals:list = None
+        self._ndvs:list[str] = None
 
     @property
     def name(self) -> str:
@@ -320,7 +394,19 @@ class Application(object):
         :return: all properties being instances of :class:`NumericValue`
         :rtype: list[NumericValue]
         """
-        return self._loop_props(self.NumericValue)
+        if None in (self._nvals, self._nnvs):
+            self._nnvs, self._nvals = self._loop_props(self.NumericValue)
+        return self._nvals
+
+    @property
+    def numval_names(self) -> list[str]:
+        """
+        :return: names of :func:`numeric_values` (same order!)
+        :rtype: list[str]
+        """
+        if None in (self._nvals, self._nnvs):
+            self._nnvs, self._nvals = self._loop_props(self.NumericValue)
+        return self._nnvs
 
     @property
     def descriptive_values(self) -> list[DescriptiveValue]:
@@ -328,22 +414,42 @@ class Application(object):
         :return: all properties being instances of :class:`DescriptiveValue`
         :rtype: list[DescriptiveValue]
         """
-        return self._loop_props(self.DescriptiveValue)
+        if None in (self._dvals, self._ndvs):
+            self._ndvs, self._dvals = self._loop_props(self.DescriptiveValue)
+        return self._dvals
 
-    def _loop_props(self, cls) -> list:
-        ret = []
+    @property
+    def descrval_names(self) -> list[str]:
+        """
+        :return: names of :func:`descriptive_values` (same order!)
+        :rtype: list[str]
+        """
+        if None in (self._dvals, self._ndvs):
+            self._ndvs, self._dvals = self._loop_props(self.DescriptiveValue)
+        return self._ndvs
+
+    def _loop_props(self, cls) -> tuple[list, list]:
+        vnames, vals = [], []
         for prop in self._props:
             if prop in ('name', 'numeric_values', 'descriptive_values'):
                 continue
             attr = getattr(self, prop)
             if isinstance(attr, cls):
-                ret.append(attr)
-        return ret
+                vnames.append(prop)
+                vals.append(attr)
+        return vnames, vals
     
     @staticmethod
-    def map_from_file(self, fp:str) -> np.ndarray:
-        # TODO
-        pass
+    def map_from_file(self, fp:str) -> tuple[int, float, tuple, np.ndarray]:
+        """
+        Load application map from file
+
+        :param fp: absolute path to the file
+        :type fp: str
+        :return: crs/epsg, object-resolution [m], bbox (x_min, y_min, x_max, y_max), application map itself (i.e. raster)
+        :rtype: tuple[int, float, tuple, np.ndarray]
+        """
+        raise NotImplementedError()
 
     @classmethod
     def get_properties(cls) -> list:
@@ -378,7 +484,12 @@ class Task(GeoRaster):
     corresponding numeric values :class:`Application.NumericValue` represent the 
     layers of the task/georaster where layer-ids are composed of the application 
     name and the name of the numeric value (i.e. the ``name`` attributes of 
-    :class:`Application` and :class:`Application.NumericValue`)
+    :class:`Application` and :class:`Application.NumericValue`).
+    If there is more than one application value which is derived from an 
+    application map, it is required, that these values exhibit the same 
+    georeference (i.e. same raster-shape, bounding-box, object-resolution, 
+    crs/epsg).
+
     The descriptive values :class:`Application.DescriptiveValue` are stored in 
     the metadata file of the georaster.
     """
@@ -396,6 +507,10 @@ class Task(GeoRaster):
         super().__init__()
         self._apps:list[Application] = []
         self._avshape:tuple = None
+        self._avores:float = None
+        self._avbbox:tuple = None
+        self._avepsg:int = None
+        self._set_up:bool = False
         self._meta['date_begin'] = None
         self._meta['date_end'] = None
         self._meta['time_begin'] = None
@@ -484,6 +599,14 @@ class Task(GeoRaster):
         msg = '`valid_applications` have to be defined in child class!'
         raise NotImplementedError(msg)
 
+    @property
+    def set_up(self) -> bool:
+        """
+        :return: flag if task has already been set up (i.e. :func:`set_up_task` has already been called)
+        :rtype: bool
+        """
+        return self._set_up
+
     def add_application(self, appl:Application):
         """
         Add an :class:`Application` to the task. 
@@ -498,16 +621,24 @@ class Task(GeoRaster):
             msg += '`valid_applications`!'
             raise ValueError(msg)
         for val in appl.numeric_values:
-            c1 = isinstance(val.value, np.ndarray)
-            if (self._avshape is None) and c1:
-                self._avshape = val.value.shape
-            if c1 and (val.value.shape != self._avshape):
-                msg = 'Shapes of provided application maps do not match >>> '
-                msg += '{} != {}'.format(self._avshape, appl.value.shape)
-                raise ValueError(msg)
+            if isinstance(val.value, np.ndarray):
+                if self._avshape is None:
+                    self._avshape = val.value.shape
+                    self._avores = val.obj_resolution
+                    self._avbbox = val.bbox
+                    self._avepsg = val.crs
+                c1 = self._avshape != val.value.shape
+                c2 = self._avores != val.obj_resolution
+                c3 = self._avbbox != val.bbox
+                c4 = self._avepsg != val.crs
+                if True in (c1, c2, c3, c4):
+                    msg = 'Georeference of provided application values does not'
+                    msg += 'match (either raster-shape, object-resolution, '
+                    msg += 'bounding-box or crs/epsg)!'
+                    raise ValueError(msg)
         self._apps.append(appl)
 
-    def set_up_task(self):
+    def set_up_task(self, field:GeoDataFrame=None):
         """
         Processing the provided applications (see :func:`add_application`) to 
         create appropriate georaster information.
@@ -523,7 +654,13 @@ class Task(GeoRaster):
         :func:`units` is set to :class:`mef_agri.utils.misc.PixelUnits`.FLOAT32 
         and :func:`nodata_value` to ``numpy.nan``.
 
+        ``field`` is only required, if all numeric application values are 
+        scalar, i.e. only uniform applications have been performed in the task.
+
+        :param field: one row of a geodataframe containing field geo-information, defaults to None
+        :type field: geopandas.GeoDataFrame, optional
         :raises ValueError: if :func:`layer_index` has not been provided yet
+        :raises ValueError: if ``field`` has not exactly one row
         :raises ValueError: if there are redundant applications and/or numeric values
         """
         if self.layer_index is None:
@@ -589,8 +726,30 @@ class Task(GeoRaster):
             self._meta[self.META_APPL_KEY][appl.name] = applinfo
 
         # final settings
+        if self._avshape is None:
+            if (field is None) or (len(field) != 1):
+                msg = '`field` has to be a geopandas.GeoDataFrame containing '
+                msg += 'exactly one row with field-information!'
+                raise ValueError(msg)
+            self.crs = field.crs.to_epsg()
+            self.bounds = bbox_from_gdf(field)
+            ores = max(
+                self.bounds[2] - self.bounds[0],
+                self.bounds[3] - self.bounds[1]
+            )
+        else:
+            self.crs = self._avepsg
+            self.bounds = self._avbbox
+            ores = self._avores
+        self.transformation = np.array([
+            [ores, 0., self.bounds[0]],
+            [0., -ores, self.bounds[3]],
+            [0., 0., 1.]
+        ])
+        self.raster_shape = self.raster.shape
         self.units = PixelUnits.FLOAT32
         self.nodata_value = np.nan
+        self._set_up = True
 
     @staticmethod
     def _check_date(val) -> datetime.date:

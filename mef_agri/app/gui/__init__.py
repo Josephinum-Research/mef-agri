@@ -21,14 +21,6 @@ class _CustomErrorDialog(QMessageBox):
         self.setIcon(QMessageBox.Critical)
 
 
-class _ErrorDialogs:
-    @staticmethod
-    def no_prj_selected():
-        msg = 'No project selected yet!'
-        dlg = _CustomErrorDialog(msg)
-        dlg.exec()
-
-
 class _TEXT:
     TAB_PRJ = 'project'
     TAB_DATA = 'data'

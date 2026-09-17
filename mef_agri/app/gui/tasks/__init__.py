@@ -219,18 +219,22 @@ class TasksTask(_TasksItem):
                     vitem = item.child(i2)
                     if isinstance(vitem, TasksApplDescrVal):
                         setattr(
-                            getattr(appl, vitem.name), 'value', vitem.value()
+                            getattr(appl, vitem.property_name), 'value', vitem.value()
                         )
                     if isinstance(vitem, TasksApplNumVal):
-                        if isinstance(vitem.value, 'str'):
+                        if isinstance(vitem.value, str):
                             # TODO val = appl.map_from_file(vitem.value)
                             pass
                         else:
                             val = vitem.value
-                        setattr(getattr(appl, vitem.name), 'value', val)
-                        setattr(getattr(appl, vitem.name), 'unit', vitem.unit)
+                        setattr(
+                            getattr(appl, vitem.property_name), 'value', val
+                        )
+                        setattr(
+                            getattr(appl, vitem.property_name), 'unit', 
+                            vitem.unit
+                        )
                 task.add_application(appl)
-        task.set_up_task()
         return task
 
 
@@ -327,14 +331,18 @@ class TasksApplNumVal(_TasksItem):
     """
     Class which represents the tasks-tree items of numeric application values
     """
-    def __init__(self, tree:QTreeWidget, vname:str, valid_units:list[str]):
+    def __init__(
+            self, tree:QTreeWidget, vname:str, valid_units:list[str], 
+            appl_prop_name:str
+        ):
         data = ['', vname, '', '']
         super().__init__(data)
         self._tree:QTreeWidget = tree
         self._vu:list[str] = valid_units
+        self._apn:str = appl_prop_name
         self._usel:ComboBox = ComboBox(_TEXT.APPL_UNIT_HINT)
         self._usel.addItems(valid_units)
-        self._tree.setItemWidget(self, 3, self._usel)
+        QTimer.singleShot(100, self._set_unit_selection)
         self.editable_cols = (2,)
 
     @property
@@ -354,12 +362,24 @@ class TasksApplNumVal(_TasksItem):
         return self._vu
 
     @property
+    def property_name(self) -> str:
+        """
+        :return: name of the numeric value property (i.e. property-name of the corresponding numeric value in the child class of :class:`Application`)
+        :rtype: str
+        """
+        return self._apn
+
+    @property
     def value(self) -> str | float:
         """
         :return: value itself (number or path to application map)
         :rtype: str | float
         """
-        return self.text(2)
+        val = self.text(2)
+        try:
+            return float(val)
+        except:
+            return val
     
     @value.setter
     def value(self, val):
@@ -388,6 +408,9 @@ class TasksApplNumVal(_TasksItem):
             msg += '`TasksApplNumVal.valid_units`!'
             raise ValueError(msg)
         self._usel.setCurrentText(unit)
+
+    def _set_unit_selection(self):
+        self._tree.setItemWidget(self, 3, self._usel)
 
 class TasksApplDescrVal(_TasksItem):
     """
@@ -480,7 +503,7 @@ class TasksApplDescrVal(_TasksItem):
                 else:
                     self.widget_setter(value)
         
-    def __init__(self, tree:QTreeWidget, vname:str):
+    def __init__(self, tree:QTreeWidget, vname:str, appl_prop_name:str):
         """
         :param vname: name of the descriptive value
         :type vname: str
@@ -488,6 +511,7 @@ class TasksApplDescrVal(_TasksItem):
         data = ['', vname, '', '']
         super().__init__(data)
         self._v:TasksApplDescrVal.Value = self.Value(tree, self, 2)
+        self._apn:str = appl_prop_name
 
     @property
     def name(self) -> str:
@@ -496,6 +520,14 @@ class TasksApplDescrVal(_TasksItem):
         :rtype: str
         """
         return self.text(1)
+
+    @property
+    def property_name(self) -> str:
+        """
+        :return: name of the descriptive value property (i.e. property-name of the corresponding descriptive value in the child class of :class:`Application`)
+        :rtype: str
+        """
+        return self._apn
     
     @property
     def value(self) -> TasksApplDescrVal.Value:
@@ -628,10 +660,11 @@ class TaskMenu(QMenu):
         )()
         appl_item = TasksAppl(appl_name)
         appl_item = self.handle_descriptive_values(appl_item, appl_obj)
-        for nval in appl_obj.numeric_values:
-            appl_val = TasksApplNumVal(self._tree, nval.name)
+        for nval, nvname in zip(appl_obj.numeric_values, appl_obj.numval_names):
+            appl_val = TasksApplNumVal(
+                self._tree, nval.name, nval.valid_units, nvname
+            )
             appl_item.addChild(appl_val)
-            appl_val.unit.set_valid_units(nval.valid_units)
         self.task_item.addChild(appl_item)
 
     def handle_descriptive_values(

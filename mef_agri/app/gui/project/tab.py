@@ -1,11 +1,10 @@
 import geopandas as gpd
 from PyQt5.QtWidgets import (
     QGridLayout, QFileDialog, QPushButton, QFormLayout,QLabel, QLineEdit, 
-    QDialog, QMessageBox
+    QDialog
 )
 from shapely.geometry import Polygon
 
-from ..map import MapView
 from ..utils.widgets import BaseTab
 from ..conn.msgs import Messages
 from ....data.project import DB
@@ -26,28 +25,25 @@ class _TEXT:
     DEF_CRS = '25833'
     DLG_NEWPRJ_TITLE = 'create new project'
 
-class _CustomErrorDialog(QMessageBox):
-    def __init__(self, msg):
-        super().__init__()
-        self.setWindowTitle('project-error')
-        self.setText(msg)
-        self.setIcon(QMessageBox.Critical)
 
 class _ErrorDialogs:
     @staticmethod
     def no_gpkg_in_pdir():
+        from ...gui import _CustomErrorDialog
         msg = 'No .gpkg available in the selected directory!'
         dlg = _CustomErrorDialog(msg)
         dlg.exec()
 
     @staticmethod
     def gpkg_exists_in_pdir():
+        from ...gui import _CustomErrorDialog
         msg = 'A .gpkg already exists in the selected directory!'
         dlg = _CustomErrorDialog(msg)
         dlg.exec()
 
     @staticmethod
     def no_project_selected():
+        from ...gui import _CustomErrorDialog
         msg = 'No project has been created or selected yet!'
         dlg = _CustomErrorDialog(msg)
         dlg.exec()
