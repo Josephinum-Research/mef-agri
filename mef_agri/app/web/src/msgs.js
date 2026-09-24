@@ -193,4 +193,15 @@ export class Messages {
             return this.getCont('tabname');
         }
     }
+
+    static GotTasksTreeChanges = class extends Messages.GotMessage {
+        static msgType = 'tasks_tree_changes';
+
+        /**
+         * @returns {boolean} - flag if unsaved changes are present in the tasks-tree of the tasks-tab
+         */
+        get unseavedChanges() {
+            return this.getCont('unsaved_changes');
+        }
+    }
 }

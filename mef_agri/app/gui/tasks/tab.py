@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem, QPushButton
 )
 from PyQt5.QtCore import (
-    Qt, QPoint
+    Qt, QPoint, QTimer
 )
 from PyQt5.QtGui import (
     QCursor
@@ -44,11 +44,22 @@ class _ErrorDialogs:
         dlg.exec()
 
 
+class _WarningDialogs:
+    @staticmethod
+    def unsaved_changes():
+        from ...gui import _CustomWarningDialog
+        msg = 'There are unsaved changes in the tasks-tree!'
+        dlg = _CustomWarningDialog(msg)
+        dlg.show()
+
+
 class TasksTab(NonProjectTab):
     """
     Tab which provides access to the tasks related to the selected field.
     Tasks are organized in a tree with years being the top-level items.
     """
+    _VAR_TTREE_CHANGE = '__mef__task_tree_change'
+
     def __init__(self, parent, store):
         super().__init__(parent, store)
         self._active_field:str = None
@@ -77,6 +88,7 @@ class TasksTab(NonProjectTab):
         self._tree.itemChanged.connect(self._item_changed)
         self._tree.itemDoubleClicked.connect(self._edit_item)
         self.layout_main.addWidget(self._tree)
+        self._toggle_unsaved_changes(False)
 
         # buttons for user interaction
         self._btn_save = QPushButton(_TEXT.BTN_SAVE)
@@ -137,8 +149,15 @@ class TasksTab(NonProjectTab):
         elif msg.field_name == self._active_field:
             return
         
+        if getattr(self._tree, self._VAR_TTREE_CHANGE):
+            # TODO
+            return
+
+        self._toggle_unsaved_changes(False)        
         self._tree.clear()
+        self._active_field = msg.field_name
         self._lbl_sfld.setText(msg.field_name)
+
         tasks = self.store.project_data.query(
             self._tdbi.sql_query(msg.field_name)
         )
@@ -166,6 +185,8 @@ class TasksTab(NonProjectTab):
         if not isinstance(item, (TasksYear, TasksTask, TasksApplNumVal)):
             return
         
+        self._toggle_unsaved_changes(True)
+
         if isinstance(item, TasksYear):
             ymenu = YearMenu(self._tree)
             ymenu.year_item = item
@@ -263,3 +284,11 @@ class TasksTab(NonProjectTab):
                     #_ErrorDialogs.task2folder_error(
                     #    task.__class__.__name__, exc
                     #)
+
+        self._toggle_unsaved_changes(False)
+
+    def _toggle_unsaved_changes(self, flag:bool):
+        setattr(self._tree, self._VAR_TTREE_CHANGE, flag)
+        msg = Messages.SendTasksTreeChanges()
+        msg.unsaved_changes = flag
+        self.store.websocket_server.send_messages(msg)

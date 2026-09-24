@@ -547,6 +547,9 @@ class YearMenu(QMenu):
     It contains a point for adding a new :class:`TasksYear` item as well as 
     tasks being available in ``mef_agri.app.gui.tasks._available_tasks``.
     """
+    _VAR_TNAME = '__mef__task_name'
+    _VAR_TMODULE = '__mef__task_module'
+
     def __init__(self, tree:QTreeWidget):
         """
         :param tree: tasks-tree currently visible in the app
@@ -565,8 +568,8 @@ class YearMenu(QMenu):
 
         for task in _available_tasks:
             addt = self.addAction(_TEXT.MENU_ADD_TASK.format(task.__name__))
-            setattr(addt, '_task_name', task.__name__)
-            setattr(addt, '_task_module', task.__module__)
+            setattr(addt, self._VAR_TNAME, task.__name__)
+            setattr(addt, self._VAR_TMODULE, task.__module__)
             addt.triggered.connect(self._add_task)
 
     @property
@@ -610,8 +613,8 @@ class YearMenu(QMenu):
         """
         task = TasksTask(
             self._tree,
-            getattr(self.sender(), '_task_name'),
-            getattr(self.sender(), '_task_module')
+            getattr(self.sender(), self._VAR_TNAME),
+            getattr(self.sender(), self._VAR_TMODULE)
         )
         task.addChildren([
             TasksInfo(self._tree, Task.date_begin.__name__, TasksInfo.HINT_DATE),

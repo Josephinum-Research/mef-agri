@@ -19,6 +19,7 @@ export class SelectField {
         this.selectDef = new Select({style: this.selectMethod.bind(this)});
         this.appConn = appConn;
         this.fMap = fMap;
+        this.suppress_selection = false;
     }
 
     selectMethod(feature) {
@@ -26,7 +27,9 @@ export class SelectField {
         const color = feature.get('COLOR') || 'rgba(255, 150, 150, 0.5)';
         this.selectedStyle.getFill().setColor(color);
 
-        if (feature != this.selectedField) {
+        var c1 = feature != this.selectedField;
+        var c2 = !this.suppress_selection;
+        if (c1 && c2) {
             // zoom to feature
             this.selectedField = feature;
             var extent = feature.getGeometry().getExtent();
@@ -46,5 +49,9 @@ export class SelectField {
             this.fMap.map.removeInteraction(this.selectDef);
             this.selectedField = null;
         }
+    }
+
+    static handle_tasks_tree_changes(selectField, flag) {
+        selectField.suppress_selection = flag;
     }
 }

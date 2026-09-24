@@ -30,4 +30,8 @@ fMap.addCustomControl(mFields);
 fMap.addCustomInteraction(mFields.selectDef);
 const sFields = new SelectField(fMap, appConn);
 fMap.addCustomInteraction(sFields.selectDef);
+appConn.registerHandler(
+    Messages.GotTasksTreeChanges, sFields.handle_tasks_tree_changes, sFields
+);
+
 fMap.run();

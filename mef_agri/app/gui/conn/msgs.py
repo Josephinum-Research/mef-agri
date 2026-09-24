@@ -144,3 +144,19 @@ class Messages:
         @tab_name.setter
         def tab_name(self, value):
             setattr(self, '_' + self.CONT_TABNAME, value)
+
+    class SendTasksTreeChanges(MsgBaseClass):
+        MTYPE = 'tasks_tree_changes'
+        CONT_CHANGES = 'unsaved_changes'
+
+        @property
+        def unsaved_changes(self) -> bool:
+            """
+            :return: flag if unsaved changes are present in the tasks-tree
+            :rtype: bool
+            """
+            return getattr(self, '_' + self.CONT_CHANGES)
+        
+        @unsaved_changes.setter
+        def unsaved_changes(self, value):
+            setattr(self, '_' + self.CONT_CHANGES, value)

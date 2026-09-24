@@ -21,6 +21,14 @@ class _CustomErrorDialog(QMessageBox):
         self.setIcon(QMessageBox.Critical)
 
 
+class _CustomWarningDialog(QMessageBox):
+    def __init__(self, msg):
+        super().__init__()
+        self.setWindowTitle('warning')
+        self.setText(msg)
+        self.setIcon(QMessageBox.Warning)
+
+
 class _TEXT:
     TAB_PRJ = 'project'
     TAB_DATA = 'data'
