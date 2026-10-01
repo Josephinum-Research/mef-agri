@@ -25,7 +25,21 @@ class _TEXT:
     DB_CULT_TABLE = 'cultivars'
     DB_FERT_TABLE = 'fertilizers'
     LBL_SELFLD_INIT = 'select field in map'
-    BTN_SAVE = 'save'
+    BTN_SAVE_DISABLED = 'nothing to save'
+    BTN_SAVE_ENABLED = 'save changes'
+
+
+class _STYLE:
+    BTN_SAVE_ENABLED = """
+        QPushButton {
+            background-color: rgb(255, 127, 80)
+        }
+    """
+    BTN_SAVE_DISABLED = """
+        QPushButton {
+            background-color: rgb(0, 255, 150)
+        }
+    """
 
 
 class _ErrorDialogs:
@@ -88,12 +102,13 @@ class TasksTab(NonProjectTab):
         self._tree.itemChanged.connect(self._item_changed)
         self._tree.itemDoubleClicked.connect(self._edit_item)
         self.layout_main.addWidget(self._tree)
-        self._toggle_unsaved_changes(False)
 
         # buttons for user interaction
-        self._btn_save = QPushButton(_TEXT.BTN_SAVE)
+        self._btn_save = QPushButton(_TEXT.BTN_SAVE_DISABLED)
         self._btn_save.clicked.connect(self._save_changes)
         self.layout_main.addWidget(self._btn_save)
+
+        self._toggle_unsaved_changes(False)
 
     def init_tab(self):
         """
@@ -148,9 +163,7 @@ class TasksTab(NonProjectTab):
             self._active_field = msg.field_name
         elif msg.field_name == self._active_field:
             return
-        
         if getattr(self._tree, self._VAR_TTREE_CHANGE):
-            # TODO
             return
 
         self._toggle_unsaved_changes(False)        
@@ -158,16 +171,18 @@ class TasksTab(NonProjectTab):
         self._active_field = msg.field_name
         self._lbl_sfld.setText(msg.field_name)
 
-        tasks = self.store.project_data.query(
-            self._tdbi.sql_query(msg.field_name)
-        )
-        if len(tasks) == 0 and self._tree.topLevelItemCount() == 0:
+        prj_tasks = ProjectTasksExtension(self.store.project_data)
+        tasks = prj_tasks.get_tasks(fields=msg.field_name)
+        if (
+            len(tasks[msg.field_name]) == 0 and 
+            self._tree.topLevelItemCount() == 0
+        ):
             self._tree.addTopLevelItem(TasksYear(dt.date.today().year))
         else:
             ####################################################################
             # TODO create tree from db entries and tasks in data directory
             ####################################################################
-            pass
+            print(tasks)
 
     def _add_item(self, position:QPoint):
         """
@@ -270,9 +285,8 @@ class TasksTab(NonProjectTab):
                         self._tdbi.sql_insert(task, titem.field_name)
                     )
                 except Exception as exc:
-                    raise exc
-                    #_ErrorDialogs.task2db_error(task.__class__.__name__, exc)
-                    #return
+                    _ErrorDialogs.task2db_error(task.__class__.__name__, exc)
+                    return
 
                 try:
                     prj_tasks.save_task(titem.field_name, task)
@@ -280,14 +294,20 @@ class TasksTab(NonProjectTab):
                     self.store.project_data.execute(
                         self._tdbi.sql_delete(task, titem.field_name)
                     )
-                    raise exc
-                    #_ErrorDialogs.task2folder_error(
-                    #    task.__class__.__name__, exc
-                    #)
-
+                    _ErrorDialogs.task2folder_error(
+                        task.__class__.__name__, exc
+                    )
         self._toggle_unsaved_changes(False)
 
     def _toggle_unsaved_changes(self, flag:bool):
+        self._btn_save.setEnabled(flag)
+        if flag:
+            self._btn_save.setStyleSheet(_STYLE.BTN_SAVE_ENABLED)
+            self._btn_save.setText(_TEXT.BTN_SAVE_ENABLED)
+        else:
+            self._btn_save.setStyleSheet(_STYLE.BTN_SAVE_DISABLED)
+            self._btn_save.setText(_TEXT.BTN_SAVE_DISABLED)
+
         setattr(self._tree, self._VAR_TTREE_CHANGE, flag)
         msg = Messages.SendTasksTreeChanges()
         msg.unsaved_changes = flag

@@ -62,22 +62,50 @@ class ProjectTasksExtension(object):
         task.save_geotiff(sdir)
 
     def get_tasks(
-            self, tstart:datetime.date, tstop:datetime.date=None, 
-            field_name:str=None
+            self, fields:str|list[str]|None=None,
+            tstart:datetime.date|str|None=None, 
+            tstop:datetime.date|str|None=None
         ) -> dict:
         """
-        TODO
+        Get tasks from the project.
+        The returned dictionary exhibits the same structure as the 
+        ``ProjectTasksExtension.TASK_DIRECTORY`` folder.
+        Available tasks are loaded by using 
+        :func:`mef_agri.farming.tasks.Task.from_directory`.
 
-        :param tstart: _description_
-        :type tstart: datetime.date
-        :param tstop: _description_, defaults to None
-        :type tstop: datetime.date, optional
-        :param field_name: _description_, defaults to None
-        :type field_name: str, optional
-        :return: _description_
+        :param fields: fields for which tasks should be returned, defaults to None
+        :type fields: str | list[str] | None, optional
+        :param tstart: first date for available tasks, defaults to None
+        :type tstart: datetime.date | str | None, optional
+        :param tstop: last date for available tasks, defaults to None
+        :type tstop: datetime.date | str | None, optional
+        :return: dictionary with tasks/georasters
         :rtype: dict
         """
-        pass
+        fields = self._prj._prepare_list(
+            fields, 
+            self._prj.fields[DB.TBL_FIELDS.COL_FIELDNAME].values.tolist()
+        )
+        if isinstance(tstart, datetime.date):
+            tstart = tstart.isoformat()
+        if isinstance(tstop, datetime.date):
+            tstop = tstop.isoformat()
+
+        ret = {}
+        dbi = DBIntegration(DB.TBL_FIELDS.NAME)
+        for field in fields:
+            ret[field] = {}
+            fdir = os.path.join(self._prj.directory, self.TASK_DIRECTORY, field)
+            tasks = self._prj.query(
+                dbi.sql_query(field, tstart=tstart, tstop=tstop)
+            )
+            for task in tasks.itertuples():
+                if not task.epoch in ret[field].keys():
+                    ret[field][task.epoch] = {}
+                tdir = os.path.join(fdir, task.epoch, task.task)
+                ret[field][task.epoch][task.task] = Task.from_directory(tdir)
+
+        return ret
 
 
 class DBIntegration(object):
@@ -139,16 +167,27 @@ class DBIntegration(object):
         sql += f'{self.COL_TNAME}=\'{task.__class__.__name__}\';'
         return sql
     
-    def sql_query(self, field:str) -> str:
+    def sql_query(
+            self, field:str, tstart:str|None=None, tstop:str|None=None
+        ) -> str:
         """
-        Returns sql-command to query all tasks for a specified field.
+        Generate sql-command to query tasks for a specified field.
 
         :param field: name of the field
         :type field: str
-        :return: sql-command
+        :param tstart: iso-formatted date-string, defaults to None
+        :type tstart: str | None, optional
+        :param tstop: iso-formatted date-string, defaults to None
+        :type tstop: str | None, optional
+        :return: sql-SELECT-command
         :rtype: str
         """
-        sql = f'SELECT * FROM {self._tname} WHERE {self.COL_FIELD}=\'{field}\' '
+        sql = f'SELECT * FROM {self._tname} WHERE '
+        cond = f'{self.COL_FIELD}=\'{field}\' '
+        if tstart is not None:
+            cond += f'AND date({self.COL_EPOCH}) >= date(\'{tstart}\') '
+        if tstop is not None:
+            cond += f'AND date({self.COL_EPOCH}) <= date(\'{tstop}\') '
         sql += f'ORDER BY {self.COL_EPOCH} ASC;'
         return sql
     
@@ -750,6 +789,11 @@ class Task(GeoRaster):
         self.units = PixelUnits.FLOAT32
         self.nodata_value = np.nan
         self._set_up = True
+
+    @classmethod
+    def from_directory(cls, directory):
+        # TODO check if this classmethod needs to be changed or extended
+        return super().from_directory(directory)
 
     @staticmethod
     def _check_date(val) -> datetime.date:

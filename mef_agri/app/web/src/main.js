@@ -6,7 +6,7 @@ import { ManipulateFields } from './mfields.js';
 import { SelectField } from './sfields.js';
 
 
-function handle_tab_change(_, msg) {
+function handleTabChange(_, msg) {
     if (msg.activeTab == 'project') {
         mFields.toggle(true);
         sFields.toggle(false);
@@ -23,7 +23,7 @@ function handle_tab_change(_, msg) {
 const appConn = new AppConnection();
 const fMap = new FieldMap(appConn);
 appConn.registerHandler(Messages.GotFieldInfo, FieldMap.addFields, fMap);
-appConn.registerHandler(Messages.GotActiveTab, handle_tab_change);
+appConn.registerHandler(Messages.GotActiveTab, handleTabChange);
 fMap.initializeWMTS();
 const mFields = new ManipulateFields(fMap.fldSource, appConn);
 fMap.addCustomControl(mFields);
@@ -31,7 +31,7 @@ fMap.addCustomInteraction(mFields.selectDef);
 const sFields = new SelectField(fMap, appConn);
 fMap.addCustomInteraction(sFields.selectDef);
 appConn.registerHandler(
-    Messages.GotTasksTreeChanges, sFields.handle_tasks_tree_changes, sFields
+    Messages.GotTasksTreeChanges, SelectField.handleTasksTreeChanges, sFields
 );
 
 fMap.run();

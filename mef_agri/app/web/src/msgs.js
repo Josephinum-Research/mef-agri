@@ -200,7 +200,7 @@ export class Messages {
         /**
          * @returns {boolean} - flag if unsaved changes are present in the tasks-tree of the tasks-tab
          */
-        get unseavedChanges() {
+        get unsavedChanges() {
             return this.getCont('unsaved_changes');
         }
     }
