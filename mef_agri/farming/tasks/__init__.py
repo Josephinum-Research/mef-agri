@@ -3,6 +3,7 @@ import numpy as np
 import json
 import os
 from geopandas import GeoDataFrame
+from importlib import import_module
 
 from ...utils.raster import GeoRaster, bbox_from_gdf
 from ...utils.misc import PixelUnits
@@ -16,12 +17,13 @@ class ProjectTasksExtension(object):
     """
     TASK_DIRECTORY = 'tasks'
 
-    def __init__(self, prj:ProjectData):
+    def __init__(self, prj:ProjectData, task_table_name:str):
         """
         :param prj: instande of project-data(base)
         :type prj: mef_agri.data.project.ProjectData
         """
         self._prj:ProjectData = prj
+        self._ttbl:str = task_table_name
         self._tdir = os.path.join(prj.directory, self.TASK_DIRECTORY)
         if not os.path.exists(self._tdir):
             os.mkdir(self._tdir)
@@ -92,7 +94,7 @@ class ProjectTasksExtension(object):
             tstop = tstop.isoformat()
 
         ret = {}
-        dbi = DBIntegration(DB.TBL_FIELDS.NAME)
+        dbi = DBIntegration(self._ttbl)
         for field in fields:
             ret[field] = {}
             fdir = os.path.join(self._prj.directory, self.TASK_DIRECTORY, field)
@@ -123,6 +125,14 @@ class DBIntegration(object):
         :type table_name: str
         """
         self._tname:str = table_name
+
+    @property
+    def table_name(self) -> str:
+        """
+        :return: name of the db-table containing information about tasks
+        :rtype: str
+        """
+        return self._tname
 
     @property
     def sql_table_exists(self) -> str:
@@ -183,11 +193,11 @@ class DBIntegration(object):
         :rtype: str
         """
         sql = f'SELECT * FROM {self._tname} WHERE '
-        cond = f'{self.COL_FIELD}=\'{field}\' '
+        sql += f'{self.COL_FIELD}=\'{field}\' '
         if tstart is not None:
-            cond += f'AND date({self.COL_EPOCH}) >= date(\'{tstart}\') '
+            sql += f'AND date({self.COL_EPOCH}) >= date(\'{tstart}\') '
         if tstop is not None:
-            cond += f'AND date({self.COL_EPOCH}) <= date(\'{tstop}\') '
+            sql += f'AND date({self.COL_EPOCH}) <= date(\'{tstop}\') '
         sql += f'ORDER BY {self.COL_EPOCH} ASC;'
         return sql
     
@@ -360,7 +370,7 @@ class Application(object):
             return self._bbox
 
         @bbox.setter
-        def bbbox(self, val):
+        def bbox(self, val):
             self._bbox = val
 
     class DescriptiveValue(object):
@@ -470,8 +480,6 @@ class Application(object):
     def _loop_props(self, cls) -> tuple[list, list]:
         vnames, vals = [], []
         for prop in self._props:
-            if prop in ('name', 'numeric_values', 'descriptive_values'):
-                continue
             attr = getattr(self, prop)
             if isinstance(attr, cls):
                 vnames.append(prop)
@@ -541,6 +549,8 @@ class Task(GeoRaster):
     META_APPL_NVALS_FROM = 'derived_from'
     META_APPL_DVALS = 'descriptive_values'
     META_APPL_DVALS_VALUE = 'value'
+    LAYER_FROM_NUMVAL = 'from-numeric-value'
+    LAYER_FROM_APPLMAP = 'from-application-map'
 
     def __init__(self):
         super().__init__()
@@ -709,7 +719,9 @@ class Task(GeoRaster):
         if not self.META_APPL_KEY in self._meta.keys():
             self._meta[self.META_APPL_KEY] = {}
         
+        i = 0
         for appl in self._apps:
+            i += 1
             applinfo = {
                 self.META_APPL_NAME: appl.__class__.__name__,
                 self.META_APPL_MODULE: appl.__class__.__module__,
@@ -721,17 +733,11 @@ class Task(GeoRaster):
             # i.e. becoming GeoRaster-layers
             for numval in appl.numeric_values:
                 # processing layer-id
-                lid = appl.name + ' -> ' + numval.name
-                if lid in self.layer_ids:
-                    msg = f'Application-name {appl.name} with value '
-                    msg += f'{numval.name} already present in `layer_ids`!'
-                    raise ValueError(msg)
+                lid = appl.name + f'-{str(i)}>' + numval.name
                 self.layer_ids.append(lid)
 
-                # create layer from numeric value
-                valfrom = 'from-application-map'
                 if isinstance(numval.value, float):
-                    valfrom = 'from-numeric-value'
+                    valfrom = self.LAYER_FROM_NUMVAL
                     if self._avshape is None:
                         layer = np.array([[[numval.value]]], dtype=np.float32)
                     else:
@@ -739,6 +745,7 @@ class Task(GeoRaster):
                             self._avshape, dtype=np.float32
                         ) * numval.value
                 else:
+                    valfrom = self.LAYER_FROM_APPLMAP
                     layer = numval.value
 
                 if self.raster is None:
@@ -762,7 +769,7 @@ class Task(GeoRaster):
                 applinfo[self.META_APPL_DVALS][descrval.name] = descrval.value
                 
             # save metadata
-            self._meta[self.META_APPL_KEY][appl.name] = applinfo
+            self._meta[self.META_APPL_KEY][appl.name + f'-{str(i)}'] = applinfo
 
         # final settings
         if self._avshape is None:
@@ -792,8 +799,32 @@ class Task(GeoRaster):
 
     @classmethod
     def from_directory(cls, directory):
-        # TODO check if this classmethod needs to be changed or extended
-        return super().from_directory(directory)
+        task = super().from_directory(directory)
+        for appldef in task.metadata[task.META_APPL_KEY].values():
+            appl:Application = getattr(
+                import_module(appldef[task.META_APPL_MODULE]),
+                appldef[task.META_APPL_NAME]
+            )()
+            for dvalname, dvalvalue in appldef[task.META_APPL_DVALS].items():
+                dval = None
+                for dvobj in appl.descriptive_values:
+                    if dvobj.name == dvalname:
+                        dval = dvobj
+                dval.value = dvalvalue
+            for nvalname, nvaldef in appldef[task.META_APPL_NVALS].items():
+                nval = None
+                for nvobj in appl.numeric_values:
+                    if nvobj.name == nvalname:
+                        nval = nvobj
+                nval.unit = nvaldef[task.META_APPL_NVALS_UNIT]
+                layer = task[nvaldef[task.META_APPL_NVALS_LID]]
+                if nvaldef[task.META_APPL_NVALS_FROM] == task.LAYER_FROM_NUMVAL:
+                    nval.value = float(layer[0, 0, 0])
+                else:
+                    nval.value = layer
+            task.applications.append(appl)
+        task._set_up = True
+        return task
 
     @staticmethod
     def _check_date(val) -> datetime.date:

@@ -76,7 +76,7 @@ sowing amount in (bio)mass per area
 
     @property
     def name(self):
-        return 'amount-of -> ' + self.cultivar.value + '-' + self.crop.value
+        return 'sowing-amount'
     
     @property
     def amount(self) -> Application.NumericValue:
@@ -107,7 +107,7 @@ sowing density in number of seeds/grains/plants per area
 
     @property
     def name(self):
-        return 'density-of -> ' + self.cultivar.value + '-' + self.crop.value
+        return 'sowing-density'
     
     @property
     def density(self) -> Application.NumericValue:

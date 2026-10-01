@@ -57,6 +57,21 @@ class _ErrorDialogs:
         dlg = _CustomErrorDialog(msg)
         dlg.exec()
 
+    @staticmethod
+    def task_setup_no_application(task:str):
+        from ...gui import _CustomErrorDialog
+        msg = f'Error when setting up task `{task}` -> there is no application '
+        msg += 'added to this task!'
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+    @staticmethod
+    def task_setup_error(task:str, exc:str|Exception):
+        from ...gui import _CustomErrorDialog
+        msg = f'Error when setting up task `{task}`:\n{exc}'
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
 
 class _WarningDialogs:
     @staticmethod
@@ -171,7 +186,9 @@ class TasksTab(NonProjectTab):
         self._active_field = msg.field_name
         self._lbl_sfld.setText(msg.field_name)
 
-        prj_tasks = ProjectTasksExtension(self.store.project_data)
+        prj_tasks = ProjectTasksExtension(
+            self.store.project_data, _TEXT.DB_TASK_TABLE
+        )
         tasks = prj_tasks.get_tasks(fields=msg.field_name)
         if (
             len(tasks[msg.field_name]) == 0 and 
@@ -200,8 +217,6 @@ class TasksTab(NonProjectTab):
         if not isinstance(item, (TasksYear, TasksTask, TasksApplNumVal)):
             return
         
-        self._toggle_unsaved_changes(True)
-
         if isinstance(item, TasksYear):
             ymenu = YearMenu(self._tree)
             ymenu.year_item = item
@@ -214,14 +229,14 @@ class TasksTab(NonProjectTab):
 ################################################################################
             # add further tasks here if necessary
             if tname == sowing.Sowing.__name__:
-                tmenu = SowingMenu(self._tree)
+                tmenu = SowingMenu(self._tree, self)
                 tmenu.available_cultivars = self.store.project_data.query(
                     self._cdbi.sql_query_all
                 )
             elif tname == harvest.Harvest.__name__:
-                tmenu = HarvestMenu(self._tree)
+                tmenu = HarvestMenu(self._tree, self)
             elif tname == fertilization.MineralFertilization.__name__:
-                tmenu = MinFertMenu(self._tree)
+                tmenu = MinFertMenu(self._tree, self)
 ################################################################################
 # NOTE #########################################################################
 ################################################################################
@@ -268,7 +283,9 @@ class TasksTab(NonProjectTab):
         Information from the tasks-tree is saved to the project-databse and to 
         the project's data directory.
         """
-        prj_tasks = ProjectTasksExtension(self.store.project_data)
+        prj_tasks = ProjectTasksExtension(
+            self.store.project_data, _TEXT.DB_TASK_TABLE
+        )
         for i1 in range(self._tree.topLevelItemCount()):
             yitem:TasksYear = self._tree.topLevelItem(i1)
             if yitem.year == None:
@@ -278,7 +295,14 @@ class TasksTab(NonProjectTab):
                 titem.field_name = self._active_field
                 if titem.from_db:
                     continue
-                task:Task = titem.setup_task_obj()
+                try:
+                    task:Task = titem.setup_task_obj()
+                    if task is None:
+                        _ErrorDialogs.task_setup_no_application(titem.task_name)
+                        return
+                except Exception as exc:
+                    _ErrorDialogs.task_setup_error(titem.task_name, exc)
+                    return
 
                 try:
                     self.store.project_data.execute(
@@ -297,6 +321,8 @@ class TasksTab(NonProjectTab):
                     _ErrorDialogs.task2folder_error(
                         task.__class__.__name__, exc
                     )
+                    return
+                
         self._toggle_unsaved_changes(False)
 
     def _toggle_unsaved_changes(self, flag:bool):

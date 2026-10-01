@@ -29,7 +29,7 @@ dict or json-string with the structure from
 
     @property
     def name(self):
-        return 'amount-of -> ' + self._fname.value
+        return 'fertilizer-amount'
     
     @property
     def amount(self) -> Application.NumericValue:

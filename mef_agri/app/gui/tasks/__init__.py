@@ -113,6 +113,7 @@ class TasksTask(_TasksItem):
         :type task_module: str
         """
         self._fname:str = None
+        self._tname:str = task_name
         self._tree:QTreeWidget = tree
         self._tree.itemChanged.connect(self._edit_date)
         super().__init__([self.HINT_DATE, task_name, '', ''])
@@ -122,6 +123,14 @@ class TasksTask(_TasksItem):
         self._task:Task = getattr(import_module(task_module), task_name)()
         self._new_task_date:str = None
         self._db:bool = False
+
+    @property
+    def task_name(self) -> str:
+        """
+        :return: name of the task
+        :rtype: str
+        """
+        return self._tname
 
     @property
     def field_name(self) -> str:
@@ -197,11 +206,11 @@ class TasksTask(_TasksItem):
     def _update_task_date(self):
         self.setText(0, self._new_task_date)
 
-    def setup_task_obj(self) -> Task:
+    def setup_task_obj(self) -> Task | None:
         """
         Setting up a copy of :func:`task_obj` from the content of the tasks-tree
 
-        :return: set up task ready for saving
+        :return: set up task ready for saving or ``None`` if task contains no application(s)
         :rtype: Task
         """
         task = deepcopy(self.task_obj)
@@ -224,7 +233,9 @@ class TasksTask(_TasksItem):
                     if isinstance(vitem, TasksApplNumVal):
                         if isinstance(vitem.value, str):
                             # TODO val = appl.map_from_file(vitem.value)
-                            pass
+                            if not vitem.value:
+                                msg = f'No value provided for `{vitem.name}`!'
+                                raise ValueError(msg)
                         else:
                             val = vitem.value
                         setattr(
@@ -235,7 +246,10 @@ class TasksTask(_TasksItem):
                             vitem.unit
                         )
                 task.add_application(appl)
-        return task
+        if len(task.applications) == 0:
+            return None
+        else:
+            return task
 
 
 class TasksInfo(_TasksItem):
@@ -631,13 +645,17 @@ class TaskMenu(QMenu):
     It contains the applications which can be added to a task (see 
     :func:`mef_agri.farming.tasks.Task.valid_applications`).
     """
-    def __init__(self, tree:QTreeWidget):
+    def __init__(self, tree:QTreeWidget, tasks_tab):
         """
         :param tree: tasks-tree currently visible in the app
         :type tree: QTreeWidget
+        :param tasks_tab: tasks-tab of the GUI
+        :type tasks_tab: TasksTab
         """
         super().__init__()
+        from .tab import TasksTab
         self._tree:QTreeWidget = tree
+        self._ttab:TasksTab = tasks_tab
         self._it:TasksTask = None
 
     @property
@@ -669,6 +687,7 @@ class TaskMenu(QMenu):
             )
             appl_item.addChild(appl_val)
         self.task_item.addChild(appl_item)
+        self._ttab._toggle_unsaved_changes(True)
 
     def handle_descriptive_values(
             self, appl_item:TasksAppl, appl_obj:Application

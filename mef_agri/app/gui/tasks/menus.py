@@ -16,12 +16,14 @@ class SowingMenu(TaskMenu):
     """
     Context menu containing applications which can be added to a sowing task.
     """
-    def __init__(self, tree:QTreeWidget):
+    def __init__(self, tree:QTreeWidget, tasks_tab):
         """
         :param tree: tasks-tree currently visible in the app
         :type tree: QTreeWidget
+        :param tasks_tab: tasks-tab of the GUI
+        :type tasks_tab: TasksTab
         """
-        super().__init__(tree)
+        super().__init__(tree, tasks_tab)
         self._cults:DataFrame = None
         self._crop_item:TasksApplDescrVal = None
         self._cult_item:TasksApplDescrVal = None
@@ -131,9 +133,9 @@ class SowingMenu(TaskMenu):
         self._pars_item.value(value=self._cparams)
 
 class HarvestMenu(TaskMenu):
-    def __init__(self, tree):
-        super().__init__(tree)
+    def __init__(self, tree, tasks_tab):
+        super().__init__(tree, tasks_tab)
 
 class MinFertMenu(TaskMenu):
-    def __init__(self, tree):
-        super().__init__(tree)
+    def __init__(self, tree, tasks_tab):
+        super().__init__(tree, tasks_tab)
