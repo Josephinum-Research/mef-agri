@@ -422,11 +422,13 @@ class Application(object):
 
     #####################   Application-Class-stuff   ##########################
     def __init__(self):
-        self._props = self.get_properties()
-        self._nvals:list = None
-        self._nnvs:list[str] = None
-        self._dvals:list = None
-        self._ndvs:list[str] = None
+        self._nvals:list = []
+        self._nv_vn2pn:dict = {}
+        self._nv_pn2vn:dict = {}
+        self._dvals:list = []
+        self._dv_vn2pn:dict = {}
+        self._dv_pn2vn:dict = {}
+        self._initialized:bool = False
 
     @property
     def name(self) -> str:
@@ -443,19 +445,9 @@ class Application(object):
         :return: all properties being instances of :class:`NumericValue`
         :rtype: list[NumericValue]
         """
-        if None in (self._nvals, self._nnvs):
-            self._nnvs, self._nvals = self._loop_props(self.NumericValue)
+        if not self._initialized:
+            self._init_appl()
         return self._nvals
-
-    @property
-    def numval_names(self) -> list[str]:
-        """
-        :return: names of :func:`numeric_values` (same order!)
-        :rtype: list[str]
-        """
-        if None in (self._nvals, self._nnvs):
-            self._nnvs, self._nvals = self._loop_props(self.NumericValue)
-        return self._nnvs
 
     @property
     def descriptive_values(self) -> list[DescriptiveValue]:
@@ -463,29 +455,70 @@ class Application(object):
         :return: all properties being instances of :class:`DescriptiveValue`
         :rtype: list[DescriptiveValue]
         """
-        if None in (self._dvals, self._ndvs):
-            self._ndvs, self._dvals = self._loop_props(self.DescriptiveValue)
+        if not self._initialized:
+            self._init_appl()
         return self._dvals
 
-    @property
-    def descrval_names(self) -> list[str]:
+    def get_property_name(self, value_name:str) -> str:
         """
-        :return: names of :func:`descriptive_values` (same order!)
-        :rtype: list[str]
-        """
-        if None in (self._dvals, self._ndvs):
-            self._ndvs, self._dvals = self._loop_props(self.DescriptiveValue)
-        return self._ndvs
+        Method to get the name of the property representing either a numeric 
+        or a descriptive value with the provided ``value_name``
 
-    def _loop_props(self, cls) -> tuple[list, list]:
-        vnames, vals = [], []
-        for prop in self._props:
+        :param value_name: ``name`` property of numeric or descriptive value
+        :type value_name: str
+        :raises ValueError: if there is no numeric or descriptive value having the provided name
+        :return: name of the property
+        :rtype: str
+        """
+        if not self._initialized:
+            self._init_appl()
+
+        if value_name in self._nv_vn2pn.keys():
+            return self._nv_vn2pn[value_name]
+        elif value_name in self._dv_vn2pn.keys():
+            return self._dv_vn2pn[value_name]
+        else:
+            msg = 'Provided value-name not present in `numeric_values` or '
+            msg += '`descriptive_values`!'
+            raise ValueError(msg)
+
+    def get_value_name(self, property_name:str) -> str:
+        """
+        Method to get the name (i.e. value of the ``name`` attribute) of the 
+        numeric or descriptive value represented by a property with the 
+        provided ``property_name``.
+
+        :param property_name: name of the property representing a numeric or descriptive value
+        :type property_name: str
+        :raises ValueError: if there is no property with the provided name representing numeric or descriptive value
+        :return: name of the numeric or descriptive value
+        :rtype: str
+        """
+        if not self._initialized:
+            self._init_appl()
+            
+        if property_name in self._nv_pn2vn.keys():
+            return self._nv_pn2vn[property_name]
+        elif property_name in self._dv_pn2vn.keys():
+            return self._dv_pn2vn[property_name]
+        else:
+            msg = 'Provided property-name does not represent a value in '
+            msg += '`numeric_values` or `descriptive_values`!'
+            raise ValueError(msg)
+        
+    def _init_appl(self) -> None:
+        props = self.get_properties()
+        for prop in props:
             attr = getattr(self, prop)
-            if isinstance(attr, cls):
-                vnames.append(prop)
-                vals.append(attr)
-        return vnames, vals
-    
+            if isinstance(attr, self.NumericValue):
+                self._nvals.append(attr)
+                self._nv_pn2vn[prop] = attr.name
+                self._nv_vn2pn[attr.name] = prop
+            elif isinstance(attr, self.DescriptiveValue):
+                self._dvals.append(attr)
+                self._dv_pn2vn[prop] = attr.name
+                self._dv_vn2pn[attr.name] = prop
+        
     @staticmethod
     def map_from_file(self, fp:str) -> tuple[int, float, tuple, np.ndarray]:
         """

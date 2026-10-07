@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt, QTimer
 import datetime as dt
 from importlib import import_module
 from copy import deepcopy
+from numpy import ndarray
 
 from ....farming.tasks import (
     Task, Application, DBIntegration as TDBI, sowing, fertilization, harvest
@@ -208,7 +209,8 @@ class TasksTask(_TasksItem):
 
     def setup_task_obj(self) -> Task | None:
         """
-        Setting up a copy of :func:`task_obj` from the content of the tasks-tree
+        Setting up a copy of :func:`task_obj` from the content of the 
+        tasks-tree, i.e. the input of the user.
 
         :return: set up task ready for saving or ``None`` if task contains no application(s)
         :rtype: Task
@@ -226,10 +228,9 @@ class TasksTask(_TasksItem):
                 )()
                 for i2 in range(item.childCount()):
                     vitem = item.child(i2)
+                    pname = appl.get_property_name(vitem.name)
                     if isinstance(vitem, TasksApplDescrVal):
-                        setattr(
-                            getattr(appl, vitem.property_name), 'value', vitem.value()
-                        )
+                        setattr(getattr(appl, pname), 'value', vitem.value())
                     if isinstance(vitem, TasksApplNumVal):
                         if isinstance(vitem.value, str):
                             # TODO val = appl.map_from_file(vitem.value)
@@ -238,18 +239,63 @@ class TasksTask(_TasksItem):
                                 raise ValueError(msg)
                         else:
                             val = vitem.value
-                        setattr(
-                            getattr(appl, vitem.property_name), 'value', val
-                        )
-                        setattr(
-                            getattr(appl, vitem.property_name), 'unit', 
-                            vitem.unit
-                        )
+                        setattr(getattr(appl, pname), 'value', val)
+                        setattr(getattr(appl, pname), 'unit', vitem.unit)
                 task.add_application(appl)
         if len(task.applications) == 0:
             return None
         else:
             return task
+
+    def setup_task_item(self, task_obj:Task) -> None:
+        self._task = task_obj
+        self.task_date = self._task.date_begin.isoformat()
+
+        # add task infos to task-item/self
+        tinfo_db = TasksInfo(
+            self._tree, 
+            Task.date_begin.__name__, 
+            self._task.date_begin.isoformat()
+        )
+        tinfo_tb = TasksInfo(
+            self._tree,
+            Task.time_begin.__name__,
+            self._task.time_begin.isoformat()
+        )
+        tinfo_de = TasksInfo(
+            self._tree,
+            Task.date_end.__name__,
+            self._task.date_end.isoformat()
+        )
+        tinfo_te = TasksInfo(
+            self._tree,
+            Task.time_end.__name__,
+            self._task.time_end.isoformat()
+        )
+        tinfos = [tinfo_db, tinfo_tb, tinfo_de, tinfo_te]
+        for tinfo in tinfos:
+            tinfo.editable_cols = ()
+        self.addChildren(tinfos)
+
+        # add applications
+        for appl in self._task.applications:
+            apitem = TasksAppl(appl.name)
+            for dval in appl.descriptive_values:
+                dvitem = TasksApplDescrVal(self._tree, dval.name)
+                dvitem.value(value=dval.value)
+                dvitem.editable_cols = ()
+                apitem.addChild(dvitem)
+            for nval in appl.numeric_values:
+                nvitem = TasksApplNumVal(
+                    self._tree, nval.name, nval.valid_units
+                )
+                if isinstance(nval.value, ndarray):
+                    nvitem.value = 'application map'
+                else:
+                    nvitem.value = nval.value
+                nvitem.unit = nval.unit
+                apitem.addChild(nvitem)
+        self.from_db = True
 
 
 class TasksInfo(_TasksItem):
@@ -346,14 +392,12 @@ class TasksApplNumVal(_TasksItem):
     Class which represents the tasks-tree items of numeric application values
     """
     def __init__(
-            self, tree:QTreeWidget, vname:str, valid_units:list[str], 
-            appl_prop_name:str
+            self, tree:QTreeWidget, vname:str, valid_units:list[str]
         ):
         data = ['', vname, '', '']
         super().__init__(data)
         self._tree:QTreeWidget = tree
         self._vu:list[str] = valid_units
-        self._apn:str = appl_prop_name
         self._usel:ComboBox = ComboBox(_TEXT.APPL_UNIT_HINT)
         self._usel.addItems(valid_units)
         QTimer.singleShot(100, self._set_unit_selection)
@@ -376,14 +420,6 @@ class TasksApplNumVal(_TasksItem):
         return self._vu
 
     @property
-    def property_name(self) -> str:
-        """
-        :return: name of the numeric value property (i.e. property-name of the corresponding numeric value in the child class of :class:`Application`)
-        :rtype: str
-        """
-        return self._apn
-
-    @property
     def value(self) -> str | float:
         """
         :return: value itself (number or path to application map)
@@ -401,7 +437,7 @@ class TasksApplNumVal(_TasksItem):
             msg = f'Provided value for `TasksApplNumVal.value` has to be of '
             msg += 'type `str` (i.e. a path to an application map) or `float`!'
             raise ValueError(msg)
-        self.setText(2, val)
+        self.setText(2, str(val))
 
     @property
     def unit(self) -> str:
@@ -517,15 +553,10 @@ class TasksApplDescrVal(_TasksItem):
                 else:
                     self.widget_setter(value)
         
-    def __init__(self, tree:QTreeWidget, vname:str, appl_prop_name:str):
-        """
-        :param vname: name of the descriptive value
-        :type vname: str
-        """
+    def __init__(self, tree:QTreeWidget, vname:str):
         data = ['', vname, '', '']
         super().__init__(data)
         self._v:TasksApplDescrVal.Value = self.Value(tree, self, 2)
-        self._apn:str = appl_prop_name
 
     @property
     def name(self) -> str:
@@ -535,14 +566,6 @@ class TasksApplDescrVal(_TasksItem):
         """
         return self.text(1)
 
-    @property
-    def property_name(self) -> str:
-        """
-        :return: name of the descriptive value property (i.e. property-name of the corresponding descriptive value in the child class of :class:`Application`)
-        :rtype: str
-        """
-        return self._apn
-    
     @property
     def value(self) -> TasksApplDescrVal.Value:
         """
@@ -681,10 +704,8 @@ class TaskMenu(QMenu):
         )()
         appl_item = TasksAppl(appl_name)
         appl_item = self.handle_descriptive_values(appl_item, appl_obj)
-        for nval, nvname in zip(appl_obj.numeric_values, appl_obj.numval_names):
-            appl_val = TasksApplNumVal(
-                self._tree, nval.name, nval.valid_units, nvname
-            )
+        for nval in appl_obj.numeric_values:
+            appl_val = TasksApplNumVal(self._tree, nval.name, nval.valid_units)
             appl_item.addChild(appl_val)
         self.task_item.addChild(appl_item)
         self._ttab._toggle_unsaved_changes(True)

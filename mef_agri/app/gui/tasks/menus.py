@@ -67,25 +67,20 @@ class SowingMenu(TaskMenu):
         :return: ``appl_item`` with additional children being the descriptive values
         :rtype: TasksAppl
         """
-        self._crop_item = TasksApplDescrVal(
-            self._tree, appl_obj.crop.name, appl_obj.__class__.crop.__name__
-        )
+        self._crop_item = TasksApplDescrVal(self._tree, appl_obj.crop.name)
         self._crop_item.editable_cols = ()
         self._crop_item.value.default = _TEXT.SOW_CROP_HINT
-        self._cult_item = TasksApplDescrVal(
-            self._tree, appl_obj.cultivar.name, 
-            appl_obj.__class__.cultivar.__name__
-        )
+        self._cult_item = TasksApplDescrVal(self._tree, appl_obj.cultivar.name)
         self._cult_item.editable_cols = ()
         self._cult_item.value.default = _TEXT.SOW_CULT_HINT
         self._pars_item = TasksApplDescrVal(
             self._tree, appl_obj.parameters.name, 
-            appl_obj.__class__.parameters.__name__
         )
         self._pars_item.editable_cols = (2,)
         appl_item.addChildren(
             [self._crop_item, self._cult_item, self._pars_item]
         )
+        
         self._crop_item.value.widget = self._crop_sel
         self._crop_item.value.widget_getter = self._crop_sel.currentText
         self._crop_item.value.widget_setter = self._crop_sel.setCurrentText

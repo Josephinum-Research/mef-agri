@@ -189,17 +189,25 @@ class TasksTab(NonProjectTab):
         prj_tasks = ProjectTasksExtension(
             self.store.project_data, _TEXT.DB_TASK_TABLE
         )
-        tasks = prj_tasks.get_tasks(fields=msg.field_name)
+        tasks = prj_tasks.get_tasks(fields=msg.field_name)[msg.field_name]
         if (
-            len(tasks[msg.field_name]) == 0 and 
-            self._tree.topLevelItemCount() == 0
+            len(tasks) == 0 and self._tree.topLevelItemCount() == 0
         ):
             self._tree.addTopLevelItem(TasksYear(dt.date.today().year))
         else:
-            ####################################################################
-            # TODO create tree from db entries and tasks in data directory
-            ####################################################################
-            print(tasks)
+            yitems = {}
+            for epoch, etasks in tasks.items():
+                eyear = dt.date.fromisoformat(epoch).year
+                if not str(eyear) in yitems.keys():
+                    yitems[str(eyear)] = TasksYear(eyear)
+                for task in etasks.values():
+                    titem = TasksTask(
+                        self._tree, task.task_name, task.task_module
+                    )
+                    titem.setup_task_item(task)
+                    yitems[str(eyear)].addChild(titem)
+            for yitem in yitems.values():
+                self._tree.addTopLevelItem(yitem)
 
     def _add_item(self, position:QPoint):
         """

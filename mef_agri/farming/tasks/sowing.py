@@ -21,6 +21,7 @@ name of the sown crop
         """
         self._cult = Application.DescriptiveValue()
         self._cult.name = 'cultivar'
+        self._cult.prop_name = 'cultivar'
         self._cult.description = """
 name of the sown cultivar
         """
