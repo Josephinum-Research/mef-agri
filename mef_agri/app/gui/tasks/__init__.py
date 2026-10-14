@@ -176,7 +176,10 @@ class TasksTask(_TasksItem):
         except:
             return
         self._new_task_date = date
-        QTimer.singleShot(100, self._update_task_date)
+        if self.from_db:
+            self._update_task_date()
+        else:
+            QTimer.singleShot(100, self._update_task_date)
 
     @property
     def from_db(self) -> bool:
@@ -248,6 +251,7 @@ class TasksTask(_TasksItem):
             return task
 
     def setup_task_item(self, task_obj:Task) -> None:
+        self.from_db = True
         self._task = task_obj
         self.task_date = self._task.date_begin.isoformat()
 
@@ -255,39 +259,40 @@ class TasksTask(_TasksItem):
         tinfo_db = TasksInfo(
             self._tree, 
             Task.date_begin.__name__, 
-            self._task.date_begin.isoformat()
+            self._task.date_begin.isoformat(),
+            from_db=True
         )
         tinfo_tb = TasksInfo(
             self._tree,
             Task.time_begin.__name__,
-            self._task.time_begin.isoformat()
+            self._task.time_begin.isoformat(),
+            from_db=True
         )
         tinfo_de = TasksInfo(
             self._tree,
             Task.date_end.__name__,
-            self._task.date_end.isoformat()
+            self._task.date_end.isoformat(),
+            from_db=True
         )
         tinfo_te = TasksInfo(
             self._tree,
             Task.time_end.__name__,
-            self._task.time_end.isoformat()
+            self._task.time_end.isoformat(),
+            from_db=True
         )
         tinfos = [tinfo_db, tinfo_tb, tinfo_de, tinfo_te]
-        for tinfo in tinfos:
-            tinfo.editable_cols = ()
         self.addChildren(tinfos)
 
         # add applications
         for appl in self._task.applications:
-            apitem = TasksAppl(appl.name)
+            apitem = TasksAppl(appl.name, from_db=True)
             for dval in appl.descriptive_values:
-                dvitem = TasksApplDescrVal(self._tree, dval.name)
+                dvitem = TasksApplDescrVal(self._tree, dval.name, from_db=True)
                 dvitem.value(value=dval.value)
-                dvitem.editable_cols = ()
                 apitem.addChild(dvitem)
             for nval in appl.numeric_values:
                 nvitem = TasksApplNumVal(
-                    self._tree, nval.name, nval.valid_units
+                    self._tree, nval.name, nval.valid_units, from_db=True
                 )
                 if isinstance(nval.value, ndarray):
                     nvitem.value = 'application map'
@@ -295,7 +300,7 @@ class TasksTask(_TasksItem):
                     nvitem.value = nval.value
                 nvitem.unit = nval.unit
                 apitem.addChild(nvitem)
-        self.from_db = True
+        self.addChild(apitem)
 
 
 class TasksInfo(_TasksItem):
@@ -306,7 +311,10 @@ class TasksInfo(_TasksItem):
     HINT_DATE = '< YYYY-MM-DD >'
     HINT_TIME = '< hh:mm >'
     
-    def __init__(self, tree:QTreeWidget, info_name:str, info_value:str):
+    def __init__(
+            self, tree:QTreeWidget, info_name:str, info_value:str, 
+            from_db:bool=False
+        ):
         """
         :param tree: currently visible tasks-tree
         :type tree: QTreeWidget
@@ -318,8 +326,12 @@ class TasksInfo(_TasksItem):
         self._tree = tree
         self._tree.itemChanged.connect(self._edit_value)
         super().__init__(['', info_name, info_value, ''])
-        self.editable_cols = (2,)
         self._newval = None
+        self._from_db:bool = from_db
+        if self._from_db:
+            self.editable_cols = ()
+        else:
+            self.editable_cols = (2,)
 
     @property
     def name(self) -> str:
@@ -348,7 +360,10 @@ class TasksInfo(_TasksItem):
         except:
             return
         self._newval = val
-        QTimer.singleShot(100, self._update_value)
+        if self._from_db:
+            self._update_value()
+        else:
+            QTimer.singleShot(100, self._update_value)
 
     def _update_value(self):
         self.setText(2, self._newval)
@@ -371,12 +386,15 @@ class TasksAppl(_TasksItem):
     """
     Class which represents the tasks-tree items containing the application names
     """
-    def __init__(self, appl_name:str):
+    def __init__(self, appl_name:str, from_db:bool=False):
         """
         :param appl_name: name of the application being equal to the corresponding class in ``mef_agri.farming.tasks`` (second column - not editable)
         :type appl_name: str
+        :param from_db: flag if information stems from user input or database/tasks-directory, defaults to ``False``
+        :type from_db: bool, optional
         """
         super().__init__(['', appl_name, '', ''])
+        self._from_db:bool = from_db
 
     @property
     def name(self) -> str:
@@ -386,22 +404,31 @@ class TasksAppl(_TasksItem):
         """
         return self.text(1)
 
+    @property
+    def from_db(self) -> bool:
+        return self._from_db
+
 
 class TasksApplNumVal(_TasksItem):
     """
     Class which represents the tasks-tree items of numeric application values
     """
     def __init__(
-            self, tree:QTreeWidget, vname:str, valid_units:list[str]
+            self, tree:QTreeWidget, vname:str, valid_units:list[str], 
+            from_db:bool=False
         ):
         data = ['', vname, '', '']
         super().__init__(data)
         self._tree:QTreeWidget = tree
         self._vu:list[str] = valid_units
-        self._usel:ComboBox = ComboBox(_TEXT.APPL_UNIT_HINT)
-        self._usel.addItems(valid_units)
-        QTimer.singleShot(100, self._set_unit_selection)
-        self.editable_cols = (2,)
+        self._from_db:bool = from_db
+        if self._from_db:
+            self.editable_cols = ()
+        else:
+            self._usel:ComboBox = ComboBox(_TEXT.APPL_UNIT_HINT)
+            self._usel.addItems(valid_units)
+            QTimer.singleShot(100, self._set_unit_selection)
+            self.editable_cols = (2,)
 
     @property
     def name(self) -> str:
@@ -410,6 +437,10 @@ class TasksApplNumVal(_TasksItem):
         :rtype: str
         """
         return self.text(1)
+
+    @property
+    def from_db(self) -> bool:
+        return self._from_db
     
     @property
     def valid_units(self) -> list[str]:
@@ -457,7 +488,10 @@ class TasksApplNumVal(_TasksItem):
             msg = f'Provided unit `{unit}` is not available in '
             msg += '`TasksApplNumVal.valid_units`!'
             raise ValueError(msg)
-        self._usel.setCurrentText(unit)
+        if self._from_db:
+            self.setText(3, unit)
+        else:
+            self._usel.setCurrentText(unit)
 
     def _set_unit_selection(self):
         self._tree.setItemWidget(self, 3, self._usel)
@@ -553,10 +587,11 @@ class TasksApplDescrVal(_TasksItem):
                 else:
                     self.widget_setter(value)
         
-    def __init__(self, tree:QTreeWidget, vname:str):
+    def __init__(self, tree:QTreeWidget, vname:str, from_db:bool=False):
         data = ['', vname, '', '']
         super().__init__(data)
         self._v:TasksApplDescrVal.Value = self.Value(tree, self, 2)
+        self._from_db:bool = from_db
 
     @property
     def name(self) -> str:
@@ -573,6 +608,10 @@ class TasksApplDescrVal(_TasksItem):
         :rtype: str
         """
         return self._v
+
+    @property
+    def from_db(self) -> bool:
+        return self._from_db
 
 
 ################################################################################

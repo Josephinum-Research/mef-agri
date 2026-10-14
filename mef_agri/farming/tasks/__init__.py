@@ -518,6 +518,7 @@ class Application(object):
                 self._dvals.append(attr)
                 self._dv_pn2vn[prop] = attr.name
                 self._dv_vn2pn[attr.name] = prop
+        self._initialized = True
         
     @staticmethod
     def map_from_file(self, fp:str) -> tuple[int, float, tuple, np.ndarray]:

@@ -230,28 +230,34 @@ class TasksTab(NonProjectTab):
             ymenu.year_item = item
             ymenu.exec_(QCursor.pos())
         elif isinstance(item, TasksTask):
-            tname = item.task_obj.__class__.__name__
+            if item.from_db:
+                # TODO menu which contains a delete-option
+                return
+            else:
+                tname = item.task_obj.__class__.__name__
 
 ################################################################################
 # NOTE #########################################################################
 ################################################################################
-            # add further tasks here if necessary
-            if tname == sowing.Sowing.__name__:
-                tmenu = SowingMenu(self._tree, self)
-                tmenu.available_cultivars = self.store.project_data.query(
-                    self._cdbi.sql_query_all
-                )
-            elif tname == harvest.Harvest.__name__:
-                tmenu = HarvestMenu(self._tree, self)
-            elif tname == fertilization.MineralFertilization.__name__:
-                tmenu = MinFertMenu(self._tree, self)
+                # add further tasks here if necessary
+                if tname == sowing.Sowing.__name__:
+                    tmenu = SowingMenu(self._tree, self)
+                    tmenu.available_cultivars = self.store.project_data.query(
+                        self._cdbi.sql_query_all
+                    )
+                elif tname == harvest.Harvest.__name__:
+                    tmenu = HarvestMenu(self._tree, self)
+                elif tname == fertilization.MineralFertilization.__name__:
+                    tmenu = MinFertMenu(self._tree, self)
 ################################################################################
 # NOTE #########################################################################
 ################################################################################
             
-            tmenu.task_item = item
-            tmenu.exec_(QCursor.pos())
+                tmenu.task_item = item
+                tmenu.exec_(QCursor.pos())
         elif isinstance(item, TasksApplNumVal):
+            if item.from_db:
+                return
             vmenu = NumValMenu()
             vmenu.numval_item = item
             vmenu.exec_(QCursor.pos())
