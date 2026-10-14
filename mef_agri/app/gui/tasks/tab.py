@@ -1,16 +1,12 @@
 from PyQt5.QtWidgets import (
     QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem, QPushButton
 )
-from PyQt5.QtCore import (
-    Qt, QPoint, QTimer
-)
-from PyQt5.QtGui import (
-    QCursor
-)
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QCursor
 import datetime as dt
 
-from . import YearMenu, NumValMenu, TasksYear, TasksTask, TasksApplNumVal
-from .menus import SowingMenu, HarvestMenu, MinFertMenu
+from .tree_items import TasksYear, TasksTask, TasksApplNumVal
+from .menus import YearMenu, NumValMenu, SowingMenu, HarvestMenu, MinFertMenu
 from ..utils.widgets import NonProjectTab
 from ..conn.msgs import Messages
 from ....farming.tasks import (
