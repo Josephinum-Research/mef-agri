@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (
 from .project.tab import ProjectTab
 from .data.tab import DataTab
 from .tasks.tab import TasksTab
+from .zoning.tab import ZoningTab
 from .conn.server import Messages
 from .map import MapView
 
@@ -33,6 +34,7 @@ class _TEXT:
     TAB_PRJ = 'project'
     TAB_DATA = 'data'
     TAB_TASK = 'tasks'
+    TAB_ZONE = 'zoning'
 
 
 class MainWindow(QWidget):
@@ -55,9 +57,11 @@ class MainWindow(QWidget):
         self._tab_prj = ProjectTab(self, self._store)
         self._tab_data = DataTab(self, self._store)
         self._tab_task = TasksTab(self, self._store)
+        self._tab_zone = ZoningTab(self, self._store)
         self._tabs.addTab(self._tab_prj, _TEXT.TAB_PRJ)
         self._tabs.addTab(self._tab_data, _TEXT.TAB_DATA)
         self._tabs.addTab(self._tab_task, _TEXT.TAB_TASK)
+        self._tabs.addTab(self._tab_zone, _TEXT.TAB_ZONE)
 
         # final ui stuff
         self._l.addWidget(self._tabs, 1)
@@ -75,6 +79,8 @@ class MainWindow(QWidget):
             msg = self._init_non_prj_tab(msg, self._tab_data, _TEXT.TAB_DATA)
         elif index == self._tabs.indexOf(self._tab_task):
             msg = self._init_non_prj_tab(msg, self._tab_task, _TEXT.TAB_TASK)
+        elif index == self._tabs.indexOf(self._tab_zone):
+            msg = self._init_non_prj_tab(msg, self._tab_zone, _TEXT.TAB_ZONE)
 
         self._store.websocket_server.send_messages(msg)
 

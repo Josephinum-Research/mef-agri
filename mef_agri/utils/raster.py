@@ -124,18 +124,33 @@ class GeoRaster(object):
     # ITERATOR ATTRIBUTES
     @property
     def current_row(self) -> int:
+        """
+        :raises ValueError: if called outside of a for-loop which iterates :class:`GeoRaster`
+        :return: current row in the iteration of the :class:`GeoRaster`
+        :rtype: int
+        """
         if self._crst is None:
             raise ValueError('This value is only available in an iteration!')
         return self._crst[1, self._i1]
     
     @property
     def current_column(self) -> int:
+        """
+        :raises ValueError: if called outside of a for-loop which iterates :class:`GeoRaster`
+        :return: current column in the iteration of the :class:`GeoRaster`
+        :rtype: int
+        """
         if self._crst is None:
             raise ValueError('This value is only available in an iteration!')
         return self._crst[0, self._i1]
 
     @property
     def current_object_coordinates(self) -> tuple[float, float]:
+        """
+        :raises ValueError: if called outside of a for-loop which iterates :class:`GeoRaster`
+        :return: object coordinates of upper-left corner of current pixel in the iteration of the :class:`GeoRaster`
+        :rtype: tuple[float, float]
+        """
         if self._crst is None:
             raise ValueError('This value is only available in an iteration!')
         return self.get_object_coordinates(
@@ -144,6 +159,11 @@ class GeoRaster(object):
 
     @property
     def nextcol_object_coordinates(self) -> tuple[float, float]:
+        """
+        :raises ValueError: if called outside of a for-loop which iterates :class:`GeoRaster`
+        :return: object coordinates of upper-right corner of current pixel in the iteration of the :class:`GeoRaster`
+        :rtype: tuple[float, float]
+        """
         if self._crst is None:
             raise ValueError('This value is only available in an iteration!')
         return self.get_object_coordinates(
@@ -152,6 +172,11 @@ class GeoRaster(object):
 
     @property
     def nextrow_object_coordinates(self) -> tuple[float, float]:
+        """
+        :raises ValueError: if called outside of a for-loop which iterates :class:`GeoRaster`
+        :return: object coordinates of lower-left corner of current pixel in the iteration of the :class:`GeoRaster`
+        :rtype: tuple[float, float]
+        """
         if self._crst is None:
             raise ValueError('This value is only available in an iteration!')
         return self.get_object_coordinates(
@@ -160,6 +185,11 @@ class GeoRaster(object):
 
     @property
     def diagonal_object_coordinates(self) -> tuple[float, float]:
+        """
+        :raises ValueError:if called outside of a for-loop which iterates :class:`GeoRaster`
+        :return: object coordinates of lower-right corner of current pixel in the iteration of the :class:`GeoRaster`
+        :rtype: tuple[float, float]
+        """
         if self._crst is None:
             raise ValueError('This value is only available in an iteration!')
         return self.get_object_coordinates(
@@ -675,6 +705,28 @@ class GeoRaster(object):
         obj.transformation = trafo_from_affine(ttrf)
         if not inplace:
             return obj
+
+    def to_gdf(self) -> GeoDataFrame:
+        """
+        Converts the :class:`GeoRaster` to a ``geopandas.GeoDataFrame`` where 
+        each row corresponds to one pixel with the corresponding 
+        geometry/polygon.
+        Each column of the geodataframe represents one layer with the 
+        corresponding pixel values.
+
+        :return: geodataframe-representation of the georaster
+        :rtype: GeoDataFrame
+        """
+        data = {'geometry': []}
+        for pxl in self:
+            data['geometry'].append(self.current_geometry)
+            pxl1d = pxl.flatten()
+            for i in range(pxl1d.shape[0]):
+                lid = self.layer_ids[i]
+                if not lid in data.keys():
+                    data[lid] = []
+                data[lid].append(pxl1d[i])
+        return GeoDataFrame(data=data, geometry='geometry', crs=self.crs)
     
     def _check_impl(self, attr_name:str) -> None:
         if getattr(self, attr_name) is None:

@@ -176,7 +176,29 @@ export class Messages {
         }
 
         /**
-         * @returns {Array} - array containing polygon-defining corner-coordinate-lists - defined in WGS84
+         * @returns {Array} - array containing polygon-defining corner-coordinate-lists - defined in web-mercator (i.e. epsg 3857)
+         */
+        get cornerCoords() {
+            return this.getCont('coords');
+        }
+    }
+
+    /**
+     * Class which handles incoming messages containing information about
+     * zones within a field
+     */
+    static GotZoneInfo = class extends Messages.GotMessage {
+        static msgType = 'zones';
+
+        /**
+         * @returns {Array} - array with zone names being strings
+         */
+        get zoneNames() {
+            return this.getCont('znames');
+        }
+
+        /**
+         * @returns {Array} - array containing polygon-defining corner-coordinate-lists - defined in web-mercator (i.e. epsg 3857)
          */
         get cornerCoords() {
             return this.getCont('coords');

@@ -16,6 +16,9 @@ function handleTabChange(_, msg) {
     } else if (msg.activeTab == 'tasks') {
         mFields.toggle(false);
         sFields.toggle(true);
+    } else if (msg.activeTab == 'zoning') {
+        mFields.toggle(false);
+        sFields.toggle(true);
     }
 }
 
@@ -24,6 +27,7 @@ const appConn = new AppConnection();
 const fMap = new FieldMap(appConn);
 appConn.registerHandler(Messages.GotFieldInfo, FieldMap.addFields, fMap);
 appConn.registerHandler(Messages.GotActiveTab, handleTabChange);
+appConn.registerHandler(Messages.GotZoneInfo, FieldMap.addZones, fMap)
 fMap.initializeWMTS();
 const mFields = new ManipulateFields(fMap.fldSource, appConn);
 fMap.addCustomControl(mFields);

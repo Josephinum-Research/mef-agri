@@ -726,6 +726,25 @@ class Geopackage(object):
         print(msg)
 
     @DB.connect
+    def execute_pending(self, sql:str) -> None:
+        self._curs.execute(sql)
+        msg = f'(gpkg.py) executed sql with response: {self._curs.fetchall()}'
+        msg += ' >>> pending'
+        print(msg)
+
+    @DB.close
+    def commit_pending(self) -> None:
+        self._conn.commit()
+        msg = '(gpkg.py) committed pending transaction'
+        print(msg)
+
+    @DB.close
+    def rollback_pending(self) -> None:
+        self._conn.rollback()
+        msg = '(gpkg.py) aborted pending transaction'
+        print(msg)
+
+    @DB.connect
     @DB.close
     def query(self, sql:str) -> pd.DataFrame:
         """

@@ -119,7 +119,7 @@ class TasksTask(_TasksItem):
     @property
     def task_name(self) -> str:
         """
-        :return: name of the task
+        :return: name of the task (i.e. name of the class representing the task)
         :rtype: str
         """
         return self._tname
@@ -154,7 +154,11 @@ class TasksTask(_TasksItem):
     
     @property
     def task_date(self) -> str:
-        date = self.text(2)
+        """
+        :return: iso-formatted datestring of the task's begin date
+        :rtype: str
+        """
+        date = self.text(0)
         if date == self.HINT_DATE:
             return None
         else:

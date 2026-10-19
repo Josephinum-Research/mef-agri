@@ -33,6 +33,15 @@ export class FieldLayerStyle {
 }
 
 
+export class ZoneLayerStyle {
+    constructor() {
+        this.strokeColor = 'rgb(100, 5, 240)';
+        this.strokeWidth = 2;
+        this.fillColor = 'rgba(100, 5, 240, 0.25)';
+    }
+}
+
+
 export class FieldMap {
     static logMsgPrefix = '(fmap.js) FieldMap';
 
@@ -54,6 +63,15 @@ export class FieldMap {
         this.fldLayer = new VectorLayer({
             source: this.fldSource,
             style: this.#getFieldStyle.bind(this)
+        });
+
+        ////////////////////////////////////////////////////////////////////////
+        // ZONES vector-layer
+        this.znStyleOptions = new ZoneLayerStyle();
+        this.znSource = new VectorSource({wrapX: false});
+        this.znLayer = new VectorLayer({
+            source: this.znSource,
+            style: this.#getZoneStyle.bind(this)
         });
 
         ////////////////////////////////////////////////////////////////////////
@@ -122,6 +140,18 @@ export class FieldMap {
         });
     }
 
+    #getZoneStyle(feature) {
+        return new Style({
+            stroke: new Stroke({
+                color: this.znStyleOptions.strokeColor,
+                width: this.znStyleOptions.strokeWidth
+            }),
+            fill: new Fill({
+                color: this.znStyleOptions.fillColor
+            })
+        });
+    }
+
     #createMap() {
         this.mapView = new View({
             center: this.initPos,
@@ -130,7 +160,9 @@ export class FieldMap {
         this.map = new Map({
             target: 'map',
             //projection: new Projection('EPSG:' + this.mapEpsg.toString()),
-            layers: [this.osmLayer, this.wmtsLayer, this.fldLayer],
+            layers: [
+                this.osmLayer, this.wmtsLayer, this.fldLayer, this.znLayer
+            ],
             view: this.mapView,
             controls: defaultControls().extend(this.controls)
         });
@@ -176,5 +208,17 @@ export class FieldMap {
         } else {
             setTimeout(FieldMap.addFields(fieldMap, msg), 10);
         }
+    }
+
+    static addZones(fieldMap, msg) {
+        fieldMap.znSource.clear(true);
+        var features = [];
+        for (let i = 0; i < msg.zoneNames.length; i++) {
+            var corners = msg.cornerCoords[i];
+            corners.push(corners[0]);
+            var feat = new Feature(new Polygon([corners]));
+            features.push(feat);
+        }
+        fieldMap.znSource.addFeatures(features);
     }
 }

@@ -129,6 +129,35 @@ class Messages:
         def coordinates(self, value):
             setattr(self, '_' + self.CONT_COORDS, value)
 
+    class SendZones(MsgBaseClass):
+        MTYPE = 'zones'
+        CONT_ZNAMES = 'znames'
+        CONT_COORDS = 'coords'
+
+        @property
+        def zone_names(self) -> list[str]:
+            """
+            :return: zone names (i.e. layer ids from corresponding georaster)
+            :rtype: list[str]
+            """
+            return getattr(self, '_' + self.CONT_ZNAMES)
+
+        @zone_names.setter
+        def zone_names(self, znames):
+            setattr(self, '_' + self.CONT_ZNAMES, znames)
+
+        @property
+        def coordinates(self) -> list:
+            """
+            :return: list of polygon-defining point-coordinate-lists - coordinates have to be defined in web-mercator (epsg:3857)
+            :rtype: list[list[list[float, float]]]
+            """
+            return getattr(self, '_' + self.CONT_COORDS)
+
+        @coordinates.setter
+        def coordinates(self, coords):
+            setattr(self, '_' + self.CONT_COORDS, coords)
+
     class SendActiveTab(MsgBaseClass):
         MTYPE = 'active_tab'
         CONT_TABNAME = 'tabname'

@@ -4,6 +4,7 @@ import json
 import os
 from geopandas import GeoDataFrame
 from importlib import import_module
+from shutil import rmtree
 
 from ...utils.raster import GeoRaster, bbox_from_gdf
 from ...utils.misc import PixelUnits
@@ -109,6 +110,29 @@ class ProjectTasksExtension(object):
 
         return ret
 
+    def delete_task(self, field_name:str, task:Task=None):
+        dbi = DBIntegration(self._ttbl)
+        try:
+            self._prj.execute_pending(dbi.sql_delete(task, field_name))
+        except Exception as exc:
+            msg = f'{task.task_name}-task on {task.date_begin.isoformat()} '
+            msg += f'could not be deleted for field `{field_name}` from '
+            msg += f'database due to the following exception\n\n{exc}'
+            raise ValueError(msg)
+        try:
+            sdir = os.path.join(
+                self._tdir, field_name, task.date_begin.isoformat(), 
+                task.task_name
+            )
+            rmtree(sdir)
+            self._prj.commit_pending()
+        except Exception as exc:
+            self._prj.rollback_pending()
+            msg = f'{task.task_name}-task on {task.date_begin.isoformat()} '
+            msg += f'could not be deleted for field `{field_name}` from '
+            msg += f'folder structure due to the following exception\n\n{exc}'
+            raise ValueError(msg)
+
 
 class DBIntegration(object):
     """
@@ -174,9 +198,9 @@ class DBIntegration(object):
     def sql_delete(self, task:Task, field:str) -> str:
         sql = f'DELETE FROM {self._tname} WHERE {self.COL_FIELD}=\'{field}\' '
         sql += f'AND {self.COL_EPOCH}=\'{task.date_begin.isoformat()}\' AND '
-        sql += f'{self.COL_TNAME}=\'{task.__class__.__name__}\';'
+        sql += f'{self.COL_TNAME}=\'{task.task_name}\';'
         return sql
-    
+
     def sql_query(
             self, field:str, tstart:str|None=None, tstop:str|None=None
         ) -> str:

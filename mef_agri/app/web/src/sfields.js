@@ -16,7 +16,10 @@ export class SelectField {
                 color: 'rgba(255, 0, 0, 1.0)'  // rgb+opacity
             })
         });
-        this.selectDef = new Select({style: this.selectMethod.bind(this)});
+        this.selectDef = new Select({
+            style: this.selectMethod.bind(this),
+            layers: function (layer) {return layer === fMap.fldLayer}
+        });
         this.appConn = appConn;
         this.fMap = fMap;
         this.active = false;
@@ -28,6 +31,8 @@ export class SelectField {
         this.selectedStyle.getFill().setColor(color);
 
         if (feature != this.selectedField) {
+            // clear possibly visible zones
+            this.fMap.znSource.clear(true);
             // zoom to feature
             this.selectedField = feature;
             var extent = feature.getGeometry().getExtent();

@@ -2,14 +2,16 @@ from PyQt5.QtWidgets import QTreeWidget, QMenu
 from PyQt5.QtCore import QTimer
 from pandas import DataFrame
 from importlib import import_module
+from copy import deepcopy
 
 from .tree_items import (
     TasksYear, TasksTask, TasksInfo, TasksAppl, TasksApplNumVal, 
     TasksApplDescrVal
 )
 from ..utils.widgets import ComboBox
-from ....farming.tasks import Task, Application
-from ....farming.tasks import sowing, fertilization, harvest
+from ....farming.tasks import (
+    Task, Application, ProjectTasksExtension, sowing, fertilization, harvest
+)
 from ....farming.crops import DBIntegration as CDBI
 
 
@@ -26,12 +28,16 @@ _available_tasks = (
 class _TEXT:
     MENU_ADD_YEAR = 'add year'
     MENU_SEP_TASK = '--- tasks ---'
+    MENU_SEP_APPL_TOP = '--- applications ---'
+    MENU_SEP_APPL_BOT = '^^^^^^^^^^^^^^^^^^^^'
     MENU_ADD_TASK = 'add {}-task'
     MENU_ADD_APPL = 'add {}'
     MENU_SEL_APPLMAP = 'select application map'
+    MENU_DEL_TASK = 'DELETE'
+    MENU_DEL_APPL = 'DELETE'
     SOW_CULT_HINT = 'select cultivar'
     SOW_CROP_HINT = 'select crop'
-    
+
 
 class YearMenu(QMenu):
     """
@@ -147,10 +153,16 @@ class TaskMenu(QMenu):
     @task_item.setter
     def task_item(self, item):
         self._it = item
+        if self._it.from_db:
+            return
+        sep1 = self.addAction(_TEXT.MENU_SEP_APPL_TOP)
+        sep1.setEnabled(False)
         for appl in self._it.task_obj.valid_applications:
             adda = self.addAction(_TEXT.MENU_ADD_APPL.format(appl.__name__))
             setattr(adda, '_appl_name', appl.__name__)
             adda.triggered.connect(self._add_application)
+        sep2 = self.addAction(_TEXT.MENU_SEP_APPL_BOT)
+        sep2.setEnabled(False)
 
     def _add_application(self):
         appl_name = getattr(self.sender(), '_appl_name')
@@ -164,6 +176,30 @@ class TaskMenu(QMenu):
             appl_item.addChild(appl_val)
         self.task_item.addChild(appl_item)
         self._ttab._toggle_unsaved_changes(True)
+
+    def add_delete_action(self):
+        if self._it is None:
+            return
+        deltask = self.addAction(_TEXT.MENU_DEL_TASK)
+        deltask.triggered.connect(self._delete_task)
+
+    def _delete_task(self):
+        if self._it.from_db:
+            from .tab import _TEXT as _TABTEXT
+            prjtasks = ProjectTasksExtension(
+                self._ttab.store.project_data, _TABTEXT.DB_TASK_TABLE
+            )
+            try:
+                self._it.task_obj.date_begin = self._it.task_date
+                prjtasks.delete_task(
+                    self._ttab.selected_field, self._it.task_obj
+                )
+            except Exception as exc:
+                from .tab import _ErrorDialogs
+                _ErrorDialogs.delete_task_error(exc)
+                return
+        self._ttab._toggle_unsaved_changes(False)
+        self._it.parent().removeChild(self._it)
 
     def handle_descriptive_values(
             self, appl_item:TasksAppl, appl_obj:Application
@@ -187,10 +223,24 @@ class TaskMenu(QMenu):
         return appl_item
 
 
+class ApplMenu(QMenu):
+    def __init__(self, appl_item:TasksAppl, tasks_tab):
+        super().__init__()
+        from .tab import TasksTab
+        self._ttab:TasksTab = tasks_tab
+        self._ait:TasksAppl = appl_item
+        delappl = self.addAction(_TEXT.MENU_DEL_APPL)
+        delappl.triggered.connect(self._delete_application)
+
+    def _delete_application(self):
+        self._ttab._toggle_unsaved_changes(False)
+        self._ait.parent().removeChild(self._ait)
+
+
 class NumValMenu(QMenu):
     def __init__(self):
         super().__init__()
-        self._nvit:TasksApplNumVal
+        self._nvit:TasksApplNumVal = None
         selmap = self.addAction(_TEXT.MENU_SEL_APPLMAP)
         selmap.triggered.connect(self._select_applmap)
 

@@ -5,8 +5,11 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QCursor
 import datetime as dt
 
-from .tree_items import TasksYear, TasksTask, TasksApplNumVal
-from .menus import YearMenu, NumValMenu, SowingMenu, HarvestMenu, MinFertMenu
+from .tree_items import TasksYear, TasksTask, TasksAppl, TasksApplNumVal
+from .menus import (
+    TaskMenu, YearMenu, NumValMenu, SowingMenu, HarvestMenu, MinFertMenu,
+    ApplMenu
+)
 from ..utils.widgets import NonProjectTab
 from ..conn.msgs import Messages
 from ....farming.tasks import (
@@ -68,6 +71,12 @@ class _ErrorDialogs:
         dlg = _CustomErrorDialog(msg)
         dlg.exec()
 
+    @staticmethod
+    def delete_task_error(exc:Exception):
+        from ...gui import _CustomErrorDialog
+        dlg = _CustomErrorDialog(str(exc))
+        dlg.exec()
+
 
 class _WarningDialogs:
     @staticmethod
@@ -120,6 +129,14 @@ class TasksTab(NonProjectTab):
         self.layout_main.addWidget(self._btn_save)
 
         self._toggle_unsaved_changes(False)
+
+    @property
+    def selected_field(self) -> str:
+        """
+        :return: name of the currently selected/active field
+        :rtype: str
+        """
+        return self._active_field
 
     def init_tab(self):
         """
@@ -218,39 +235,40 @@ class TasksTab(NonProjectTab):
         :type position: QPoint
         """
         item = self._tree.itemAt(position)
-        if not isinstance(item, (TasksYear, TasksTask, TasksApplNumVal)):
-            return
-        
         if isinstance(item, TasksYear):
             ymenu = YearMenu(self._tree)
             ymenu.year_item = item
             ymenu.exec_(QCursor.pos())
         elif isinstance(item, TasksTask):
-            if item.from_db:
-                # TODO menu which contains a delete-option
-                return
-            else:
-                tname = item.task_obj.__class__.__name__
+            tname = item.task_obj.__class__.__name__
 
+            if item.from_db:
+                tmenu = TaskMenu(self._tree, self)
 ################################################################################
 # NOTE #########################################################################
 ################################################################################
-                # add further tasks here if necessary
-                if tname == sowing.Sowing.__name__:
-                    tmenu = SowingMenu(self._tree, self)
-                    tmenu.available_cultivars = self.store.project_data.query(
-                        self._cdbi.sql_query_all
-                    )
-                elif tname == harvest.Harvest.__name__:
-                    tmenu = HarvestMenu(self._tree, self)
-                elif tname == fertilization.MineralFertilization.__name__:
-                    tmenu = MinFertMenu(self._tree, self)
+            # add further tasks here if necessary
+            elif tname == sowing.Sowing.__name__:
+                tmenu = SowingMenu(self._tree, self)
+                tmenu.available_cultivars = self.store.project_data.query(
+                    self._cdbi.sql_query_all
+                )
+            elif tname == harvest.Harvest.__name__:
+                tmenu = HarvestMenu(self._tree, self)
+            elif tname == fertilization.MineralFertilization.__name__:
+                tmenu = MinFertMenu(self._tree, self)
 ################################################################################
 # NOTE #########################################################################
 ################################################################################
             
-                tmenu.task_item = item
-                tmenu.exec_(QCursor.pos())
+            tmenu.task_item = item
+            tmenu.add_delete_action()
+            tmenu.exec_(QCursor.pos())
+        elif isinstance(item, TasksAppl):
+            if item.from_db:
+                return
+            amenu = ApplMenu(item, self)
+            amenu.exec_(QCursor.pos())
         elif isinstance(item, TasksApplNumVal):
             if item.from_db:
                 return
