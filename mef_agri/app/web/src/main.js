@@ -28,6 +28,11 @@ const fMap = new FieldMap(appConn);
 appConn.registerHandler(Messages.GotFieldInfo, FieldMap.addFields, fMap);
 appConn.registerHandler(Messages.GotActiveTab, handleTabChange);
 appConn.registerHandler(Messages.GotZoneInfo, FieldMap.addZones, fMap)
+appConn.registerHandler(
+    Messages.GotMiscPolygons, FieldMap.addMiscPolygons, fMap
+);
+appConn.registerHandler(Messages.GotClearMapSource, FieldMap.clearSource, fMap);
+
 fMap.initializeWMTS();
 const mFields = new ManipulateFields(fMap.fldSource, appConn);
 fMap.addCustomControl(mFields);

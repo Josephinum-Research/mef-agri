@@ -158,6 +158,35 @@ class Messages:
         def coordinates(self, coords):
             setattr(self, '_' + self.CONT_COORDS, coords)
 
+    class SendMiscPolygons(MsgBaseClass):
+        MTYPE = 'misc_polygons'
+        CONT_PIDS = 'polygon_ids'
+        CONT_COORDS = 'coords'
+
+        @property
+        def pids(self) -> list[str]:
+            """
+            :return: ids/names of the polygons
+            :rtype: list[str]
+            """
+            return getattr(self, '_' + self.CONT_PIDS)
+        
+        @pids.setter
+        def pids(self, pids):
+            setattr(self, '_' + self.CONT_PIDS, pids)
+
+        @property
+        def coordinates(self) -> list:
+            """
+            :return: list of polygon-defining point-coordinate-lists - coordinates have to be defined in web-mercator (epsg:3857)
+            :rtype: list[list[list[float, float]]]
+            """
+            return getattr(self, '_' + self.CONT_COORDS)
+
+        @coordinates.setter
+        def coordinates(self, coords):
+            setattr(self, '_' + self.CONT_COORDS, coords)
+
     class SendActiveTab(MsgBaseClass):
         MTYPE = 'active_tab'
         CONT_TABNAME = 'tabname'
@@ -189,3 +218,15 @@ class Messages:
         @unsaved_changes.setter
         def unsaved_changes(self, value):
             setattr(self, '_' + self.CONT_CHANGES, value)
+
+    class SendClearMapSource(MsgBaseClass):
+        MTYPE = 'clear_map_source'
+        CONT_SOURCE = 'map_source'
+
+        @property
+        def map_source(self) -> str:
+            return getattr(self, '_' + self.CONT_SOURCE)
+        
+        @map_source.setter
+        def map_source(self, msid):
+            setattr(self, '_' + self.CONT_SOURCE, msid)

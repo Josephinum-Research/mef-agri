@@ -1,8 +1,13 @@
 import os
-from PyQt5.QtWidgets import QSizePolicy
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtWebEngineCore import QWebEngineUrlRequestInterceptor
+
+
+class MapSources:
+    FIELDS = 'fields'
+    ZONES = 'zones'
+    MISC = 'misc'
 
 
 class _Interceptor(QWebEngineUrlRequestInterceptor):

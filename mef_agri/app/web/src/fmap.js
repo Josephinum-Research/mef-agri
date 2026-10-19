@@ -18,26 +18,84 @@ import { OSM } from "ol/source";
 import { extend as extendExtent } from "ol/extent";
 
 
-export class FieldLayerStyle {
+class LayerStyle {
     constructor() {
+        this.strokeColor = 'rgb(0, 0, 0)';
+        this.strokeWidth = 1;
+        this.fillColor = 'rgba(0, 0, 0, 0.25)';
+        this.textAlign = 'center';
+        this.textOverflow = true;
+        this.textFont = '12px Calibri,sans-serif';
+        this.textFillColor = 'rgb(0, 0, 0)';
+        this.textStrokeColor = 'rgb(255, 255, 255)';
+        this.textStrokeWidth = 1;
+        this.textVisible = true;
+    }
+
+    getStyle(feature, attr) {
+        var textStyle = null;
+        if (this.textVisible) {
+            textStyle = {
+                textAlign: this.textAlign,
+                overflow: this.textOverflow,
+                font: this.textFont,
+                stroke: new Stroke({
+                    color: this.textStrokeColor,
+                    width: this.textStrokeWidth
+                }),
+                fill: new Fill({
+                    color: this.textFillColor
+                }),
+                text: feature.get(attr)
+            };
+        } else {
+            textStyle = {};
+        }
+        return new Style({
+            stroke: new Stroke({
+                color: this.strokeColor,
+                width: this.strokeWidth
+            }),
+            fill: new Fill({
+                color: this.fillColor
+            }),
+            text: new Text(textStyle)
+        });
+    }
+}
+
+
+export class FieldLayerStyle extends LayerStyle {
+    constructor() {
+        super();
         this.strokeColor = 'rgb(0, 255, 150)';
         this.strokeWidth = 4;
         this.fillColor = 'rgba(0, 255, 150, 0.25)';
-        this.textAlign = 'center';
-        this.textOverflow = true;
         this.textFont = '16px Calibri,sans-serif';
-        this.textFillColor = 'rgb(0, 0, 0)';
-        this.textStrokeColor = 'rgb(255, 255, 255)';
         this.textStrokeWidth = 2;
     }
 }
 
 
-export class ZoneLayerStyle {
+export class ZoneLayerStyle extends LayerStyle {
     constructor() {
+        super();
         this.strokeColor = 'rgb(100, 5, 240)';
         this.strokeWidth = 2;
         this.fillColor = 'rgba(100, 5, 240, 0.25)';
+        this.textFont = '16px Calibri,sans-serif';
+        this.textStrokeWidth = 2;
+    }
+}
+
+
+export class MiscPolygonLayerStyle extends LayerStyle {
+    constructor() {
+        super();
+        this.strokeColor = 'rgb(245, 155, 40)';
+        this.strokeWidth = 2;
+        this.fillColor = 'rgba(245, 155, 40, 0.25)';
+        this.textVisible = false;
     }
 }
 
@@ -62,8 +120,17 @@ export class FieldMap {
         this.fldSource = new VectorSource({wrapX: false});
         this.fldLayer = new VectorLayer({
             source: this.fldSource,
-            style: this.#getFieldStyle.bind(this)
+            style: this.#getFldStyle.bind(this),
         });
+
+        ////////////////////////////////////////////////////////////////////////
+        // MISC polygon-layer
+        this.miscStyleOptions = new MiscPolygonLayerStyle();
+        this.miscSource = new VectorSource({wrapX: false});
+        this.miscLayer = new VectorLayer({
+            source: this.miscSource,
+            style: this.#getMiscStyle.bind(this)
+        })
 
         ////////////////////////////////////////////////////////////////////////
         // ZONES vector-layer
@@ -71,7 +138,7 @@ export class FieldMap {
         this.znSource = new VectorSource({wrapX: false});
         this.znLayer = new VectorLayer({
             source: this.znSource,
-            style: this.#getZoneStyle.bind(this)
+            style: this.#getZnStyle.bind(this)
         });
 
         ////////////////////////////////////////////////////////////////////////
@@ -82,6 +149,18 @@ export class FieldMap {
         this.mapView = null;
         this.controls = [];
         this.interactions = [];
+    }
+
+    #getFldStyle(feature) {
+        return this.fldStyleOptions.getStyle(feature, 'fname');
+    }
+
+    #getZnStyle(feature) {
+        return this.znStyleOptions.getStyle(feature, 'zname');
+    }
+
+    #getMiscStyle(feature) {
+        return this.miscStyleOptions.getStyle(feature, null);
     }
 
     initializeWMTS() {
@@ -115,43 +194,6 @@ export class FieldMap {
         this.interactions.push(interaction);
     }
 
-    #getFieldStyle(feature) {
-        return new Style({
-            stroke: new Stroke({
-                color: this.fldStyleOptions.strokeColor,
-                width: this.fldStyleOptions.strokeWidth
-            }),
-            fill: new Fill({
-                color: this.fldStyleOptions.fillColor
-            }),
-            text: new Text({
-                textAlign: this.fldStyleOptions.textAlign,
-                overflow: this.fldStyleOptions.textOverflow,
-                font: this.fldStyleOptions.textFont,
-                stroke: new Stroke({
-                    color: this.fldStyleOptions.textStrokeColor,
-                    width: this.fldStyleOptions.textStrokeWidth
-                }),
-                fill: new Fill({
-                    color: this.fldStyleOptions.textFillColor
-                }),
-                text: feature.get('fname')
-            })
-        });
-    }
-
-    #getZoneStyle(feature) {
-        return new Style({
-            stroke: new Stroke({
-                color: this.znStyleOptions.strokeColor,
-                width: this.znStyleOptions.strokeWidth
-            }),
-            fill: new Fill({
-                color: this.znStyleOptions.fillColor
-            })
-        });
-    }
-
     #createMap() {
         this.mapView = new View({
             center: this.initPos,
@@ -161,7 +203,8 @@ export class FieldMap {
             target: 'map',
             //projection: new Projection('EPSG:' + this.mapEpsg.toString()),
             layers: [
-                this.osmLayer, this.wmtsLayer, this.fldLayer, this.znLayer
+                this.osmLayer, this.wmtsLayer, this.fldLayer, this.miscLayer,
+                this.znLayer
             ],
             view: this.mapView,
             controls: defaultControls().extend(this.controls)
@@ -217,8 +260,31 @@ export class FieldMap {
             var corners = msg.cornerCoords[i];
             corners.push(corners[0]);
             var feat = new Feature(new Polygon([corners]));
+            feat.set('zname', msg.zoneNames[i])
             features.push(feat);
         }
         fieldMap.znSource.addFeatures(features);
+    }
+
+    static addMiscPolygons(fieldMap, msg) {
+        fieldMap.miscSource.clear(true);
+        var features = [];
+        for (let i = 0; i < msg.plgnIds.length; i++) {
+            var corners = msg.cornerCoords[i];
+            corners.push(corners[0]);
+            var feat = new Feature(new Polygon([corners]));
+            features.push(feat);
+        }
+        fieldMap.miscSource.addFeatures(features);
+    }
+
+    static clearSource(fieldMap, msg) {
+        if (msg.mapSource == 'fields') {
+            fieldMap.fldSource.clear(true);
+        } else if (msg.mapSource == 'zones') {
+            fieldMap.znSource.clear(true);
+        } else if (msg.mapSource == 'misc') {
+            fieldMap.miscSource.clear(true);
+        }
     }
 }

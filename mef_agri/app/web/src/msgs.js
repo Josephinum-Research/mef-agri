@@ -205,6 +205,18 @@ export class Messages {
         }
     }
 
+    static GotMiscPolygons = class extends Messages.GotMessage {
+        static msgType = 'misc_polygons';
+
+        get plgnIds() {
+            return this.getCont('polygon_ids');
+        }
+
+        get cornerCoords() {
+            return this.getCont('coords');
+        }
+    }
+
     static GotActiveTab = class extends Messages.GotMessage {
         static msgType = 'active_tab';
 
@@ -224,6 +236,14 @@ export class Messages {
          */
         get unsavedChanges() {
             return this.getCont('unsaved_changes');
+        }
+    }
+
+    static GotClearMapSource = class extends Messages.GotMessage {
+        static msgType = 'clear_map_source';
+
+        get mapSource() {
+            return this.getCont('map_source');
         }
     }
 }

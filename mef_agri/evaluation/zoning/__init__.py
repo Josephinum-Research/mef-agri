@@ -224,6 +224,34 @@ class Zoning(GeoRaster):
         crs:int=None,
         intersect_fraction:float=1.0
     ):
+        """
+        Create zoning-georaster from provided absolute filepath ``vfile`` which 
+        represents the zones as vector geometries (i.e. polygons or 
+        multi-polygons).
+        ``vfile`` has to be a file which can be read by 
+        :func:`geopandas.read_file`.
+        Zones/vector geometries will be removed if they do not intersect the 
+        ``field_geom`` and the geodataframe containing the remaining zones is 
+        available via the ``zone_geoms`` attribute of the returned georaster.
+        Each zone/vector geometry will be converted to one layer which pixels 
+        contains a 1 if the intersection of the these pixels with a zone 
+        exceed ``intersect_fraction``.
+        The georeference of the created georaster is derived from the bounding 
+        box of ``field_geom`` and provided ``objres``.
+
+        :param field_geom: geometry representing the field
+        :type field_geom: GeoDataFrame | Polygon | MultiPolygon
+        :param objres: extent of the zones (i.e. squares)
+        :type objres: float
+        :param vfile: absolute path to file containing zones/vector geometries
+        :type vfile: str
+        :param crs: epsg code, defaults to None
+        :type crs: int, optional
+        :param intersect_fraction: intersection percentage which is used to decide if a pixel belongs to a zone/vector geometry, defaults to 1.0
+        :type intersect_fraction: float, optional
+        :return: zoning instance
+        :rtype: Zoning
+        """
         rstr = cls()
         rstr.layer_index = 0
         rstr._set_crs(field_geom, crs)
@@ -233,6 +261,15 @@ class Zoning(GeoRaster):
         gdf = gpd.read_file(vfile)
         if (gdf.crs.to_epsg() != rstr.crs):
             gdf.to_crs(epsg=rstr.crs, inplace=True)
+        # remove vectors/polygons which do not touch the field
+        if isinstance(field_geom, gpd.GeoDataFrame):
+            fgeom = field_geom.geometry.union_all()
+        else:
+            fgeom = field_geom
+        gdf['touches_field'] = gdf.intersects(fgeom)
+        gdf = gdf[gdf['touches_field'] == True]
+        setattr(rstr, 'zone_geoms', gdf)
+
         bbox = bbox_from_aoi(field_geom)
         dimx, dimy = bbox[2] - bbox[0], bbox[3] - bbox[1]
         npx, npy = ceil(dimx / objres), ceil(dimy / objres)

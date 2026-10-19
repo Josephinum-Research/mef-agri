@@ -1,12 +1,14 @@
 from PyQt5.QtWidgets import (
-    QGridLayout, QLabel, QDateEdit, QLineEdit, QPushButton
+    QGridLayout, QLabel, QDateEdit, QLineEdit, QPushButton, QFileDialog
 )
 from PyQt5.QtCore import QDate
 import numpy as np
 from geopandas import GeoDataFrame
+from shapely.geometry import MultiPolygon
 
 from ..conn.msgs import Messages
 from ..utils.widgets import NonProjectTab, ComboBox
+from ..map import MapSources
 from ....data.project import DB as PrjDB
 from ....evaluation.zoning import Zoning
 
@@ -16,13 +18,17 @@ class _TEXT:
     LBL_VALFROM = 'valid from'
     LBL_VALUNTIL = 'valid until'
     LBL_OBJRES = '[m] object resolution'
+    LBL_INTS = '[0, 1] intersection percentage'
+    LBL_VFILE_INIT = 'select file with vector data'
     INP_ORES_DEF = '25.0'
+    INP_INTS_DEF = '1.0'
     DD_ZMETH_INIT = 'select zoning method'
     DD_ZMETH_ONEZONE = 'one zone'
     DD_ZMETH_FROMVEC = 'from vector data'
     DD_ZMETH_REGGRID = 'regular grid'
     BTN_RENDER = 'render'
     BTN_SAVE = 'save'
+    BTN_SEL_VFILE = 'select file'
 
 
 class _STYLE:
@@ -32,6 +38,24 @@ class _STYLE:
             margin-right: 5px;
         }
     """
+
+
+class _ErrorDialogs:
+    @staticmethod
+    def invalid_objres(exc:str|Exception):
+        from ...gui import _CustomErrorDialog
+        msg = 'Provided object-resolution cannot be converted to float\n'
+        msg += str(exc)
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+    @staticmethod
+    def invalid_intersection_fraction(exc:str|Exception):
+        from ...gui import _CustomErrorDialog
+        msg = 'Provided intersection-percentage cannot be converted to float\n'
+        msg += str(exc)
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
 
 
 class ZoningTab(NonProjectTab):
@@ -48,7 +72,8 @@ class ZoningTab(NonProjectTab):
         self.layout_main.setRowStretch(2, 1)
         self.layout_main.setRowStretch(3, 1)
         self.layout_main.setRowStretch(4, 1)
-        self.layout_main.setRowStretch(5, 10)
+        self.layout_main.setRowStretch(5, 1)
+        self.layout_main.setRowStretch(6, 8)
 
         self._lbl_sfld = QLabel(_TEXT.LBL_SELFLD_INIT)
         self.layout_main.addWidget(self._lbl_sfld, 0, 0)
@@ -81,12 +106,25 @@ class ZoningTab(NonProjectTab):
         self._btn_rndr = QPushButton(_TEXT.BTN_RENDER)
         self._btn_rndr.setVisible(False)
         self._btn_rndr.clicked.connect(self._render_zones)
-        self.layout_main.addWidget(self._btn_rndr, 4, 3)
+        self.layout_main.addWidget(self._btn_rndr, 5, 3)
         self._btn_save = QPushButton(_TEXT.BTN_SAVE)
         self._btn_save.setVisible(False)
         self._btn_save.clicked.connect(self._save_zones)
-        self.layout_main.addWidget(self._btn_save, 4, 4)
-        # TODO button to select vector data file
+        self.layout_main.addWidget(self._btn_save, 5, 4)
+        self._btn_vfile = QPushButton(_TEXT.BTN_SEL_VFILE)
+        self._btn_vfile.setVisible(False)
+        self._btn_vfile.clicked.connect(self._select_vfile)
+        self.layout_main.addWidget(self._btn_vfile, 3, 1)
+        self._lbl_vfile = QLabel(_TEXT.LBL_VFILE_INIT)
+        self._lbl_vfile.setVisible(False)
+        self.layout_main.addWidget(self._lbl_vfile, 4, 1, 1, 2)
+        self._inp_ints = QLineEdit()
+        self._inp_ints.setText(_TEXT.INP_INTS_DEF)
+        self._inp_ints.setVisible(False)
+        self.layout_main.addWidget(self._inp_ints, 4, 3)
+        self._lbl_ints = QLabel(_TEXT.LBL_INTS)
+        self._lbl_ints.setVisible(False)
+        self.layout_main.addWidget(self._lbl_ints, 4, 4)
 
         self._reset_date_widgets()
         self._zw1 = [
@@ -99,8 +137,8 @@ class ZoningTab(NonProjectTab):
         # internal variables
         self._zep1 = self._d_vfrom.date().toString('yyyy-MM-dd')
         self._zep2 = self._d_vuntil.date().toString('yyyy-MM-dd')
-        self._ores:float = None
         self._zoning:Zoning = None
+        self._vfile:str = None
 
     def init_tab(self):
         super().init_tab()
@@ -121,6 +159,12 @@ class ZoningTab(NonProjectTab):
         self._inp_ores.setVisible(False)
         self._btn_rndr.setVisible(False)
         self._btn_save.setVisible(False)
+        self._vfile = None
+        self._lbl_vfile.setText(_TEXT.LBL_VFILE_INIT)
+        self._lbl_vfile.setVisible(False)
+        self._btn_vfile.setVisible(False)
+        self._inp_ints.setVisible(False)
+        self._lbl_ints.setVisible(False)
 
     def _field_selected(self, msg:Messages.GotSelectedField):
         if self._active_field is None:
@@ -134,6 +178,12 @@ class ZoningTab(NonProjectTab):
         self._lbl_sfld.setText(msg.field_name)
         self._reset_date_widgets()
         self._reset_zmeth_selection()
+        self._clear_map_misc_source()
+
+    def _clear_map_misc_source(self):
+        msg_clear = Messages.SendClearMapSource()
+        msg_clear.map_source = MapSources.MISC
+        self.store.websocket_server.send_messages([msg_clear])
 
     def _set_first_epoch(self):
         self._zep1 = self._d_vfrom.date().toString('yyyy-MM-dd')
@@ -142,17 +192,40 @@ class ZoningTab(NonProjectTab):
         self._zep2 = self._d_vuntil.date().toString('yyyy-MM-dd')
 
     def _zmeth_selected(self):
+        self._clear_map_misc_source()
         self._btn_rndr.setVisible(True)
         self._btn_save.setVisible(True)
 
         if self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_ONEZONE:
             self._inp_ores.setVisible(False)
             self._lbl_ores.setVisible(False)
-        elif self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_FROMVEC:
-            pass
-        elif self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_REGGRID:
+            self._lbl_vfile.setVisible(False)
+            self._btn_vfile.setVisible(False)
+            self._inp_ints.setVisible(False)
+            self._lbl_ints.setVisible(False)
+        elif self._dd_zmeth.currentText() in (
+                _TEXT.DD_ZMETH_FROMVEC, _TEXT.DD_ZMETH_REGGRID
+            ):
             self._inp_ores.setVisible(True)
             self._lbl_ores.setVisible(True)
+            if self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_FROMVEC:
+                self._btn_vfile.setVisible(True)
+                self._lbl_vfile.setVisible(True)
+                self._inp_ints.setVisible(True)
+                self._lbl_ints.setVisible(True)
+            else:
+                self._btn_vfile.setVisible(False)
+                self._lbl_vfile.setVisible(False)
+                self._inp_ints.setVisible(False)
+                self._lbl_ints.setVisible(False)
+
+    def _select_vfile(self):
+        fd = QFileDialog()
+        fd.setWindowTitle('select file with vector data')
+        fd.show()
+        if fd.exec():
+            self._vfile = fd.selectedFiles()[0]
+            self._lbl_vfile.setText(self._vfile)
 
     def _get_field_gdf(self) -> GeoDataFrame:
         cond = self.store.project_data.fields[
@@ -164,12 +237,20 @@ class ZoningTab(NonProjectTab):
 
     def _render_zones(self):
         zn_info = Messages.SendZones()
+        zn_info.zone_names = []
+        zn_info.coordinates = []
 
         try:
-            self._ores = float(self._inp_ores.text())
-        except:
-            # TODO
-            pass
+            ores = float(self._inp_ores.text())
+        except Exception as exc:
+            _ErrorDialogs.invalid_objres(exc)
+            return
+        
+        try:
+            intsfr = float(self._inp_ints.text())
+        except Exception as exc:
+            _ErrorDialogs.invalid_intersection_fraction(exc)
+            return
 
         if self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_ONEZONE:
             self._zoning = Zoning.one_zone(self._get_field_gdf())
@@ -182,7 +263,7 @@ class ZoningTab(NonProjectTab):
 
         elif self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_REGGRID:
             self._zoning = Zoning.regular_grid(
-                self._get_field_gdf(), objres=self._ores
+                self._get_field_gdf(), objres=ores
             )
             zgdf = self._zoning.to_gdf()
             zgdf = zgdf[zgdf[self._zoning.layer_ids[-1]] == 1.]
@@ -190,8 +271,6 @@ class ZoningTab(NonProjectTab):
             for col in zgdf.columns:
                 if 'zone_' in col:
                     inscols.append(col)
-            zn_info.zone_names = []
-            zn_info.coordinates = []
             for tpl in zgdf.itertuples():
                 for col in inscols:
                     if getattr(tpl, col):
@@ -201,7 +280,40 @@ class ZoningTab(NonProjectTab):
                     np.array(tpl.geometry.exterior.coords)[:-1, :].tolist()
                 )
         elif self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_FROMVEC:
-            pass
+            self._zoning = Zoning.from_vector(
+                self._get_field_gdf(), objres=ores, vfile=self._vfile,
+                intersect_fraction=intsfr
+            )
+            zgdf = self._zoning.zones_to_gdf()
+            for tpl in zgdf.itertuples():
+                if isinstance(tpl.geometry, MultiPolygon):
+                    for plgn in tpl.geometry.geoms:
+                        zn_info.zone_names.append(getattr(tpl, 'zone_id'))
+                        zn_info.coordinates.append(
+                            np.array(plgn.exterior.coords)[:-1, :].tolist()
+                        )
+                else:
+                    zn_info.zone_names.append(getattr(tpl, 'zone_id'))
+                    zn_info.coordinates.append(
+                        np.array(tpl.geometry.exterior.coords)[:-1, :].tolist()
+                    )
+            
+            zn_vectors = Messages.SendMiscPolygons()
+            zn_vectors.pids = []
+            zn_vectors.coordinates = []
+            for tpl in self._zoning.zone_geoms.itertuples():
+                if isinstance(tpl.geometry, MultiPolygon):
+                    for plgn in tpl.geometry.geoms:
+                        zn_vectors.pids.append('some-zone')
+                        zn_vectors.coordinates.append(
+                            np.array(plgn.exterior.coords)[:-1, :].tolist()
+                        )
+                else:
+                    zn_vectors.pids.append('some-zone')
+                    zn_vectors.coordinates.append(
+                        np.array(tpl.geometry.exterior.coords)[:-1, :].tolist()
+                    )
+            self.store.websocket_server.send_messages([zn_vectors])
 
         self.store.websocket_server.send_messages([zn_info])
 
