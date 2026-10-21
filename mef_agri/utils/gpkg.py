@@ -42,7 +42,7 @@ class DB:
     """
     Decorators for methods in :class:`Geopackage`.
     """
-    NULLSTRINGS = ('', 'nan', 'NaN', 'None')
+    NULLSTRINGS = ('', 'nan', 'NaN', 'None', 'null')
 
     @staticmethod
     def connect(func):

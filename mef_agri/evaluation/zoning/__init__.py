@@ -133,16 +133,11 @@ class Zoning(GeoRaster):
         thresh:float=1e-6
     ):
         """
-        Zones correspond to a regular grid overlaying the field, where each 
-        zone is a square with side length being ``objres``.
-        The upper-left corner of the regular grid is equal to the upper-left 
-        coordinates of the field's bounding box.
-        :func:`layer_index` will be set to ``0`` (i.e. layers are accessible by 
-        the first index of the 3D raster).
-        The last layer indicates if a zone touches the field (pixel-value = 1) 
-        or not (pixel-value = 0).
-        Correspondingly, the layer-ids are `zone-<i>` if the zone thouches the 
-        field or `outside-<i>` if not.
+        A regular grid (i.e. squares/pixels) with side-lengths of ``objres`` [m] 
+        overlaying the field is created, which represents the georaster.
+        Only pixels which intersect the field by a fraction of ``thresh`` will 
+        be considered as zones representing the layers of the georaster.
+        The ``layer_index`` is set to 0.
 
         :param field_geom: geometry representing the field
         :type field_geom: GeoDataFrame | Polygon | MultiPolygon
@@ -174,7 +169,7 @@ class Zoning(GeoRaster):
             raise ValueError(msg.format(2 ** 32))
         rstr.nodata_value = 0
 
-        # defining the georaster
+        # defining the georeference
         rstr.bounds = [
             bbox[0], bbox[3] - objres * npy, bbox[0] + objres * npx, bbox[3]
         ]
@@ -183,36 +178,20 @@ class Zoning(GeoRaster):
             [0., -objres, bbox[3]],
             [0., 0., 1.]
         ])
-        rstr.raster_shape = (npa + 1, npy, npx)
-        rstr.raster = np.zeros((npa + 1, npy, npx), dtype=rstr.units)
 
-        # create an additional layer indicating, if a pixel touches the field
+        # creating the raster itself (i.e. the layers representing zones)
         rvi = RasterVectorIntersection(field_geom, rstr)
         rvi.fraction = thresh
         rvi.compute()
-        rstr.raster[-1:, :, :] = rvi.assignment
 
-        zids = []
-        ix, iy = 0, 0
-        inan, iins = 0, 0
-        for i in range(npa):
-            if rstr.raster[-1, iy, ix]:
-                zids.append(f'zone_{iins + 1}')
-                iins += 1
-            else:
-                zids.append(f'outside_{inan + 1}')
-                inan += 1
-            
-            rstr.raster[i, iy, ix] = 1
-            if (ix == (npx - 1)):
-                ix = 0
-                iy += 1
-            else:
-                ix += 1
-            i += 1
-        zids.append('touches_field')
-        rstr.layer_ids = zids
-
+        ix_ins = np.where(rvi.assignment == 1)
+        nl = len(ix_ins[0])
+        rstr.raster_shape = (nl, npy, npx)
+        rstr.raster = np.zeros((nl, npy, npx), dtype=rstr.units)
+        rstr.layer_ids = []
+        for il, iy, ix in zip(range(nl), ix_ins[1], ix_ins[2]):
+            rstr.layer_ids.append(f'zone_{il + 1}')
+            rstr.raster[il, iy, ix] = 1
         return rstr
 
     @classmethod

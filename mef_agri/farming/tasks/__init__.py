@@ -7,7 +7,7 @@ from importlib import import_module
 from shutil import rmtree
 
 from ...utils.raster import GeoRaster, bbox_from_gdf
-from ...utils.misc import PixelUnits
+from ...utils.misc import PixelUnits, check_date, check_time
 from ...data.project import ProjectData, DB
 
 
@@ -886,24 +886,8 @@ class Task(GeoRaster):
 
     @staticmethod
     def _check_date(val) -> datetime.date:
-        if isinstance(val, datetime.datetime):
-            return val.date()
-        elif isinstance(val, str):
-            return datetime.date.fromisoformat(val)
-        elif isinstance(val, datetime.date):
-            return val
-        else:
-            msg = 'Provided value cannot be converted to datetime.date!'
-            raise ValueError(msg)
-        
+        return check_date(val)
+
     @staticmethod
     def _check_time(val) -> datetime.time:
-        if isinstance(val, datetime.datetime):
-            return val.time()
-        elif isinstance(val, str):
-            return datetime.time.fromisoformat(val)
-        elif isinstance(val, datetime.time):
-            return val
-        else:
-            msg = 'Provided value cannot be converted to datetime.time!'
-            raise ValueError(msg)
+        return check_time(val)

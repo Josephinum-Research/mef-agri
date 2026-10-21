@@ -1,8 +1,12 @@
 import datetime as dt
+import json
 from copy import deepcopy
 from inspect import isclass
 
 from ..utils.gpkg import Geopackage, SQLTable, ForeignKey, GeometryType
+from ..utils.misc import check_date
+from .zoning.data import ZoningData
+from .zoning import Zoning
 
 
 class DBSchema(object):
@@ -14,26 +18,21 @@ class DBSchema(object):
         self._fk_te.on_delete = 'CASCADE'
         self._fk_te.on_update = 'CASCADE'
 
-    @property
-    def table_zones(self) -> SQLTable:
-        tbl = SQLTable()
-        tbl.name = 'zones'
-        tbl.columns = {
+        self._tzones = SQLTable()
+        self._tzones.name = 'zones'
+        self._tzones.columns = {
             'zid': 'INT',  # NOTE incrementing integer
             'field': 'TEXT',
             'zoning': 'TEXT',  # NOTE identifier to find specific zoning in folder structure
             'zone_name': 'TEXT',
             'height': 'REAL'
         }
-        tbl.primary_key = ['zid']
-        tbl.geom = GeometryType.MULTIPOLYGON
-        return tbl
+        self._tzones.primary_key = ['zid']
+        self._tzones.geom = GeometryType.MULTIPOLYGON
 
-    @property
-    def table_evals(self) -> SQLTable:
-        tbl = SQLTable()
-        tbl.name = 'evaluations'
-        tbl.columns = {
+        self._tevals = SQLTable()
+        self._tevals.name = 'evaluations'
+        self._tevals.columns = {
             'eid': 'INT',  # NOTE incrementing integer
             'zid': 'INT',
             'epoch_start': 'TEXT',
@@ -42,21 +41,18 @@ class DBSchema(object):
             'zone_model_module': 'TEXT',
             'info': 'TEXT'
         }
-        tbl.primary_key = ['eid']
+        self._tevals.primary_key = ['eid']
         fk_tz = ForeignKey()
         fk_tz.fkey_columns = ['zid']
         fk_tz.ftable = self.table_zones.name
         fk_tz.ftable_columns = self.table_zones.primary_key
         fk_tz.on_delete = 'SET NULL'
         fk_tz.on_update = 'CASCADE'
-        tbl.foreign_keys = [fk_tz]
-        return tbl
+        self._tevals.foreign_keys = [fk_tz]
 
-    @property
-    def table_obs_def(self) -> SQLTable:
-        tbl = SQLTable()
-        tbl.name = 'obs_def'
-        tbl.columns = {
+        self._tdobs = SQLTable()
+        self._tdobs.name = 'obs_def'
+        self._tdobs.columns = {
             'eid': 'INT',
             'name': 'TEXT',
             'model': 'TEXT',
@@ -64,15 +60,12 @@ class DBSchema(object):
             'value': 'REAL',
             'distr': 'TEXT'
         }
-        tbl.primary_key = ['eid', 'name', 'model', 'epoch']
-        tbl.foreign_keys = [deepcopy(self._fk_te)]
-        return tbl
+        self._tdobs.primary_key = ['eid', 'name', 'model', 'epoch']
+        self._tdobs.foreign_keys = [deepcopy(self._fk_te)]
 
-    @property
-    def table_states_def(self) -> SQLTable:
-        tbl = SQLTable()
-        tbl.name = 'states_def'
-        tbl.columns = {
+        self._tdstates = SQLTable()
+        self._tdstates.name = 'states_def'
+        self._tdstates.columns = {
             'eid': 'INT',
             'name': 'TEXT',
             'model': 'TEXT',
@@ -80,15 +73,12 @@ class DBSchema(object):
             'value': 'REAL',
             'distr': 'TEXT'
         }
-        tbl.primary_key = ['eid', 'name', 'model', 'epoch']
-        tbl.foreign_keys = [deepcopy(self._fk_te)]
-        return tbl
+        self._tdstates.primary_key = ['eid', 'name', 'model', 'epoch']
+        self._tdstates.foreign_keys = [deepcopy(self._fk_te)]
 
-    @property
-    def table_params_def(self) -> SQLTable:
-        tbl = SQLTable()
-        tbl.name = 'params_def'
-        tbl.columns = {
+        self._tdparams = SQLTable()
+        self._tdparams.name = 'params_def'
+        self._tdparams.columns = {
             'eid': 'INT',
             'name': 'TEXT',
             'model': 'TEXT',
@@ -96,39 +86,60 @@ class DBSchema(object):
             'value': 'REAL',
             'distr': 'TEXT'
         }
-        tbl.primary_key = ['eid', 'name', 'model', 'epoch']
-        tbl.foreign_keys = [deepcopy(self._fk_te)]
-        return tbl
+        self._tdparams.primary_key = ['eid', 'name', 'model', 'epoch']
+        self._tdparams.foreign_keys = [deepcopy(self._fk_te)]
 
-    @property
-    def table_pfuncs_def(self) -> SQLTable:
-        tbl = SQLTable()
-        tbl.name = 'pfuncs_def'
-        tbl.columns = {
+        self._tdpfuncs = SQLTable()
+        self._tdpfuncs.name = 'pfuncs_def'
+        self._tdpfuncs.columns = {
             'eid': 'INT',
             'name': 'TEXT',
             'model': 'TEXT',
             'epoch': 'TEXT',
             'fdef': 'TEXT',
         }
-        tbl.primary_key = ['eid', 'name', 'model', 'epoch']
-        tbl.foreign_keys = [deepcopy(self._fk_te)]
-        return tbl
+        self._tdpfuncs.primary_key = ['eid', 'name', 'model', 'epoch']
+        self._tdpfuncs.foreign_keys = [deepcopy(self._fk_te)]
 
-    @property
-    def table_croprot(self) -> SQLTable:
-        tbl = SQLTable()
-        tbl.name = 'crop_rotation'
-        tbl.columns = {
+        self._tcrpr = SQLTable()
+        self._tcrpr.name = 'crop_rotation'
+        self._tcrpr.columns = {
             'eid': 'INT',
             'crop_model': 'TEXT',
             'crop_model_module': 'TEXT',
             'epoch_start': 'TEXT',
             'epoch_end': 'TEXT'
         }
-        tbl.primary_key = ['eid', 'epoch_start']
-        tbl.foreign_keys = [deepcopy(self._fk_te)]
-        return tbl
+        self._tcrpr.primary_key = ['eid', 'epoch_start']
+        self._tcrpr.foreign_keys = [deepcopy(self._fk_te)]
+    
+    @property
+    def table_zones(self) -> SQLTable:
+        return self._tzones
+    
+    @property
+    def table_evals(self) -> SQLTable:
+        return self._tevals
+    
+    @property
+    def table_obs_def(self) -> SQLTable:
+        return self._tdobs
+    
+    @property
+    def table_states_def(self) -> SQLTable:
+        return self._tdstates
+    
+    @property
+    def table_params_def(self) -> SQLTable:
+        return self._tdparams
+    
+    @property
+    def table_pfuncs_def(self) -> SQLTable:
+        return self._tdpfuncs
+    
+    @property
+    def table_croprot(self) -> SQLTable:
+        return self._tcrpr
 
     
 class EvalDB(Geopackage):
@@ -156,7 +167,9 @@ class EvalDB(Geopackage):
     distribution information (see`mef_agri.evaluation.stats_utils` for more 
     details).
     """
-    def __init__(self, save_dir, file_name):
+    DBNAME = 'eval.gpkg'
+
+    def __init__(self, prjdir:str):
         """
         constructor
 
@@ -165,18 +178,47 @@ class EvalDB(Geopackage):
         :param file_name: name of the database-file
         :type file_name: str
         """
-        super().__init__(save_dir, file_name)
+        super().__init__(prjdir, self.DBNAME)
         self._dbs:DBSchema = DBSchema()
         self.tables = {
-            self._dbs.table_zones, self._dbs.table_evals, 
-            self._dbs.table_croprot, self._dbs.table_states_def, 
-            self._dbs.table_params_def, self._dbs.table_pfuncs_def,
-            self._dbs.table_obs_def
+            self._dbs.table_zones.name: self._dbs.table_zones, 
+            self._dbs.table_evals.name: self._dbs.table_evals, 
+            self._dbs.table_croprot.name: self._dbs.table_croprot, 
+            self._dbs.table_states_def.name: self._dbs.table_states_def, 
+            self._dbs.table_params_def.name: self._dbs.table_params_def, 
+            self._dbs.table_pfuncs_def.name: self._dbs.table_pfuncs_def,
+            self._dbs.table_obs_def.name: self._dbs.table_obs_def  
         }
+        self._tdefs = [
+            self._dbs.table_croprot.name, self._dbs.table_obs_def.name,
+            self._dbs.table_states_def.name, self._dbs.table_params_def.name,
+            self._dbs.table_pfuncs_def.name
+        ]
+        self._ddefs:dict = None
+        self._ddefs = dict.fromkeys(self._tdefs, None)
+        for tname in self._tdefs:
+            self._reset_defdata(tname)
+
+        self._zd:ZoningData = ZoningData(prjdir)
+
+    @property
+    def zoning_data(self) -> ZoningData:
+        """
+        :return: object to handle zoning georasters in the project folder structure
+        :rtype: ZoningData
+        """
+        return self._zd
+    
+    ############################################################################
+    # evaluation and zoning stuff
+    ############################################################################
+    def save_zoning(self, field_name:str, zoning:Zoning):
+        pass
+        # TODO
 
     def insert_eval_data(
-            self, zid:int, epoch_start:dt.date, model, 
-            epoch_end:dt.date|None=None, info:str|None=None
+            self, zid:int, epoch_start:dt.date|str, model, 
+            epoch_end:dt.date|str|None=None, info:str|None=None
         ):
         """
         Insert data into the evaluations-table.
@@ -186,16 +228,21 @@ class EvalDB(Geopackage):
         :param zid: PK of zones-table
         :type zid: int
         :param epoch_start: first epoch of evaluation
-        :type epoch_start: datetime.date
+        :type epoch_start: datetime.date | str
         :param model: name of the top-level model (i.e. the zone-model)
         :type model: mef_agri.models.zone.base.Zone
         :param epoch_end: epoch when evaluation is stopped, defaults to None
-        :type epoch_end: datetime.date | None, optional
+        :type epoch_end: datetime.date | str | None, optional
         :param info: information about the evaluation run, defaults to None
         :type info: str | None, optional
+        :return: new evaluation id
+        :rtype: int
         """
+        epoch_start = check_date(epoch_start)
         if epoch_end is None:
             epoch_end = 'null'
+        else:
+            epoch_end = check_date(epoch_end).isoformat()
         if info is None:
             info = 'null'
 
@@ -217,3 +264,206 @@ class EvalDB(Geopackage):
             zone_model_module=mmodule,
             info=info
         )
+        return eid
+
+    ############################################################################
+    # data definition stuff
+    ############################################################################
+    def add_crop_rotation(
+            self, eid:int, crop_model, epoch_start:dt.date|str, 
+            epoch_end:dt.date|str
+        ):
+        """
+        Add crop rotation data to queued data which will be inserted into the 
+        crop_rotation-table.
+
+        :param eid: evaluation id
+        :type eid: int
+        :param crop_model: model representing the crop
+        :type crop_model: object or class
+        :param epoch_start: sowing/planting date
+        :type epoch_start: datetime.date | str
+        :param epoch_end: harvesting/mulching date
+        :type epoch_end: datetime.date | str
+        """
+        if isclass(crop_model):
+            mmodule = crop_model.__module__
+            mname = crop_model.__name__
+        else:
+            mmodule = crop_model.__class__.__module__
+            mname = crop_model.__class__.__name__
+        self._add_defdata(
+            self._dbs.table_croprot.name,
+            eid=eid,
+            crop_model=mname,
+            crop_model_module=mmodule,
+            epoch_start=check_date(epoch_start).isoformat(),
+            epoch_end=check_date(epoch_end).isoformat()
+        )
+
+    def add_observation_def(
+            self, eid:int, oname:str, omodel:str, epoch:dt.date|str, 
+            value:float, distr:dict
+        ) -> None:
+        """
+        Add observation definition to queued data which will be inserted into 
+        the obs_def-table.
+
+        :param eid: evaluation id
+        :type eid: int
+        :param oname: name of the observation within the `model`
+        :type oname: str
+        :param model: `Model.model_id` of the model which the observation belongs to
+        :type model: str
+        :param epoch: epoch which the observation belongs to
+        :type epoch: datetime.date
+        :param value: value of the observation
+        :type value: float
+        :param distr: dictionary containing information about distribution
+        :type distr: dict
+        """
+        self._add_defdata(
+            self._dbs.table_obs_def.name,
+            eid=eid,
+            name=oname,
+            model=omodel,
+            epoch=check_date(epoch).isoformat(),
+            value=value,
+            distr=json.dumps(distr)
+        )
+
+    def add_states_def(
+            self, eid:int, sname:str, smodel:str, epoch:dt.date|str, 
+            value:float, distr:dict
+        ) -> None:
+        """
+        add state definition to queued data which will be inserted into the 
+        states_def-table
+
+        :param eid: evaluation id
+        :type eid: int
+        :param sname: name of the state within the `model`
+        :type sname: str
+        :param smodel: `Model.model_id` of the model which the state belongs to
+        :type smodel: str
+        :param epoch: epoch which the state belongs to
+        :type epoch: datetime.date
+        :param value: value of the state
+        :type value: float
+        :param distr: dictionary containing information about distribution
+        :type distr: dict
+        """
+        self._add_defdata(
+            self._dbs.table_states_def.name,
+            eid=eid,
+            name=sname,
+            model=smodel,
+            epoch=check_date(epoch).isoformat(),
+            value=value,
+            distr=json.dumps(distr)
+        )
+
+    def add_param_def(
+            self, eid:int, pname:str, pmodel:str, epoch:dt.date|str, 
+            value:float, distr:dict
+        ) -> None:
+        """
+        Add parameter definition to queued data which will be inserted into the 
+        params_def-table
+
+        :param eid: evaluation id
+        :type eid: int
+        :param pname: name of the parameter within the `model`
+        :type pname: str
+        :param pmodel: `Model.model_id` of the model which the parameter belongs to
+        :type pmodel: str
+        :param epoch: epoch which the parameter belongs to
+        :type epoch: datetime.date
+        :param value: value of the parameter
+        :type value: float
+        :param distr: dictionary containing information about distribution
+        :type distr: dict
+        """
+        self._add_defdata(
+            self._dbs.table_params_def.name,
+            eid=eid,
+            name=pname,
+            model=pmodel,
+            epoch=check_date(epoch).isoformat(),
+            value=value,
+            distr=json.dumps(distr)
+        )
+
+    def add_pfunc_def(
+            self, eid:int, fname:str, fmodel:str, epoch:dt.date|str, fdef:dict
+        ) -> None:
+        """
+        Add parameter-function definition to queued data which will be inserted 
+        into the pfuncs_def-table.
+
+        :param eid: evaluation id
+        :type eid: int
+        :param fname: name of the pfunction within the `model`
+        :type fname: str
+        :param fmodel: `Model.model_id` of the model which the pfunction belongs to
+        :type fmodel: str
+        :param epoch: epoch which the pfunction belongs to
+        :type epoch: datetime.date
+        :param fdef: dictionary containing information about the pfunction
+        :type fdef: dict
+        """
+        self._add_defdata(
+            self._dbs.table_pfuncs_def.name,
+            eid=eid,
+            name=fname,
+            model=fmodel,
+            epoch=check_date(epoch).isoformat(),
+            fdef=json.dumps(fdef)
+        )
+
+    def insert_crop_rotation(self):
+        """
+        Insert queued crop rotation data into the crop_rotation-table.
+        """
+        self._insert_defdata(self._dbs.table_croprot.name)
+
+    def insert_obs_def(self):
+        """
+        Insert queued observation definitions into the obs_def-table
+        """
+        self._insert_defdata(self._dbs.table_obs_def.name)
+
+    def insert_states_def(self):
+        """
+        Insert queued state definitions into the states_def-table
+        """
+        self._insert_defdata(self._dbs.table_states_def.name)
+
+    def insert_params_def(self):
+        """
+        Insert queued parameter definitions into the params_def-table
+        """
+        self._insert_defdata(self._dbs.table_params_def.name)
+
+    def insert_pfuncs_def(self):
+        """
+        Insert queued parameter-function definitions into the pfuncs_def-table
+        """
+        self._insert_defdata(self._dbs.table_pfuncs_def.name)
+
+    def _reset_defdata(self, tname:str):
+        self._ddefs[tname] = dict.fromkeys(
+            self.tables[tname].columns.keys(), 
+            []
+        )
+
+    def _add_defdata(self, tname:str, **kwargs):
+        for col in self._ddefs[tname].keys():
+            if col in kwargs.keys():
+                self._ddefs[tname].append(kwargs[col])
+            else:
+                self._ddefs[tname].append('null')
+
+    def _insert_defdata(self, tname:str):
+        self.insert_data(tname, **self._ddefs[tname])
+        self._reset_defdata(tname)
