@@ -595,6 +595,8 @@ class Geopackage(object):
     @property
     def tables(self) -> dict:
         """
+        settable
+
         :return: tables in the geopackage (keys of the dict correspond to the table-names)
         :rtype: dict
         """
@@ -624,7 +626,7 @@ class Geopackage(object):
         self._curs.execute(self._SQL_GEOM)
         print('\n(gpkg.py) Created mandatory tables\n')
         print(f'\n(gpkg.py) with response {self._curs.fetchall()}')
-        print('-----------------------------------------------------------')
+        print('---------------------------------------------------------------')
         # mandatory srs data
         # https://opengeospatial.github.io/e-learning/geopackage/text/contents.html
         self._curs.execute(self._INS_SRS.format(
@@ -647,7 +649,7 @@ class Geopackage(object):
         ))
         print('\n(gpkg.py) Inserted mandatory coordinate reference systems\n')
         print(f'\n(gpkg.py) with response {self._curs.fetchall()}')
-        print('-----------------------------------------------------------')
+        print('---------------------------------------------------------------')
 
     @DB.connect
     @DB.commit_and_close
@@ -655,7 +657,7 @@ class Geopackage(object):
         """
         Create tables specfied in ``tables``-property
         """
-        print('-----------------------------------------------------------')
+        print('---------------------------------------------------------------')
         qsrs = 'SELECT srs_id FROM gpkg_spatial_ref_sys WHERE srs_id='
         qsrs += str(self.CRS_EPSG) + ';'
         self._curs.execute(qsrs)
@@ -707,7 +709,7 @@ class Geopackage(object):
         self._curs.execute(sql)
         print('\n(gpkg.py) inserted data into {}'.format(table))
         print(f'\n(gpkg.py) with response {self._curs.fetchall()}')
-        print('-----------------------------------------------------------')
+        print('---------------------------------------------------------------')
 
     @DB.connect
     @DB.commit_and_close
@@ -763,6 +765,17 @@ class Geopackage(object):
             df.loc[i] = row
             i += 1
         return df
+
+    def number_of_rows(self, table:str) -> int:
+        """
+        Query the number of rows of the provided ``table``
+
+        :param table: table which rows should be counted
+        :type table: str
+        :return: number of rows
+        :rtype: int
+        """
+        return self.query(f'SELECT COUNT(*) FROM {table};').values[0, 0]
     
     def query_gdf(self, table:str, where:str=None) -> gpd.GeoDataFrame:
         """
