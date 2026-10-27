@@ -4,6 +4,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 from ...gui.conn.server import WebsocketServer
 from ....data.interface import Interface
+from ....evaluation.db import EvalDB, DBQueries
 from ..project import ProjectDataGUI
 
 
@@ -14,10 +15,14 @@ class AppStore(object):
         self._prj:ProjectDataGUI = None
         self._pp:str = None
         self._map:QWebEngineView = None
+        self._edb:EvalDB = None
+        self._qedb:DBQueries = None
 
     @property
     def websocket_server(self) -> WebsocketServer:
         """
+        settable
+
         :return: websocket instance to enable communication between qt-based gui with web-based map
         :rtype: WebsocketServer
         """
@@ -30,6 +35,8 @@ class AppStore(object):
     @property
     def map_view(self) -> QWebEngineView:
         """
+        settable
+
         :return: openlayers map
         :rtype: QWebEngineView
         """
@@ -42,6 +49,8 @@ class AppStore(object):
     @property
     def project_path(self) -> str:
         """
+        settable
+
         :return: absolute path where project-database (.gpkg) is located
         :rtype: str
         """
@@ -55,6 +64,8 @@ class AppStore(object):
     @property
     def project_data(self) -> ProjectDataGUI:
         """
+        settable
+
         :return: object for project-db access and data-handling
         :rtype: ProjectData
         """
@@ -67,6 +78,8 @@ class AppStore(object):
     @property
     def data_interfaces(self) -> list[Interface]:
         """
+        settable
+
         :return: data-interface instances provided by the user which should be available in the current session (if not already available in the project-db)
         :rtype: list[Interface]
         """
@@ -82,4 +95,27 @@ class AppStore(object):
                 self._dis.append(di())
             else:
                 self._dis.append(di)
+
+    @property
+    def eval_db(self) -> EvalDB:
+        """
+        settable
+
+        :return: database which contains zoning information as well as input and output data of model evaluation
+        :rtype: EvalDB
+        """
+        return self._edb
+
+    @eval_db.setter
+    def eval_db(self, edb):
+        self._edb = edb
+        self._qedb = DBQueries(edb)
+
+    @property
+    def query_eval_db(self) -> DBQueries:
+        """
+        :return: instance which can be used to perform queries in :func:`eval_db`
+        :rtype: DBQueries
+        """
+        return self._qedb
 

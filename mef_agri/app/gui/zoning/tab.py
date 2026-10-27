@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (
-    QGridLayout, QLabel, QDateEdit, QLineEdit, QPushButton, QFileDialog
+    QGridLayout, QLabel, QDateEdit, QLineEdit, QPushButton, QFileDialog,
+    QTableWidget, QTableWidgetItem, QHeaderView
 )
 from PyQt5.QtCore import QDate
 import numpy as np
@@ -10,6 +11,7 @@ from ..conn.msgs import Messages
 from ..utils.widgets import NonProjectTab, ComboBox
 from ..map import MapSources
 from ....data.project import DB as PrjDB
+from ....evaluation.db import EvalDB
 from ....evaluation.zoning import Zoning
 
 
@@ -20,6 +22,7 @@ class _TEXT:
     LBL_OBJRES = '[m] object resolution'
     LBL_INTS = '[0, 1] intersection percentage'
     LBL_VFILE_INIT = 'select file with vector data'
+    LBL_H = '[m] approximate height/altitude'
     INP_ORES_DEF = '25.0'
     INP_INTS_DEF = '1.0'
     DD_ZMETH_INIT = 'select zoning method'
@@ -29,6 +32,7 @@ class _TEXT:
     BTN_RENDER = 'render'
     BTN_SAVE = 'save'
     BTN_SEL_VFILE = 'select file'
+    TBL_ZS_HEADER = 'available zonings'
 
 
 class _STYLE:
@@ -77,6 +81,10 @@ class ZoningTab(NonProjectTab):
 
         self._lbl_sfld = QLabel(_TEXT.LBL_SELFLD_INIT)
         self.layout_main.addWidget(self._lbl_sfld, 0, 0)
+        self._inp_h = QLineEdit()
+        self.layout_main.addWidget(self._inp_h, 0, 1)
+        self._lbl_h = QLabel(_TEXT.LBL_H)
+        self.layout_main.addWidget(self._lbl_h, 0, 2)
         self._lbl_vfrom = QLabel(_TEXT.LBL_VALFROM)
         self.layout_main.addWidget(self._lbl_vfrom, 1, 0)
         self._d_vfrom = QDateEdit(calendarPopup=True)
@@ -126,10 +134,21 @@ class ZoningTab(NonProjectTab):
         self._lbl_ints.setVisible(False)
         self.layout_main.addWidget(self._lbl_ints, 4, 4)
 
+        # table containing available zonings for field
+        self._tbl_zs = QTableWidget()
+        self._tbl_zs.setColumnCount(1)
+        self._tbl_zs.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.Stretch
+        )
+        self._tbl_zs.horizontalHeader().setMinimumSectionSize(0)
+        self._tbl_zs_header = QTableWidgetItem(_TEXT.TBL_ZS_HEADER)
+        self._tbl_zs.setHorizontalHeaderItem(0, self._tbl_zs_header)
+        self.layout_main.addWidget(self._tbl_zs, 6, 1, 1, 3)
+
         self._reset_date_widgets()
         self._zw1 = [
             self._lbl_vfrom, self._d_vfrom, self._lbl_vuntil, self._d_vuntil,
-            self._dd_zmeth
+            self._dd_zmeth, self._inp_h, self._lbl_h, self._tbl_zs
         ]
         for widget in self._zw1:
             widget.setVisible(False)
@@ -145,6 +164,13 @@ class ZoningTab(NonProjectTab):
         self.store.websocket_server.register_handler(
             self._field_selected, Messages.GotSelectedField
         )
+
+        if self.store.eval_db is None:
+            edb = EvalDB(self.store.project_path)
+            if not edb.is_initialized:
+                edb.initialize()
+                edb.create_tables()
+            self.store.eval_db = edb
 
     def _reset_date_widgets(self):
         self._d_vfrom.setDate(QDate(QDate.currentDate().year(), 1, 1))
@@ -179,6 +205,13 @@ class ZoningTab(NonProjectTab):
         self._reset_date_widgets()
         self._reset_zmeth_selection()
         self._clear_map_misc_source()
+
+        for i in range(self._tbl_zs.rowCount()):
+            self._tbl_zs.removeRow(i)
+        dfz = self.store.eval_db.queries.zonings_by_field(msg.field_name)
+        self._tbl_zs.setRowCount(len(dfz))
+        for i, zoning in zip(range(len(dfz)), dfz.values.flatten()):
+            self._tbl_zs.setItem(i, 0, QTableWidgetItem(zoning))
 
     def _clear_map_misc_source(self):
         msg_clear = Messages.SendClearMapSource()
@@ -266,18 +299,11 @@ class ZoningTab(NonProjectTab):
                 self._get_field_gdf(), objres=ores
             )
             zgdf = self._zoning.to_gdf()
-            zgdf = zgdf[zgdf[self._zoning.layer_ids[-1]] == 1.]
-            inscols = []
-            for col in zgdf.columns:
-                if 'zone_' in col:
-                    inscols.append(col)
-            for tpl in zgdf.itertuples():
-                for col in inscols:
-                    if getattr(tpl, col):
-                        zn_info.zone_names.append(col)
-                        break
+            zn_info.zone_names = self._zoning.layer_ids
+            for lid in self._zoning.layer_ids:
+                pxl = zgdf[zgdf[lid] == 1].geometry.values[0]
                 zn_info.coordinates.append(
-                    np.array(tpl.geometry.exterior.coords)[:-1, :].tolist()
+                    np.array(pxl.exterior.coords)[:-1, :].tolist()
                 )
         elif self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_FROMVEC:
             self._zoning = Zoning.from_vector(
@@ -318,4 +344,9 @@ class ZoningTab(NonProjectTab):
         self.store.websocket_server.send_messages([zn_info])
 
     def _save_zones(self):
+        # TODO
+        pass
+
+    def _render_avlbl_zone(self):
+        # TODO render zone in map via context menu in self._tbl_zs
         pass

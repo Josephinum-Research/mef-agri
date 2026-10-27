@@ -12,8 +12,8 @@ class ZoningData(object):
     """
     ZONING_DIRECTORY = 'zoning'
 
-    def __init__(self, prjdir:str):
-        self._zdir:str = os.path.join(prjdir, self.ZONING_DIRECTORY)
+    def __init__(self, evaldir:str):
+        self._zdir:str = os.path.join(evaldir, self.ZONING_DIRECTORY)
         if not os.path.exists(self._zdir):
             os.mkdir(self._zdir)
 

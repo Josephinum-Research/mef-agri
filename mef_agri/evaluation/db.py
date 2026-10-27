@@ -1,7 +1,9 @@
 import datetime as dt
 import json
+import os
 from copy import deepcopy
 from inspect import isclass
+from pandas import DataFrame
 
 from ..utils.gpkg import Geopackage, SQLTable, ForeignKey, GeometryType
 from ..utils.misc import check_date
@@ -11,13 +13,6 @@ from .zoning import Zoning
 
 class DBSchema(object):
     def __init__(self):
-        self._fk_te = ForeignKey()
-        self._fk_te.fkey_columns = ['eid']
-        self._fk_te.ftable = self.table_evals.name
-        self._fk_te.ftable_columns = self.table_evals.primary_key
-        self._fk_te.on_delete = 'CASCADE'
-        self._fk_te.on_update = 'CASCADE'
-
         self._tzones = SQLTable()
         self._tzones.name = 'zones'
         self._tzones.columns = {
@@ -27,7 +22,7 @@ class DBSchema(object):
             'zone_name': 'TEXT',
             'height': 'REAL'
         }
-        self._tzones.primary_key = ['zid']
+        self._tzones.unique_cols = ['zid']
         self._tzones.geom = GeometryType.MULTIPOLYGON
 
         self._tevals = SQLTable()
@@ -45,10 +40,17 @@ class DBSchema(object):
         fk_tz = ForeignKey()
         fk_tz.fkey_columns = ['zid']
         fk_tz.ftable = self.table_zones.name
-        fk_tz.ftable_columns = self.table_zones.primary_key
+        fk_tz.ftable_columns = self.table_zones.unique_cols
         fk_tz.on_delete = 'SET NULL'
         fk_tz.on_update = 'CASCADE'
         self._tevals.foreign_keys = [fk_tz]
+
+        fk_te = ForeignKey()
+        fk_te.fkey_columns = ['eid']
+        fk_te.ftable = self.table_evals.name
+        fk_te.ftable_columns = self.table_evals.primary_key
+        fk_te.on_delete = 'CASCADE'
+        fk_te.on_update = 'CASCADE'
 
         self._tdobs = SQLTable()
         self._tdobs.name = 'obs_def'
@@ -61,7 +63,7 @@ class DBSchema(object):
             'distr': 'TEXT'
         }
         self._tdobs.primary_key = ['eid', 'name', 'model', 'epoch']
-        self._tdobs.foreign_keys = [deepcopy(self._fk_te)]
+        self._tdobs.foreign_keys = [deepcopy(fk_te)]
 
         self._tdstates = SQLTable()
         self._tdstates.name = 'states_def'
@@ -74,7 +76,7 @@ class DBSchema(object):
             'distr': 'TEXT'
         }
         self._tdstates.primary_key = ['eid', 'name', 'model', 'epoch']
-        self._tdstates.foreign_keys = [deepcopy(self._fk_te)]
+        self._tdstates.foreign_keys = [deepcopy(fk_te)]
 
         self._tdparams = SQLTable()
         self._tdparams.name = 'params_def'
@@ -87,7 +89,7 @@ class DBSchema(object):
             'distr': 'TEXT'
         }
         self._tdparams.primary_key = ['eid', 'name', 'model', 'epoch']
-        self._tdparams.foreign_keys = [deepcopy(self._fk_te)]
+        self._tdparams.foreign_keys = [deepcopy(fk_te)]
 
         self._tdpfuncs = SQLTable()
         self._tdpfuncs.name = 'pfuncs_def'
@@ -99,7 +101,7 @@ class DBSchema(object):
             'fdef': 'TEXT',
         }
         self._tdpfuncs.primary_key = ['eid', 'name', 'model', 'epoch']
-        self._tdpfuncs.foreign_keys = [deepcopy(self._fk_te)]
+        self._tdpfuncs.foreign_keys = [deepcopy(fk_te)]
 
         self._tcrpr = SQLTable()
         self._tcrpr.name = 'crop_rotation'
@@ -111,7 +113,7 @@ class DBSchema(object):
             'epoch_end': 'TEXT'
         }
         self._tcrpr.primary_key = ['eid', 'epoch_start']
-        self._tcrpr.foreign_keys = [deepcopy(self._fk_te)]
+        self._tcrpr.foreign_keys = [deepcopy(fk_te)]
     
     @property
     def table_zones(self) -> SQLTable:
@@ -141,6 +143,23 @@ class DBSchema(object):
     def table_croprot(self) -> SQLTable:
         return self._tcrpr
 
+
+class DBQueries(object):
+    def __init__(self, edb:EvalDB):
+        self._dbs:DBSchema = DBSchema()
+        self._edb:EvalDB = edb
+
+    def zonings_by_field(self, field_name:str) -> DataFrame:
+        """
+        :param field_name: name of the field
+        :type field_name: str
+        :return: dataframe containing available zonings for provided ``field_name`` with one column ``zoning``
+        :rtype: DataFrame
+        """
+        sql = f'SELECT zoning FROM {self._dbs.table_zones.name} WHERE '
+        sql += f'field=\'{field_name}\';'
+        return self._edb.query(sql)
+
     
 class EvalDB(Geopackage):
     """
@@ -168,17 +187,21 @@ class EvalDB(Geopackage):
     details).
     """
     DBNAME = 'eval.gpkg'
+    EVAL_FOLDER = 'eval'
 
     def __init__(self, prjdir:str):
         """
         constructor
 
-        :param save_dir: absolute path of directory where evaluation-database is/should be located
+        :param save_dir: absolute path of project-directory
         :type save_dir: str
         :param file_name: name of the database-file
         :type file_name: str
         """
-        super().__init__(prjdir, self.DBNAME)
+        edir = os.path.join(prjdir, self.EVAL_FOLDER)
+        if not os.path.exists(edir):
+            os.mkdir(edir)
+        super().__init__(edir, self.DBNAME)
         self._dbs:DBSchema = DBSchema()
         self.tables = {
             self._dbs.table_zones.name: self._dbs.table_zones, 
@@ -199,7 +222,8 @@ class EvalDB(Geopackage):
         for tname in self._tdefs:
             self._reset_defdata(tname)
 
-        self._zd:ZoningData = ZoningData(prjdir)
+        self._zd:ZoningData = ZoningData(edir)
+        self._dbq:DBQueries = DBQueries(self)
 
     @property
     def zoning_data(self) -> ZoningData:
@@ -208,13 +232,49 @@ class EvalDB(Geopackage):
         :rtype: ZoningData
         """
         return self._zd
+
+    @property
+    def schema(self) -> DBSchema:
+        """
+        :return: schema of the database
+        :rtype: DBSchema
+        """
+        return self._dbs
+
+    @property
+    def queries(self) -> DBQueries:
+        """
+        :return: pre-defined queries for the database
+        :rtype: DBQueries
+        """
+        return self._dbq
     
     ############################################################################
     # evaluation and zoning stuff
     ############################################################################
     def save_zoning(self, field_name:str, zoning:Zoning):
-        pass
-        # TODO
+        # save zoning to database
+        next_zid = self.number_of_rows(self._dbs.table_zones.name) + 1
+        zgdf = zoning.zones_to_gdf()
+        zgdf.rename({'zone_id': 'zone_name'}, inplace=True)
+        zgdf['zid'] = [next_zid + i for i in range(len(zgdf))]
+        zgdf['field'] = field_name
+        zfolder_id = self._zd.create_zoning_id(field_name, zoning)
+        zgdf['zoning'] = zfolder_id
+        zgdf['height'] = 0.
+        for lid in zoning.layer_ids:
+            zgdf[zgdf['zone_name'] == lid]['height'] = zoning.zone_heights[lid]
+        self.insert_from_gdf(self._dbs.table_zones.name, zgdf)
+
+        # save zoning to folder structure
+        try:
+            self._zd.save_zoning(field_name, zoning, zid=zfolder_id)
+        except Exception as exc:
+            for zid in zgdf['zid'].values:
+                sql = f'DELETE FROM {self._dbs.table_zones.name} '
+                sql += f'WHERE zid={zid};'
+                self.execute(sql)
+            raise exc
 
     def insert_eval_data(
             self, zid:int, epoch_start:dt.date|str, model, 

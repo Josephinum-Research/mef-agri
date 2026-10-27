@@ -30,6 +30,7 @@ class Zoning(GeoRaster):
         super().__init__()
         self._meta['valid_from'] = None
         self._meta['valid_until'] = None
+        self._meta['zone_heights'] = None
 
     @property
     def valid_from(self) -> date:
@@ -55,6 +56,18 @@ class Zoning(GeoRaster):
     def valid_until(self, val):
         self._meta['valid_until'] = Task._check_date(val).isoformat()
 
+    @property
+    def zone_heights(self) -> dict:
+        """
+        :return: dictionary with keys being zone-names/layer-ids with corresponding mean height
+        :rtype: dict
+        """
+        return self._meta['zone_heights']
+
+    @zone_heights.setter
+    def zone_heights(self, zhs):
+        self._meta['zone_heights'] = zhs
+
     def _set_crs(self, geom:gpd.GeoDataFrame | Polygon | MultiPolygon, crs) -> None:
         if isinstance(geom, gpd.GeoDataFrame):
             self.crs = geom.crs.to_epsg()
@@ -69,6 +82,17 @@ class Zoning(GeoRaster):
     def zones_to_gdf(
             self, incl:list[str]=None, excl:list[str]=None
         ) -> gpd.GeoDataFrame:
+        """
+        Get geodataframe with one data column ``zone_id`` and corresponding.
+        Geometries are the corresponding polygons representing the zones.
+
+        :param incl: layer-ids which should be considered, defaults to None
+        :type incl: list[str], optional
+        :param excl: layer-ids which should not be considered, defaults to None
+        :type excl: list[str], optional
+        :return: geodataframe containing zones
+        :rtype: geopandas.GeoDataFrame
+        """
         if incl is None:
             zids = self.layer_ids
         else:
@@ -180,6 +204,8 @@ class Zoning(GeoRaster):
         ])
 
         # creating the raster itself (i.e. the layers representing zones)
+        rstr.raster_shape = (npa, npy, npx)
+        rstr.raster = np.zeros((npa, npy, npx), dtype=rstr.units)
         rvi = RasterVectorIntersection(field_geom, rstr)
         rvi.fraction = thresh
         rvi.compute()
