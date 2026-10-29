@@ -34,7 +34,6 @@ class Zoning(object):
             self, tstart:dt.date, tstop:dt.date, field_name:str, 
             save_edefs:bool=False
         ) -> EvaluationDefinitions:
-        ed = EvaluationDefinitions(self._zm)
         ed.set_epoch_start_end(tstart, tstop)
 
         zones = self.determine_zones(field_name)
