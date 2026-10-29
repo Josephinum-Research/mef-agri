@@ -6,7 +6,7 @@ import rasterio as rio
 import rasterio.warp as riowrp
 
 from copy import deepcopy
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, MultiPolygon
 from geopandas import GeoDataFrame
 
 from .misc import PixelUnits
@@ -706,7 +706,7 @@ class GeoRaster(object):
         if not inplace:
             return obj
 
-    def to_gdf(self) -> GeoDataFrame:
+    def to_gdf(self, geometry=Polygon) -> GeoDataFrame:
         """
         Converts the :class:`GeoRaster` to a ``geopandas.GeoDataFrame`` where 
         each row corresponds to one pixel with the corresponding 
@@ -714,12 +714,22 @@ class GeoRaster(object):
         Each column of the geodataframe represents one layer with the 
         corresponding pixel values.
 
+        :param geometry: geometry-class from ``shapely`` which should be used to create the geodataframe
+        :type geometry: class
         :return: geodataframe-representation of the georaster
         :rtype: GeoDataFrame
+        :raises ValueError: if ``geometry`` is not ``Polygon`` or ``MultiPolygon``
         """
         data = {'geometry': []}
         for pxl in self:
-            data['geometry'].append(self.current_geometry)
+            if geometry == Polygon:
+                data['geometry'].append(self.current_geometry)
+            elif geometry == MultiPolygon:
+                data['geometry'].append(MultiPolygon([self.current_geometry]))
+            else:
+                msg = '`geometry` has to be either `Polygon`- or '
+                msg += '`MultiPolygon`-class from shapely!'
+                raise ValueError(msg)
             pxl1d = pxl.flatten()
             for i in range(pxl1d.shape[0]):
                 lid = self.layer_ids[i]

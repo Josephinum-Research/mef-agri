@@ -80,7 +80,7 @@ class Zoning(GeoRaster):
                 self.crs = int(crs)
 
     def zones_to_gdf(
-            self, incl:list[str]=None, excl:list[str]=None
+            self, incl:list[str]=None, excl:list[str]=None, geometry=Polygon
         ) -> gpd.GeoDataFrame:
         """
         Get geodataframe with one data column ``zone_id`` and corresponding.
@@ -90,8 +90,11 @@ class Zoning(GeoRaster):
         :type incl: list[str], optional
         :param excl: layer-ids which should not be considered, defaults to None
         :type excl: list[str], optional
+        :param geometry: geometry-type which is passed to ``to_gdf()``- method of :class:`GeoRaster`
+        :type geometry: class 
         :return: geodataframe containing zones
         :rtype: geopandas.GeoDataFrame
+        :raises ValueError: if zones are expected to be polygones (i.e. ``geometry=Polygon``) but at least on of the zones can only be represented as MultiPolygon
         """
         if incl is None:
             zids = self.layer_ids
@@ -100,11 +103,18 @@ class Zoning(GeoRaster):
         if excl is not None:
             zids = [zid for zid in zids if zid not in excl]
 
-        gdf = self.to_gdf()
+        gdf = self.to_gdf(geometry=geometry)
         data = {'geometry': [], 'zone_id': []}
         for zid in zids:
             zgdf = gdf[gdf[zid] == 1]
-            data['geometry'].append(zgdf.geometry.union_all())
+            geom = zgdf.geometry.union_all()
+            if isinstance(geom, Polygon) and (geometry == MultiPolygon):
+                geom = MultiPolygon([geom])
+            elif isinstance(geom, MultiPolygon) and (geometry == Polygon):
+                msg = f'Zone {zid} can only be represented as MultiPolygon but'
+                msg += 'but Polygons are expected as set with `geometry`!'
+                raise ValueError(msg)
+            data['geometry'].append(geom)
             data['zone_id'].append(zid)
         return gpd.GeoDataFrame(data=data, crs=self.crs)
 

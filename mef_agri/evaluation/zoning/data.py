@@ -18,7 +18,7 @@ class ZoningData(object):
             os.mkdir(self._zdir)
 
     def _get_field_dir(self, fname:str) -> str:
-        fdir = os.path.join(self._zidr, fname)
+        fdir = os.path.join(self._zdir, fname)
         if not os.path.exists(fdir):
             os.mkdir(fdir)
         return fdir
@@ -37,10 +37,10 @@ class ZoningData(object):
         :return: unique (with respect to the field) zoning id
         :rtype: str
         """
-        fdir = os.path.join(self._zidr, field_name)
+        fdir = self._get_field_dir(field_name)
         zi = 1
         zid_prefix = 'z_' + zoning.valid_from.isoformat() + '_'
-        zid_prefix = zoning.valid_until.isoformat() + '_'
+        zid_prefix += zoning.valid_until.isoformat() + '_'
         while True:
             if zi < 10:
                 zid = zid_prefix + '0' + str(zi)
@@ -113,7 +113,9 @@ class ZoningData(object):
     
     def delete_zoning(self, field_name:str, zid:str):
         """
-        Delete zoning georaster by provided zoning-id
+        Delete zoning georaster by provided zoning-id.
+        If no zoning exists for provided ``field_name`` and ``zid``, nothing 
+        will be done (also no exception raised).
 
         :param field_name: name of the field
         :type field_name: str
@@ -121,5 +123,9 @@ class ZoningData(object):
         :type zid: str
         """
         fdir = self._get_field_dir(field_name)
+        if not os.path.exists(fdir):
+            return
         zdir = os.path.join(fdir, zid)
+        if not os.path.exists(zdir):
+            return
         rmtree(zdir)

@@ -4,6 +4,8 @@ import os
 from copy import deepcopy
 from inspect import isclass
 from pandas import DataFrame
+from geopandas import GeoDataFrame
+from shapely.geometry import MultiPolygon
 
 from ..utils.gpkg import Geopackage, SQLTable, ForeignKey, GeometryType
 from ..utils.misc import check_date
@@ -156,9 +158,25 @@ class DBQueries(object):
         :return: dataframe containing available zonings for provided ``field_name`` with one column ``zoning``
         :rtype: DataFrame
         """
-        sql = f'SELECT zoning FROM {self._dbs.table_zones.name} WHERE '
+        sql = f'SELECT DISTINCT zoning FROM {self._dbs.table_zones.name} WHERE '
         sql += f'field=\'{field_name}\';'
         return self._edb.query(sql)
+
+    def zones_by_field_zoning(
+            self, field_name:str, zoning_folder:str
+        ) -> GeoDataFrame:
+        """
+        :param field_name: name of the field
+        :type field_name: str
+        :param zoning_folder: zoning identifier in the project folder structure
+        :type zoning_folder: str
+        :return: geodataframe containing the geometries with corresponding zone_names
+        :rtype: GeoDataFrame
+        """
+        where = f'WHERE field=\'{field_name}\' AND zoning=\'{zoning_folder}\''
+        return self._edb.query_gdf(
+            self._dbs.table_zones.name, where=where, columns=['zone_name']
+        )
 
     
 class EvalDB(Geopackage):
@@ -252,18 +270,33 @@ class EvalDB(Geopackage):
     ############################################################################
     # evaluation and zoning stuff
     ############################################################################
-    def save_zoning(self, field_name:str, zoning:Zoning):
+    def save_zoning(self, field_name:str, zoning:Zoning) -> str:
+        """
+        Save zoning for provided ``field_name``.
+        First, the database entries are inserted and second, the ``zoning`` is 
+        saved to the project folder structure as geotiff.
+        If an error occurs, all changes done to the database are cleared.
+
+        :param field_name: name of the field
+        :type field_name: str
+        :param zoning: zoning variant
+        :type zoning: Zoning
+        :raises Exception: if zoning cannot be written to project folder structure 
+        :return: zoning-identifier in project folder structure
+        :rtype: str
+        """
         # save zoning to database
         next_zid = self.number_of_rows(self._dbs.table_zones.name) + 1
-        zgdf = zoning.zones_to_gdf()
-        zgdf.rename({'zone_id': 'zone_name'}, inplace=True)
+        zgdf = zoning.zones_to_gdf(geometry=MultiPolygon)
+        zgdf.rename(columns={'zone_id': 'zone_name'}, inplace=True)
         zgdf['zid'] = [next_zid + i for i in range(len(zgdf))]
         zgdf['field'] = field_name
         zfolder_id = self._zd.create_zoning_id(field_name, zoning)
         zgdf['zoning'] = zfolder_id
         zgdf['height'] = 0.
         for lid in zoning.layer_ids:
-            zgdf[zgdf['zone_name'] == lid]['height'] = zoning.zone_heights[lid]
+            zgdf.loc[zgdf['zone_name'] == lid, 'height'] = \
+                zoning.zone_heights[lid]
         self.insert_from_gdf(self._dbs.table_zones.name, zgdf)
 
         # save zoning to folder structure
@@ -275,6 +308,31 @@ class EvalDB(Geopackage):
                 sql += f'WHERE zid={zid};'
                 self.execute(sql)
             raise exc
+
+        return zfolder_id
+
+    def delete_zoning(self, field_name:str, zoning_folder:str) -> None:
+        """
+        Delete zoning for the provided ``field_name`` from the 
+        evaluation-database and from the project folder structure.
+
+        :param field_name: name of the field
+        :type field_name: str
+        :param zoning_folder: name of the zoning folder for the provided ``field_name``
+        :type zoning_folder: str
+        :raises Exception: if deletion from database of from project folder structure fails (in this case the state before calling this method is restored)
+        """
+        sql = f'DELETE FROM {self._dbs.table_zones.name} WHERE '
+        sql += f'field=\'{field_name}\' AND zoning=\'{zoning_folder}\';'
+        self.execute_pending(sql)
+
+        try:
+            self._zd.delete_zoning(field_name, zoning_folder)
+        except Exception as exc:
+            self.rollback_pending()
+            raise exc
+
+        self.commit_pending()
 
     def insert_eval_data(
             self, zid:int, epoch_start:dt.date|str, model, 

@@ -777,7 +777,9 @@ class Geopackage(object):
         """
         return self.query(f'SELECT COUNT(*) FROM {table};').values[0, 0]
     
-    def query_gdf(self, table:str, where:str=None) -> gpd.GeoDataFrame:
+    def query_gdf(
+            self, table:str, where:str=None, columns:list[str]=None
+        ) -> gpd.GeoDataFrame:
         """
         This method queries the ``table`` of the geopackage and returns the 
         result as ``geopandas.GeoDataFrame``.
@@ -787,10 +789,18 @@ class Geopackage(object):
         There is no special index set in the returned GeoDataFrame, thus, the 
         feature-id-column (i.e. ``'fid'``) appears as standard column.
 
+        If ``columns`` contains the feature-id column and geometry column from 
+        :class:`SQLTable`, they will be removed because they are required to 
+        set up the returned geodataframe.
+        If the user provided column labels in ``columns`` which are not present 
+        in the queried ``table``, they will be also removed.
+
         :param table: table name
         :type table: str
         :param where: WHERE-clause of SQL, defaults to None
         :type where: str, optional
+        :param columns: columns which should be included in the returned geodataframe (all columns if it is left to ``None``)
+        :type columns: list[str], optional
         :raises ValueError: if provided ``table`` does not represent a vector feature
         :return: query result
         :rtype: gpd.GeoDataFrame
@@ -800,8 +810,21 @@ class Geopackage(object):
         if gtype is None:
             msg = 'Provided `table` does not represent a vector feature!'
             raise ValueError(msg)
+
         # get column names of table
         cols = list(self.tables[table].columns.keys())
+        if columns is not None:
+            # remove `fid` and `geometry` from `columns` if the user included 
+            # because they are needed to set up the geodataframe
+            if SQLTable.ID_COL_NAME in columns:
+                del columns[columns.index(SQLTable.ID_COL_NAME)]
+            if SQLTable.GEOM_COL_NAME in columns:
+                del columns[columns.index(SQLTable.GEOM_COL_NAME)]
+            # remove column labels from `columns` which are not available in 
+            # the queried table
+            cols = [el for el in columns if el in cols]
+
+        # get data from database
         sql = 'SELECT {}, ST_AsText(CastAutomagic({})) AS {}, '.format(
             SQLTable.ID_COL_NAME, SQLTable.GEOM_COL_NAME, SQLTable.GEOM_COL_NAME
         )

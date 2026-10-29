@@ -2,11 +2,13 @@ from PyQt5.QtWidgets import (
     QGridLayout, QLabel, QDateEdit, QLineEdit, QPushButton, QFileDialog,
     QTableWidget, QTableWidgetItem, QHeaderView
 )
-from PyQt5.QtCore import QDate
+from PyQt5.QtCore import Qt, QDate, QPoint
+from PyQt5.QtGui import QCursor
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import MultiPolygon
 
+from . import ZoningMenu
 from ..conn.msgs import Messages
 from ..utils.widgets import NonProjectTab, ComboBox
 from ..map import MapSources
@@ -57,6 +59,36 @@ class _ErrorDialogs:
     def invalid_intersection_fraction(exc:str|Exception):
         from ...gui import _CustomErrorDialog
         msg = 'Provided intersection-percentage cannot be converted to float\n'
+        msg += str(exc)
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+    @staticmethod
+    def save_zoning_error(exc:str|Exception):
+        from ...gui import _CustomErrorDialog
+        msg = 'Saving zoning not possible due to the following exception\n'
+        msg += str(exc)
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+    @staticmethod
+    def invalid_height():
+        from ...gui import _CustomErrorDialog
+        msg = 'Provided value for height cannot be converted to float!'
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+    @staticmethod
+    def no_zoning_present():
+        from ...gui import _CustomErrorDialog
+        msg = 'Zoning has to be rendered before it can be saved!'
+        dlg = _CustomErrorDialog(msg)
+        dlg.exec()
+
+    @staticmethod
+    def delete_zoning_error(exc:str|Exception):
+        from ...gui import _CustomErrorDialog
+        msg = 'Deleting zoning not possible due to the following exception\n'
         msg += str(exc)
         dlg = _CustomErrorDialog(msg)
         dlg.exec()
@@ -143,7 +175,16 @@ class ZoningTab(NonProjectTab):
         self._tbl_zs.horizontalHeader().setMinimumSectionSize(0)
         self._tbl_zs_header = QTableWidgetItem(_TEXT.TBL_ZS_HEADER)
         self._tbl_zs.setHorizontalHeaderItem(0, self._tbl_zs_header)
+        self._tbl_zs.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu
+        )
+        self._tbl_zs.customContextMenuRequested.connect(
+            self._handle_avlbl_zonings
+        )
         self.layout_main.addWidget(self._tbl_zs, 6, 1, 1, 3)
+        self._mnu_zs = ZoningMenu()
+        self._mnu_zs.on_render = self._render_avlbl_zoning
+        self._mnu_zs.on_delete = self._delete_avlbl_zoning
 
         self._reset_date_widgets()
         self._zw1 = [
@@ -205,10 +246,13 @@ class ZoningTab(NonProjectTab):
         self._reset_date_widgets()
         self._reset_zmeth_selection()
         self._clear_map_misc_source()
+        self._zoning = None
+        self._init_zoning_table(msg.field_name)
 
+    def _init_zoning_table(self, field_name:str):
         for i in range(self._tbl_zs.rowCount()):
             self._tbl_zs.removeRow(i)
-        dfz = self.store.eval_db.queries.zonings_by_field(msg.field_name)
+        dfz = self.store.eval_db.queries.zonings_by_field(field_name)
         self._tbl_zs.setRowCount(len(dfz))
         for i, zoning in zip(range(len(dfz)), dfz.values.flatten()):
             self._tbl_zs.setItem(i, 0, QTableWidgetItem(zoning))
@@ -225,6 +269,7 @@ class ZoningTab(NonProjectTab):
         self._zep2 = self._d_vuntil.date().toString('yyyy-MM-dd')
 
     def _zmeth_selected(self):
+        self._zoning = None
         self._clear_map_misc_source()
         self._btn_rndr.setVisible(True)
         self._btn_save.setVisible(True)
@@ -264,9 +309,7 @@ class ZoningTab(NonProjectTab):
         cond = self.store.project_data.fields[
             PrjDB.TBL_FIELDS.COL_FIELDNAME
         ] == self._active_field
-        return self.store.project_data.fields[cond].to_crs(
-            epsg=3857, inplace=False
-        )
+        return self.store.project_data.fields[cond]
 
     def _render_zones(self):
         zn_info = Messages.SendZones()
@@ -288,6 +331,7 @@ class ZoningTab(NonProjectTab):
         if self._dd_zmeth.currentText() == _TEXT.DD_ZMETH_ONEZONE:
             self._zoning = Zoning.one_zone(self._get_field_gdf())
             zgdf = self._zoning.to_gdf()
+            zgdf.to_crs(epsg=3857, inplace=True)
             zn_info = Messages.SendZones()
             zn_info.zone_names = self._zoning.layer_ids
             zn_info.coordinates = [
@@ -299,6 +343,7 @@ class ZoningTab(NonProjectTab):
                 self._get_field_gdf(), objres=ores
             )
             zgdf = self._zoning.to_gdf()
+            zgdf.to_crs(epsg=3857, inplace=True)
             zn_info.zone_names = self._zoning.layer_ids
             for lid in self._zoning.layer_ids:
                 pxl = zgdf[zgdf[lid] == 1].geometry.values[0]
@@ -311,6 +356,7 @@ class ZoningTab(NonProjectTab):
                 intersect_fraction=intsfr
             )
             zgdf = self._zoning.zones_to_gdf()
+            zgdf.to_crs(epsg=3857, inplace=True)
             for tpl in zgdf.itertuples():
                 if isinstance(tpl.geometry, MultiPolygon):
                     for plgn in tpl.geometry.geoms:
@@ -344,9 +390,62 @@ class ZoningTab(NonProjectTab):
         self.store.websocket_server.send_messages([zn_info])
 
     def _save_zones(self):
-        # TODO
-        pass
+        if self._zoning is None:
+            _ErrorDialogs.no_zoning_present()
+            return
 
-    def _render_avlbl_zone(self):
-        # TODO render zone in map via context menu in self._tbl_zs
-        pass
+        self._zoning.valid_from = \
+            self._d_vfrom.date().toString('yyyy-MM-dd')
+        self._zoning.valid_until = \
+            self._d_vuntil.date().toString('yyyy-MM-dd')
+        
+        try:
+            h = float(self._inp_h.text())
+        except:
+            _ErrorDialogs.invalid_height()
+            return
+        hd = {}
+        for lid in self._zoning.layer_ids:
+            hd[lid] = h
+        self._zoning.zone_heights = hd
+
+        try:
+            self.store.eval_db.save_zoning(
+                self._active_field, self._zoning
+            )
+        except Exception as exc:
+            _ErrorDialogs.save_zoning_error(exc)
+            return
+
+        self._init_zoning_table(self._active_field)
+
+    def _handle_avlbl_zonings(self, position:QPoint):
+        item = self._tbl_zs.itemAt(position)
+        self._mnu_zs.selected_zoning = item.text()
+        self._mnu_zs.exec_(QCursor.pos())
+
+    def _render_avlbl_zoning(self, zfid:str):
+        self._clear_map_misc_source()
+        zgdf = self.store.eval_db.queries.zones_by_field_zoning(
+            self._active_field, zfid
+        )
+        zgdf.to_crs(epsg=3857, inplace=True)
+
+        zn_info = Messages.SendZones()
+        zn_info.zone_names = []
+        zn_info.coordinates = []
+        for tpl in zgdf.itertuples():
+            for plgn in tpl.geometry.geoms:
+                zn_info.zone_names.append(getattr(tpl, 'zone_name'))
+                zn_info.coordinates.append(
+                    np.array(plgn.exterior.coords)[:-1, :].tolist()
+                )
+        self.store.websocket_server.send_messages([zn_info])
+
+    def _delete_avlbl_zoning(self, zfid:str):
+        try:
+            self.store.eval_db.delete_zoning(self._active_field, zfid)
+        except Exception as exc:
+            _ErrorDialogs.delete_zoning_error(exc)
+            return
+        self._init_zoning_table(self._active_field)
