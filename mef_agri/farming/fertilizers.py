@@ -205,6 +205,10 @@ class DBIntegration(object):
         for fert in self.default_fertilizers():
             sql += self.sql_insert_tuple(fert) + ', '
         return sql[:-2] + ';'
+
+    @property
+    def sql_query_all(self) -> str:
+        return f'SELECT * FROM {self._tname};'
     
     def sql_insert(self, fert:Fertilizer) -> str:
         sql = f'INSERT INTO {self._tname} '

@@ -12,16 +12,20 @@ class Interface(object):
             self._vals:list = None
             self._eps:list[str] = None
             self._qt:str = None
+            self._mdl:str = None
             self._distr:dict = None
 
         @property
-        def values(self) -> list:
+        def values(self) -> list[any]:
             """
-            settable
+            settable - can be also provided as scalar value; when accessing this 
+            property, it will be returned as list with one entry
 
             :return: values for model-quantity in the specified evaluation interval
-            :rtype: list
+            :rtype: list[any]
             """
+            if isinstance(self._vals, (int, float, str, bool)):
+                return [self._vals,]
             return self._vals
 
         @values.setter
@@ -31,11 +35,14 @@ class Interface(object):
         @property
         def epochs(self) -> list[str]:
             """
-            settable
+            settable - can be also provided as scalar value; when accessing this 
+            property, it will be returned as list with one entry
 
             :return: epochs/iso-formatted dates for :func:`values`
             :rtype: list[str]
             """
+            if isinstance(self._eps, str):
+                return [self._eps,]
             return self._eps
         
         @epochs.setter
@@ -57,7 +64,23 @@ class Interface(object):
             self._qt = qt
 
         @property
-        def distribution(self) -> dict:
+        def model(self) -> str:
+            """
+            settable
+
+            if the quantity belongs to TODO
+
+            :return: model-id to which the quantity belongs to (see :func:`mef_agri.models.base.Model.model_id`)
+            :rtype: str
+            """
+            return self._mdl
+
+        @model.setter
+        def model(self, model):
+            self._mdl = model
+
+        @property
+        def distributions(self) -> list[dict]:
             """
             settable
 
@@ -66,13 +89,23 @@ class Interface(object):
             * the mandatory key ``distr_id`` with an appropriate value (see :class:`mef_agri.evaluation.stats_utils.DISTRIBUTIONS`)
             * remaining keys according to specified ``distr_id`` (see :func:`mef_agri.evaluation.stats_utils.RVSampler.get_sampled_values`)
 
+            If the distribution varies with time, it can be also a list of 
+            dictionaries with appropriate distribution information (i.e. same 
+            length as :func:`values` and :func:`epochs`).
+            
+            It can provided as one dict (i.e. stationary distribution).
+            In this case, it will be returned as a list with same length as 
+            :func:`values`, when accessing this property.
+
             :return: definition of the quantity's distribution 
-            :rtype: dict
+            :rtype: list[dict]
             """
+            if isinstance(self._distr, dict):
+                return [self._distr for i in range(len(self.values))]
             return self._distr
         
-        @distribution.setter
-        def distribution(self, distr):
+        @distributions.setter
+        def distributions(self, distr):
             self._distr = distr
 
     def __init__(self):
@@ -107,7 +140,7 @@ class Interface(object):
     def data_source_id(self, did):
         self._did = did
 
-    def process_data(self, data:dict, zoning:Zoning):
+    def process_data(self, data:dict):
         pass
         
     def initialize_model_quantities(self):

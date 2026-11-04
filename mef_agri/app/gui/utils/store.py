@@ -4,8 +4,9 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 from ...gui.conn.server import WebsocketServer
 from ....data.interface import Interface
-from ....evaluation.db import EvalDB, DBQueries
+from ....evaluation.db import EvalDB
 from ..project import ProjectDataGUI
+from ....farming.tasks import ProjectTasksExtension
 
 
 class AppStore(object):
@@ -16,7 +17,7 @@ class AppStore(object):
         self._pp:str = None
         self._map:QWebEngineView = None
         self._edb:EvalDB = None
-        self._qedb:DBQueries = None
+        self._prj_dt:ProjectTasksExtension = None
 
     @property
     def websocket_server(self) -> WebsocketServer:
@@ -76,6 +77,18 @@ class AppStore(object):
         self._prj = prj
 
     @property
+    def project_data_tasks(self) -> ProjectTasksExtension:
+        """
+        :return: :func:`project_data` extended by task-information
+        :rtype: ProjectTasksExtension
+        """
+        return self._prj_dt
+
+    @project_data_tasks.setter
+    def project_data_tasks(self, prjdt):
+        self._prj_dt = prjdt
+
+    @property
     def data_interfaces(self) -> list[Interface]:
         """
         settable
@@ -109,13 +122,3 @@ class AppStore(object):
     @eval_db.setter
     def eval_db(self, edb):
         self._edb = edb
-        self._qedb = DBQueries(edb)
-
-    @property
-    def query_eval_db(self) -> DBQueries:
-        """
-        :return: instance which can be used to perform queries in :func:`eval_db`
-        :rtype: DBQueries
-        """
-        return self._qedb
-

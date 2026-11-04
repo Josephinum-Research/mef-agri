@@ -17,17 +17,27 @@ class ProjectTasksExtension(object):
     get tasks-data.
     """
     TASK_DIRECTORY = 'tasks'
+    TASK_TABLE = 'tasks'
+    CULT_TABLE = 'cultivars'
+    FERT_TABLE = 'fertilizers'
 
-    def __init__(self, prj:ProjectData, task_table_name:str):
+    def __init__(self, prj:ProjectData):
         """
         :param prj: instande of project-data(base)
         :type prj: mef_agri.data.project.ProjectData
         """
         self._prj:ProjectData = prj
-        self._ttbl:str = task_table_name
         self._tdir = os.path.join(prj.directory, self.TASK_DIRECTORY)
         if not os.path.exists(self._tdir):
             os.mkdir(self._tdir)
+
+    @property
+    def project(self) -> ProjectData:
+        """
+        :return: instance of project-data
+        :rtype: ProjectData
+        """
+        return self._prj
 
     def save_task(self, field_name:str, task:Task) -> None:
         """
@@ -95,7 +105,7 @@ class ProjectTasksExtension(object):
             tstop = tstop.isoformat()
 
         ret = {}
-        dbi = DBIntegration(self._ttbl)
+        dbi = DBIntegration(self.TASK_TABLE)
         for field in fields:
             ret[field] = {}
             fdir = os.path.join(self._prj.directory, self.TASK_DIRECTORY, field)
@@ -111,7 +121,7 @@ class ProjectTasksExtension(object):
         return ret
 
     def delete_task(self, field_name:str, task:Task=None):
-        dbi = DBIntegration(self._ttbl)
+        dbi = DBIntegration(self.TASK_TABLE)
         try:
             self._prj.execute_pending(dbi.sql_delete(task, field_name))
         except Exception as exc:
@@ -251,7 +261,7 @@ class Application(object):
     The reason for splitting applications from tasks is, that in some cases more 
     than one application is performed within one task (e.g. application of two 
     types of fertilizers, two crop protection products or combined sowing and 
-    rotary harrow).
+    rotary row).
 
     An application is composed of numeric values :class:`NumericValue` (e.g. 
     amount of sown seeds in [kg/ha]) and descriptive values 

@@ -728,6 +728,21 @@ class Geopackage(object):
         print(msg)
 
     @DB.connect
+    @DB.commit_and_close
+    def execute_many(self, sql_cmds:list[str]) -> None:
+        """
+        Executes multiple sql-commands (DDL and DML) at once.
+        It is important, that each sql-commands ends with a semicolon!
+
+        :param sql_cmds: sql-commands which should be written to database
+        :type sql_cmds: list[str]
+        """
+        self._curs.executescript(''.join(sql_cmds))
+        msg = f'(gpkg.py) executed sql with response: {self._curs.fetchall()}'
+        print(msg)
+
+
+    @DB.connect
     def execute_pending(self, sql:str) -> None:
         self._curs.execute(sql)
         msg = f'(gpkg.py) executed sql with response: {self._curs.fetchall()}'

@@ -173,9 +173,9 @@ class ProjectData(Geopackage):
         return self._pdir
 
     @property
-    def interfaces(self) -> dict:
+    def interfaces(self) -> dict[str, Interface]:
         """
-        :return: data interface instances (see :class:`mef_agri.data.interface.Interface`)
+        :return: data interface instances (see :class:`mef_agri.data.interface.Interface`) with keys being the corresponding data-source-id
         :rtype: dict
         """
         if self._dis is None:

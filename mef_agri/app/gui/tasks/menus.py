@@ -9,10 +9,9 @@ from .tree_items import (
     TasksApplDescrVal
 )
 from ..utils.widgets import ComboBox
-from ....farming.tasks import (
-    Task, Application, ProjectTasksExtension, sowing, fertilization, harvest
-)
+from ....farming.tasks import Task, Application, sowing, fertilization, harvest
 from ....farming.crops import DBIntegration as CDBI
+from ....farming.fertilizers import DBIntegration as FDBI
 
 
 ################################################################################
@@ -37,6 +36,7 @@ class _TEXT:
     MENU_DEL_APPL = 'DELETE'
     SOW_CULT_HINT = 'select cultivar'
     SOW_CROP_HINT = 'select crop'
+    FERT_FERT_HINT = 'select fertilizer'
 
 
 class YearMenu(QMenu):
@@ -185,13 +185,9 @@ class TaskMenu(QMenu):
 
     def _delete_task(self):
         if self._it.from_db:
-            from .tab import _TEXT as _TABTEXT
-            prjtasks = ProjectTasksExtension(
-                self._ttab.store.project_data, _TABTEXT.DB_TASK_TABLE
-            )
             try:
                 self._it.task_obj.date_begin = self._it.task_date
-                prjtasks.delete_task(
+                self._ttab.store.project_data_tasks.delete_task(
                     self._ttab.selected_field, self._it.task_obj
                 )
             except Exception as exc:
@@ -371,10 +367,67 @@ class SowingMenu(TaskMenu):
     def _update_params(self):
         self._pars_item.value(value=self._cparams)
 
-class HarvestMenu(TaskMenu):
+class MinFertMenu(TaskMenu):
     def __init__(self, tree, tasks_tab):
         super().__init__(tree, tasks_tab)
+        self._ferts:DataFrame = None
+        self._fert_sel:ComboBox = None
+        self._fert_item:TasksApplDescrVal = None
+        self._nutr_item:TasksApplDescrVal = None
 
-class MinFertMenu(TaskMenu):
+    @property
+    def available_fertilizers(self) -> DataFrame:
+        """
+        settable
+
+        :return: fertilizers from project database
+        :rtype: DataFrame
+        """
+        return self._ferts
+
+    @available_fertilizers.setter
+    def available_fertilizers(self, ferts):
+        self._ferts = ferts
+        if self._fert_sel is not None:
+            self._fert_sel.clear()
+
+        self._fert_sel = ComboBox(_TEXT.FERT_FERT_HINT)
+        self._fert_sel.addItems(self._ferts[FDBI.COL_FERT_NAME].unique())
+        self._fert_sel.currentTextChanged.connect(
+            lambda fert: self._fertilizer_selected(fert)
+        )
+
+    def handle_descriptive_values(
+            self, appl_item:TasksAppl, appl_obj:fertilization.FertilizerAmount
+        ):
+        self._fert_item = TasksApplDescrVal(
+            self._tree, appl_obj.fertilizer_name.name
+        )
+        self._fert_item.editable_cols = ()
+        self._fert_item.value.default = _TEXT.FERT_FERT_HINT
+        self._nutr_item = TasksApplDescrVal(
+            self._tree, appl_obj.fertilizer_params.name
+        )
+        self._nutr_item.editable_cols = (2,)
+        appl_item.addChildren([self._fert_item, self._nutr_item])
+
+        self._fert_item.value.widget = self._fert_sel
+        self._fert_item.value.widget_getter = self._fert_sel.currentText
+        self._fert_item.value.widget_setter = self._fert_sel.setCurrentText
+        return appl_item
+
+    def _fertilizer_selected(self, fert):
+        if not fert:
+            return
+        if not(self._fert_item.value()):
+            self._fert_item.setText(2, fert)
+        elif fert == self._fert_item.text(2):
+            return
+        self._fert_item.value(value=fert)
+
+        # TODO create dict with nutrient fractions and set it to self._nutr_item
+
+
+class HarvestMenu(TaskMenu):
     def __init__(self, tree, tasks_tab):
         super().__init__(tree, tasks_tab)

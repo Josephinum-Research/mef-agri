@@ -20,9 +20,6 @@ from ....farming import crops, fertilizers
 
 
 class _TEXT:
-    DB_TASK_TABLE = 'tasks'
-    DB_CULT_TABLE = 'cultivars'
-    DB_FERT_TABLE = 'fertilizers'
     LBL_SELFLD_INIT = 'select field in map'
     BTN_SAVE_DISABLED = 'nothing to save'
     BTN_SAVE_ENABLED = 'save changes'
@@ -78,15 +75,6 @@ class _ErrorDialogs:
         dlg.exec()
 
 
-class _WarningDialogs:
-    @staticmethod
-    def unsaved_changes():
-        from ...gui import _CustomWarningDialog
-        msg = 'There are unsaved changes in the tasks-tree!'
-        dlg = _CustomWarningDialog(msg)
-        dlg.show()
-
-
 class TasksTab(NonProjectTab):
     """
     Tab which provides access to the tasks related to the selected field.
@@ -99,9 +87,9 @@ class TasksTab(NonProjectTab):
         self._active_field:str = None
         self._colcont = None
         # utilities for the integration of tasks into project-db
-        self._tdbi = DBTasks(_TEXT.DB_TASK_TABLE)
-        self._cdbi = crops.DBIntegration(_TEXT.DB_CULT_TABLE)
-        self._fdbi = fertilizers.DBIntegration(_TEXT.DB_FERT_TABLE)
+        self._tdbi = DBTasks(ProjectTasksExtension.TASK_TABLE)
+        self._cdbi = crops.DBIntegration(ProjectTasksExtension.CULT_TABLE)
+        self._fdbi = fertilizers.DBIntegration(ProjectTasksExtension.FERT_TABLE)
 
         # setting up the layout
         self.layout_main = QVBoxLayout()
@@ -199,10 +187,13 @@ class TasksTab(NonProjectTab):
         self._active_field = msg.field_name
         self._lbl_sfld.setText(msg.field_name)
 
-        prj_tasks = ProjectTasksExtension(
-            self.store.project_data, _TEXT.DB_TASK_TABLE
-        )
-        tasks = prj_tasks.get_tasks(fields=msg.field_name)[msg.field_name]
+        if self.store.project_data_tasks is None:
+            self.store.project_data_tasks = ProjectTasksExtension(
+                self.store.project_data
+                )
+        tasks = self.store.project_data_tasks.get_tasks(
+            fields=msg.field_name
+        )[msg.field_name]
         if (
             len(tasks) == 0 and self._tree.topLevelItemCount() == 0
         ):
@@ -257,6 +248,9 @@ class TasksTab(NonProjectTab):
                 tmenu = HarvestMenu(self._tree, self)
             elif tname == fertilization.MineralFertilization.__name__:
                 tmenu = MinFertMenu(self._tree, self)
+                tmenu.available_fertilizers = self.store.project_data.query(
+                    self._fdbi.sql_query_all
+                )
 ################################################################################
 # NOTE #########################################################################
 ################################################################################
@@ -311,9 +305,6 @@ class TasksTab(NonProjectTab):
         Information from the tasks-tree is saved to the project-databse and to 
         the project's data directory.
         """
-        prj_tasks = ProjectTasksExtension(
-            self.store.project_data, _TEXT.DB_TASK_TABLE
-        )
         for i1 in range(self._tree.topLevelItemCount()):
             yitem:TasksYear = self._tree.topLevelItem(i1)
             if yitem.year == None:
@@ -341,7 +332,9 @@ class TasksTab(NonProjectTab):
                     return
 
                 try:
-                    prj_tasks.save_task(titem.field_name, task)
+                    self.store.project_data_tasks.save_task(
+                        titem.field_name, task
+                    )
                 except Exception as exc:
                     self.store.project_data.execute(
                         self._tdbi.sql_delete(task, titem.field_name)

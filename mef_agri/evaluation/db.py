@@ -178,6 +178,13 @@ class DBQueries(object):
             self._dbs.table_zones.name, where=where, columns=['zone_name']
         )
 
+    def zids_zones_by_field_zoning(
+            self, field_name:str, zoning_folder:str
+        ) -> DataFrame:
+        sql = f'SELECT zid, zone_name FROM {self._dbs.table_zones.name} '
+        sql += f'WHERE field=\'{field_name}\' AND zoning=\'{zoning_folder}\';'
+        return self._edb.query(sql)
+
     
 class EvalDB(Geopackage):
     """
