@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QTreeWidget, QMenu
+import json
+from PyQt5.QtWidgets import QTreeWidget, QMenu, QLabel
 from PyQt5.QtCore import QTimer
 from pandas import DataFrame
 from importlib import import_module
-from copy import deepcopy
 
 from .tree_items import (
     TasksYear, TasksTask, TasksInfo, TasksAppl, TasksApplNumVal, 
@@ -11,7 +11,7 @@ from .tree_items import (
 from ..utils.widgets import ComboBox
 from ....farming.tasks import Task, Application, sowing, fertilization, harvest
 from ....farming.crops import DBIntegration as CDBI
-from ....farming.fertilizers import DBIntegration as FDBI
+from ....farming.fertilizers import Fertilizer, DBIntegration as FDBI
 
 
 ################################################################################
@@ -37,6 +37,7 @@ class _TEXT:
     SOW_CULT_HINT = 'select cultivar'
     SOW_CROP_HINT = 'select crop'
     FERT_FERT_HINT = 'select fertilizer'
+    FERT_NUTR_ITEM = 'nutrients'
 
 
 class YearMenu(QMenu):
@@ -372,8 +373,10 @@ class MinFertMenu(TaskMenu):
         super().__init__(tree, tasks_tab)
         self._ferts:DataFrame = None
         self._fert_sel:ComboBox = None
+        self._nutr_lbl:QLabel = None
         self._fert_item:TasksApplDescrVal = None
         self._nutr_item:TasksApplDescrVal = None
+        self._nutr:dict = None
 
     @property
     def available_fertilizers(self) -> DataFrame:
@@ -390,12 +393,25 @@ class MinFertMenu(TaskMenu):
         self._ferts = ferts
         if self._fert_sel is not None:
             self._fert_sel.clear()
+            self._nutr_lbl.clear()
 
         self._fert_sel = ComboBox(_TEXT.FERT_FERT_HINT)
         self._fert_sel.addItems(self._ferts[FDBI.COL_FERT_NAME].unique())
         self._fert_sel.currentTextChanged.connect(
             lambda fert: self._fertilizer_selected(fert)
         )
+        self._nutr_lbl = QLabel('')
+        self._nutr = {}
+        for tpl in ferts.itertuples():
+            fparams = json.loads(getattr(tpl, FDBI.COL_FERT_DEF))
+            nutr = {}
+            for key, val in fparams.items():
+                if key == Fertilizer.name.__name__:
+                    continue
+                if isinstance(val, float) and (val == 0.0):
+                    continue
+                nutr[key] = val
+            self._nutr[getattr(tpl, FDBI.COL_FERT_NAME)] = nutr
 
     def handle_descriptive_values(
             self, appl_item:TasksAppl, appl_obj:fertilization.FertilizerAmount
@@ -408,12 +424,15 @@ class MinFertMenu(TaskMenu):
         self._nutr_item = TasksApplDescrVal(
             self._tree, appl_obj.fertilizer_params.name
         )
-        self._nutr_item.editable_cols = (2,)
+        self._nutr_item.editable_cols = ()
         appl_item.addChildren([self._fert_item, self._nutr_item])
 
         self._fert_item.value.widget = self._fert_sel
         self._fert_item.value.widget_getter = self._fert_sel.currentText
         self._fert_item.value.widget_setter = self._fert_sel.setCurrentText
+        self._nutr_item.value.widget = self._nutr_lbl
+        self._nutr_item.value.widget_getter = self._nutr_lbl.text
+        self._nutr_item.value.widget_setter = self._nutr_lbl.setText
         return appl_item
 
     def _fertilizer_selected(self, fert):
@@ -424,8 +443,7 @@ class MinFertMenu(TaskMenu):
         elif fert == self._fert_item.text(2):
             return
         self._fert_item.value(value=fert)
-
-        # TODO create dict with nutrient fractions and set it to self._nutr_item
+        self._nutr_item.value(json.dumps(self._nutr[fert]))
 
 
 class HarvestMenu(TaskMenu):

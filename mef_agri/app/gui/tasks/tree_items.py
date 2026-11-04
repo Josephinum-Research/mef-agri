@@ -107,13 +107,11 @@ class TasksTask(_TasksItem):
         self._fname:str = None
         self._tname:str = task_name
         self._tree:QTreeWidget = tree
-        self._tree.itemChanged.connect(self._edit_date)
         super().__init__([self.HINT_DATE, task_name, '', ''])
         self.editable_cols = (0,)
 
         self._tmodule:str = task_module
         self._task:Task = getattr(import_module(task_module), task_name)()
-        self._new_task_date:str = None
         self._db:bool = False
 
     @property
@@ -170,12 +168,8 @@ class TasksTask(_TasksItem):
             dt.date.fromisoformat(date)
         except:
             return
-        self._new_task_date = date
-        if self.from_db:
-            self._update_task_date()
-        else:
-            QTimer.singleShot(100, self._update_task_date)
-
+        self.setText(0, date)
+    
     @property
     def from_db(self) -> bool:
         """
@@ -188,23 +182,6 @@ class TasksTask(_TasksItem):
     def from_db(self, val):
         self._db = val
     
-    def _edit_date(self, item:TasksTask, column:int):
-        if not isinstance(item, TasksTask):
-            return
-        if column != 0:
-            return
-        try:
-            dt.date.fromisoformat(item.text(0))
-        except:
-            return
-        for i in range(self.childCount()):
-            child:TasksInfo = self.child(i)
-            if child.text(1) == Task.date_begin.__name__:
-                child.value = item.text(0)
-
-    def _update_task_date(self):
-        self.setText(0, self._new_task_date)
-
     def setup_task_obj(self) -> Task | None:
         """
         Setting up a copy of :func:`task_obj` from the content of the 
@@ -319,7 +296,6 @@ class TasksInfo(_TasksItem):
         :type info_value: str
         """
         self._tree = tree
-        self._tree.itemChanged.connect(self._edit_value)
         super().__init__(['', info_name, info_value, ''])
         self._newval = None
         self._from_db:bool = from_db
@@ -354,28 +330,8 @@ class TasksInfo(_TasksItem):
             dt.date.fromisoformat(val)
         except:
             return
-        self._newval = val
-        if self._from_db:
-            self._update_value()
-        else:
-            QTimer.singleShot(100, self._update_value)
+        self.setText(2, val)
 
-    def _update_value(self):
-        self.setText(2, self._newval)
-
-    def _edit_value(self, item:TasksInfo, column:int):
-        if not isinstance(item, TasksInfo):
-            return
-        if item.name != Task.date_begin.__name__:
-            return
-        if column != 2:
-            return
-        try:
-            dt.date.fromisoformat(item.value)
-        except:
-            return
-        task:TasksTask = self.parent()
-        task.task_date = item.value
 
 class TasksAppl(_TasksItem):
     """

@@ -202,6 +202,21 @@ class Model(object):
         return self._requ
     
     @property
+    def qdefs(self) -> dict:
+        """
+        dictionary which contains information on model-quantities
+
+        * ``'qtype'`` - see :class:`__QS__`
+        * ``'unit'`` - see :class:`mef_agri.models.utils.__UNITS__`
+        * ``'distr_type'`` - used to determine how evaluated quantities are saved to database
+        * ``'epoch'`` - epoch which is valid for the model quantity
+
+        :return: quantity definition dictionary
+        :rtype: dict
+        """
+        return self._qs
+    
+    @property
     def quantity_names(self) -> list[str]:
         """
         :return: names of all quantities contained in the model

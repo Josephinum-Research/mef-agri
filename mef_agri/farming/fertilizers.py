@@ -145,6 +145,7 @@ class Fertilizer(object):
         :return: fraction of zinc :math:`Zn` within a specified amount of fertilizer
         :rtype: float
         """
+        return self._zn
 
     @Zn.setter
     def Zn(self, value:float):
