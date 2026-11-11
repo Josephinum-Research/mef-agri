@@ -88,6 +88,13 @@ class Crop_Simple(Model):
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 0.3
                 }
+            },
+            'cn_ratio_res': {
+                'value': 50.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 3.
+                }
             }
         },
         crops.winter_wheat.__name__: {
@@ -135,6 +142,13 @@ class Crop_Simple(Model):
                 'distr': {
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 0.3
+                }
+            },
+            'cn_ratio_res': {
+                'value': 100.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 3.
                 }
             }
         }
@@ -308,6 +322,17 @@ class Crop_Simple(Model):
         :math:`c_{\textrm{frc2},0}\ [\frac{1}{^\circ C}]` - [R2]_ (equ. 65, table 2)
 
         :return: regression coefficient for frost influence on biomass reduction
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.PARAM, U.none)
+    def cn_ratio_res(self) -> np.ndarray:
+        r"""
+        MQ - Parameter
+
+        :math:`c_{\textrm{cnr},0}\ [\ ]`
+
+        :return: C/N ratio of crop residues and roots after harvest
         :rtype: numpy.ndarray
         """
 

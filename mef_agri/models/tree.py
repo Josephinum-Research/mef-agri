@@ -123,55 +123,7 @@ class ModelTree(object):
         for entry in self._tree.values():
             ret.append(entry['ref'])
         return ret
-    
-    @property
-    def text_representation(self) -> str:
-        """
-        :return: text representation of the model tree
-        :rtype: str
-        """
-        def loop(model, outstr, indent, praefix):
-            ws1 = ''.join(' ' for i in range(len(indent)))
-            us = ''.join('_' for i in range(3 + len(model.model_name)))
-            ws2 = ''.join(' ' for i in range(len(us)))
 
-            outstr += ws1 + ' ' + us + '\n' + ws1 + '|' + ws2 + '|\n'
-            outstr += indent + '| ' + model.model_name + '  |\n'
-            outstr += ws1 + '|' + us + '|\n'
-
-            qs = [
-                'state', 'observation', 'parameter', 'output', 
-                'pfunction'
-            ]
-            qs = [
-                Quantities.STATE, Quantities.PARAM, Quantities.PFUNC,
-                Quantities.OBS, 'output'
-            ]
-            for dtype in qs:
-                if len(getattr(model, dtype + '_names')) > 0:
-                    outstr += ws1 + '  |\n'
-                    outstr += ws1 + '  |__ ' + dtype + 's\n'
-                    outstr += ws1 + '      ' + ''.join('-' for i in range(len(dtype) + 1)) + '\n'
-                    for qname in getattr(model, dtype + '_names'):
-                        if ((dtype == 'output') and 
-                            (qname in model._qts[Quantities.DOUT].keys())):
-                            outstr += ws1 + '      <d> ' + qname + '\n'
-                        else:
-                            outstr += ws1 + '      < > ' + qname + '\n'
-            
-            indent += ' => '
-            for child_id in self._tree[praefix]['child_ids']:
-                outstr = loop(
-                    self._tree[child_id]['ref'], outstr, indent, child_id
-                )
-
-            return outstr
-
-        outstr = '\n\n\n'
-        outstr = loop(self._tree[self._toplvl]['ref'], outstr, '', self._toplvl)
-        outstr += '\n\n\n'
-        return outstr
-    
     def extend_model_tree(
             self, parent_model_id:str, child_model_name:str
         ) -> str:

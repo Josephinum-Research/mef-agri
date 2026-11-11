@@ -865,6 +865,22 @@ class Task(GeoRaster):
         self.nodata_value = np.nan
         self._set_up = True
 
+    @staticmethod
+    def appl_name_from_layer_id(lid:str) -> str:
+        """
+        Extract application name from layer id.
+
+        :param lid: layer-id (see :func:`layer_ids`)
+        :type lid: str
+        :return: application name to which layer-id belongs to
+        :rtype: str
+        """
+        return lid.split('>')[0]
+
+    @staticmethod
+    def layer_id_from_appl_numval(appl_name:str, numval_name:str) -> str:
+        pass
+
     @classmethod
     def from_directory(cls, directory):
         task = super().from_directory(directory)

@@ -12,7 +12,7 @@ if __name__ == '__main__':
     pdir = os.path.join(
         '/', 'home', 'andreas', 'development', 'projects', 'ettlinger'
     )
-    pdir = os.path.join('/', 'home', 'aet', 'devel', 'projects', 'ettlinger')
+    #pdir = os.path.join('/', 'home', 'aet', 'devel', 'projects', 'ettlinger')
     run_app(
         project_path=pdir,
         data_interfaces=[Sentinel2Interface, INCAInterface, EbodInterface]

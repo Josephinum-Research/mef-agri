@@ -121,6 +121,8 @@ def compute_zone_values(r:GeoRaster, z:Zoning, zone_name:str=None) -> dict:
     :type r: mef_agri.utils.raster.GeoRaster
     :param z: zoning
     :type z: mef_agri.evaluation.zoning.Zoning
+    :param zone_name: if provided, zoned values are only computed for this zone
+    :type zone_name: str
     :return: median values of data-pixels which touch the zones
     :rtype: dict
     """

@@ -17,18 +17,18 @@ class Harvest(Model):
         :rtype: numpy.ndarray
         """
 
-    @Model.is_quantity(Q.OBS, U.none)
-    def cn_ratio_res(self) -> np.ndarray:
-        """
-        :return: C/N ratio of crop residues and roots
-        :rtype: numpy.ndarray
-        """
-
     @Model.is_quantity(Q.OBS, U.frac)
     def residues_removed(self) -> np.ndarray:
         """
         :return: fraction of aboveground biomass which is removed
         :rtype: numpy.ndarray
+        """
+
+    @Model.is_required('cn_ratio_res', 'crop', U.none)
+    def cnr(self) -> Requirement:
+        """
+        :return: cn-ratio of crop residues (aboverground biomass - yield + roots)
+        :rtype: Requirement
         """
 
     @Model.is_required('biomass_aboveground', 'crop', U.kg_ha)
@@ -52,7 +52,7 @@ class Harvest(Model):
     def update(self, epoch=None):
         super().update(epoch)
 
-        if self.cn_ratio_res is None:
+        if self.residues_removed is None:
             return
         
         # crop residues from aboveground biomass
@@ -77,7 +77,7 @@ class Harvest(Model):
             cres = self.model_tree.get_quantity('C_res', lcm, U.kg_ha)
             cnres = self.model_tree.get_quantity('CN_res', lnm, U.none)
             cadd = 0.58 * crbm  # assumption that 58% of biomass is carbon
-            cnres = (cres * cnres + cadd * self.cn_ratio_res) / (cres + cadd)
+            cnres = (cres * cnres + cadd * self.cnr.value) / (cres + cadd)
             cres += cadd
             self.model_tree.set_quantity('C_res', lcm, cres, unit=U.kg_ha)
             self.model_tree.set_quantity('CN_res', lnm, cnres, unit=U.none)
@@ -90,5 +90,4 @@ class Harvest(Model):
                 unit=U.kg_haxday
             )
         
-        self.cn_ratio_res = None
         self.residues_removed = None

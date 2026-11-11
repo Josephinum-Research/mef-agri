@@ -171,7 +171,7 @@ class RVSampler(object):
         ) -> np.ndarray:
         """
         Get a sample from the distribution specified in the `distr` dictionary. 
-        Thus each `dinfo` dict has to contain at least a key `distr_id` to 
+        Thus each `distr` dict has to contain at least a key `distr_id` to 
         specify the distribution to be used for sampling.
         Depending on the chosen distribution, the provided `value` will be 
         used accordingly.

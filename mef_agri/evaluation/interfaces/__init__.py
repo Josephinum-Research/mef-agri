@@ -14,6 +14,7 @@ class Interface(object):
             self._qt:str = None
             self._mdl:str = None
             self._distr:dict = None
+            self._unit:str = None
 
         @property
         def values(self) -> list[any]:
@@ -50,6 +51,20 @@ class Interface(object):
             self._eps = epochs
 
         @property
+        def unit(self) -> str:
+            """
+            settable
+
+            :return: unit of the quantity (see :class:`mef_agri.models.utils.__QS__`)
+            :rtype: str
+            """
+            return self._unit
+
+        @unit.setter
+        def unit(self, unit):
+            self._unit = unit
+
+        @property
         def qtype(self) -> str:
             """
             settable
@@ -67,8 +82,6 @@ class Interface(object):
         def model(self) -> str:
             """
             settable
-
-            if the quantity belongs to TODO
 
             :return: model-id to which the quantity belongs to (see :func:`mef_agri.models.base.Model.model_id`)
             :rtype: str
@@ -131,7 +144,12 @@ class Interface(object):
         """
         settable - fix it in the constructor of the child class
 
-        :return: has to match :func:`mef_agri.data.interface.Interface.data_source_id` of the desired data-interface
+        Has to match :func:`mef_agri.data.interface.Interface.data_source_id` 
+        of the desired data-interface.
+        If it is used for tasks, it has to match the name of a class in 
+        :func:`mef_agri.farming.tasks`.
+
+        :return: id to find desired data-source
         :rtype: str
         """
         return self._did
@@ -141,6 +159,18 @@ class Interface(object):
         self._did = did
 
     def process_data(self, data:dict):
+        """
+        The ``data`` dictionary has to have the following structure
+
+        * the first level of keys has to contain the epochs (i.e. iso-formatted date-strings)
+        * depending on :func:`mef_agri.data.interface.Interface.data_types`, there are only two level of keys or a third one
+
+            * if it is  ``None``, the second level of keys represents the layer-ids of the georaster
+            * otherwise, the second level of keys represents the data-types and the third level contains the layer-ids
+
+        :param data: dictionary containing zoned values (i.e. representative value for all pixels in one zone)
+        :type data: dict
+        """
         pass
         
     def initialize_model_quantities(self):

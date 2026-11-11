@@ -1,12 +1,15 @@
 import datetime as dt
 from pandas import DataFrame
+from inspect import isclass
+from copy import deepcopy
 
 from .interfaces import Interface
+from .interfaces.mdef import ModelDefinition
 from .db import EvalDB
 from .zoning import Zoning
 from .zoning.utils import compute_zone_values
-from ..models.base import Quantities
-from ..farming.tasks import ProjectTasksExtension
+from ..models.base import Model
+from ..farming.tasks import ProjectTasksExtension, Task
 from ..farming.tasks.sowing import Sowing
 from ..farming.tasks.harvest import Harvest
 
@@ -14,22 +17,50 @@ from ..farming.tasks.harvest import Harvest
 class EvalSetup(object):
     def __init__(
             self, edb:EvalDB, prj_dt:ProjectTasksExtension, 
-            intfs:list[Interface]
+            data_intfs:list[Interface], task_intfs:list[Interface]
         ):
         self._edb:EvalDB = edb
         self._prj:ProjectTasksExtension = prj_dt
-        self._intfs:dict[str, Interface] = {}
-        for intf in intfs:
-            self._intfs[intf.data_source_id] = intf
+        self._dintfs:dict[str, Interface] = {}
+        for intf in data_intfs:
+            self._dintfs[intf.data_source_id] = intf
+        self._tintfs:dict[str, Interface] = {}
+        for intf in task_intfs:
+            self._tintfs[intf.data_source_id] = intf
         self._ins_cmds:list[str] = []
         self._field:str = None
         self._zoning:Zoning = None
         self._zinfos:DataFrame = None
 
     def set_up_eval(
-            self, field_name:str, zoning_folder_id:str, zmodel, cmodel, 
+            self, field_name:str, zoning_folder_id:str, 
+            zmodel:Model, cmodels:Model|dict[str, Model], 
             info:str=None
         ):
+        """
+        TODO 
+
+        The evaluation interval (i.e. first and last epoch) will be deduced from 
+        the zoning specified with ``field_name`` and ``zoning_folder_id``.
+
+        If ``cmodels`` is a dictionary, the keys have to match the sowing date 
+        (from tasks) for which the corresponding model should be applied.
+        If it is one class-definition/instance, the same crop model will be used 
+        for all vegetation periods in the specified evaluation interval.
+
+        :param field_name: _description_
+        :type field_name: str
+        :param zoning_folder_id: _description_
+        :type zoning_folder_id: str
+        :param zmodel: zone model which should be used for the evaluation
+        :type zmodel: Model (class or instance)
+        :param cmodels: crop model(s) which should be used for the evaluation
+        :type cmodels: Model | dict[str, Model] (class or instance)
+        :param info: _description_, defaults to None
+        :type info: str, optional
+        """
+        self._ins_cmds = []  # clear already available insert commands
+
         self._field = field_name
         last_eid = self._edb.number_of_rows(self._edb.schema.table_evals.name)
         self._zoning = self._edb.zoning_data.get_zoning_by_id(
@@ -41,95 +72,23 @@ class EvalSetup(object):
         self._zinfos['eid'] = [
             last_eid + i + 1 for i in range(len(self._zinfos))
         ]
+        self._mdefs:dict[str, ModelDefinition] = None
 
-        self._ins_cmds = []
-        self._ins_eval(zoning_folder_id, last_eid, info, zmodel)
-        self._process_tasks(last_eid, cmodel)
-        self._process_data(last_eid)
+        self._ins_eval(info, zmodel)
+        self._process_tasks(cmodels)
+        self._process_data()
+
+    def save_eval_defs(self):
+        # TODO
         self._edb.execute_many(self._ins_cmds)
 
-    def _process_data(self, last_eid:int):
-        dbs = self._edb.schema
-        data = self._prj.project.get_data(
-            self._zoning.valid_from, self._zoning.valid_until, 
-            dids=list(self._intfs.keys()), fields=self._field
-        )
-        
-        init_epoch = (
-            self._zoning.valid_from - dt.timedelta(days=1.)
-        ).isoformat()
-        for did, ifdata in data.items():
-            dif = self._prj.project.interfaces[did]  # instance of data-interface
-            for zname in self._zoning.layer_ids:
-                # process data depending on if it is static and if it is 
-                # separated into further data-types
-                zoned_data = None
-                if dif.static_data and (dif.data_types is None):
-                    zdata = compute_zone_values(
-                        ifdata[self._field], self._zoning, zone_name=zname
-                    )
-                    zoned_data = {init_epoch: zdata}
-
-                elif dif.static_data and isinstance(dif.data_types, list):
-                    zoned_data = dict(zip(
-                        ifdata[self._field].keys(), 
-                        [None for i in range(len(ifdata[self._field]))]
-                    ))
-                    for dtype, dtdata in ifdata[self._field].items():
-                        zdata = compute_zone_values(
-                            dtdata, zoning, zone_name=zname
-                        )
-                        zoned_data[dtype] = zdata
-                    zoned_data = {init_epoch: zoned_data}
-
-                else:
-                    zoned_data = dict(zip(
-                        ifdata[self._field].keys(),  # epochs
-                        [None for i in range(len(ifdata[self._field]))]
-                    ))
-                    for epoch, edata in ifdata[self._field].items():
-                        if dif.data_types is None:
-                            zoned_data[epoch] = compute_zone_values(
-                                edata, self._zoning, zone_name=zname
-                            )
-                        else:
-                            zoned_data[epoch] = dict(zip(
-                                edata.keys(),
-                                [None for i in range(len(edata))]
-                            ))
-                            for dtype, dtdata in edata.items():
-                                zoned_data[epoch][dtype] = compute_zone_values(
-                                    dtdata, self._zoning, zone_name=zname
-                                )
-
-                self._intfs[did].process_data(zoned_data)
-                for mqname in self._intfs[did].model_quantities:
-                    mq:Interface.MQDefinition = \
-                        getattr(self._intfs[did], mqname)
-                    if mq.qtype == Quantities.PFUNC:
-                        # TODO
-                        pass
-                    else:
-                        ins_data = dict(
-                            eid=[... for i in range(len(mq.values))],
-                            name=[mqname for i in range(len(mq.values))],
-                            model=[mq.model for i in range(len(mq.values))],
-                            epoch=mq.epochs,
-                            value=mq.values,
-                            distr=mq.distributions
-                        )
-                        get_sql = None
-                        if mq.qtype == Quantities.STATE:
-                            get_sql = dbs.table_states_def.sql_insert
-                        elif mq.qtype == Quantities.PARAM:
-                            get_sql = dbs.table_params_def.sql_insert
-                        elif mq.qtype == Quantities.OBS:
-                            get_sql = dbs.table_obs_def.sql_insert
-                        self._ins_cmds.append(get_sql(**ins_data))
-
     def _ins_eval(self, info:str, zmodel):
-        zmname = zmodel.__name__
-        zmmodule = zmodel.__module__
+        if isclass(zmodel):
+            zmodel = zmodel()
+        zmname = zmodel.__class__.__name__
+        zmmodule = zmodel.__class__.__module__
+
+        znames, mdefs = [], []
         for tpl in self._zinfos.itertuples():
             self._ins_cmds.append(
                 self._edb.schema.table_evals.sql_insert(
@@ -142,30 +101,138 @@ class EvalSetup(object):
                     info=info if info is not None else '---'
                 )
             )
+            znames.append(tpl.zone_name)
+            mdefs.append(ModelDefinition(zmodel))
+        self._mdefs = dict(zip(znames, mdefs))
 
-    def _process_tasks(self, last_eid:int, cmodel):
-        cmname = cmodel.__name__
-        cmmodule = cmodel.__module__
+    def _process_tasks(self, cmodels:Model | dict[str, Model]):
         tasks = self._prj.get_tasks(
             self._field, self._zoning.valid_from, self._zoning.valid_until
         )[self._field]
 
         epsow = None
-        for epoch, etasks in tasks.items():
-            for tname, task in etasks.items():
-                # determine vegetation periods
-                if tname == Sowing.__name__:
-                    if epsow is not None:
-                        msg = f'There is already a sown crop from {epsow} '
-                        msg += f'present on field {self._field} which has not '
-                        msg += 'been harvested yet - cannot add another '
-                        msg += 'Sowing-task!'
-                        raise ValueError(msg)
-                    epsow = task.date_begin.isoformat()
-                elif tname == Harvest.__name__:
-                    if epsow is None:
-                        msg = f'No crop has been sown on field {self._field_} -'
-                        msg += ' cannot add another Harvest-task!'
-                        raise ValueError(msg)
+        zoned_tasks = {}
+        for zcont in self._zinfos.itertuples():
+            for intf in self._tintfs.values():
+                intf.initialize_model_quantities()
 
-                # compute zoned values from tasks
+            for etasks in tasks.values():
+                for tname, task in etasks.items():
+                    epoch = task.date_begin.isoformat()
+                    # determine vegetation periods
+                    if tname == Sowing.__name__:
+                        if epsow is not None:
+                            msg = f'There is already a sown crop from {epsow} '
+                            msg += f'present on field {self._field} which has not '
+                            msg += 'been harvested yet - cannot add another '
+                            msg += 'Sowing-task!'
+                            raise ValueError(msg)
+                        epsow = deepcopy(epoch)
+                    elif tname == Harvest.__name__:
+                        if epsow is None:
+                            msg = f'No crop has been sown on field {self._field_} -'
+                            msg += ' cannot add another Harvest-task!'
+                            raise ValueError(msg)
+                        if isinstance(cmodels, dict):
+                            if not epsow in cmodels.keys():
+                                msg = 'There is no crop model available for sowing '
+                                msg += f'task with `date_begin`={epsow}!'
+                                raise ValueError(msg)
+                            cmodel = cmodels[epsow]
+                        else:
+                            cmodel = cmodels
+                        if isclass(cmodel):
+                            cmodel = cmodel()
+                        cmname = cmodel.__class__.__name__
+                        cmmodule = cmodels.__class__.__module__
+                        self._ins_cmds.append(
+                            self._edb.schema.table_croprot.sql_insert(
+                                eid=zcont.eid,
+                                crop_model=cmname,
+                                crop_model_module=cmmodule,
+                                epoch_start=epsow,
+                                epoch_end=epoch
+                            )
+                        )
+
+                    # process tasks for zone
+                    tname = task.__class__.__name__
+                    if not tname in zoned_tasks.keys():
+                        zoned_tasks[tname] = {'numvals': {},'metadata': {}}
+                    zoned_tasks[tname]['numvals'][epoch] = compute_zone_values(
+                        task, self._zoning, zone_name=zcont.zone_name
+                    )
+                    zoned_tasks[tname]['metadata'][epoch] = task.metadata
+            for tname, etasks in zoned_tasks.items():
+                self._tintfs[tname].process_data(
+                    etasks['numvals'], meta=etasks['metadata']
+                )
+            self._mdefs[zcont.zone_name].set_from_interfaces(
+                list(self._tintfs.values())
+            )
+
+    def _process_data(self):
+            data = self._prj.project.get_data(
+                self._zoning.valid_from, self._zoning.valid_until, 
+                dids=list(self._dintfs.keys()), fields=self._field
+            )
+            
+            init_epoch = (
+                self._zoning.valid_from - dt.timedelta(days=1.)
+            ).isoformat()
+            for zcont in self._zinfos.itertuples():
+                # initialize reset mq-definitions of all data-interfaces
+                for intf in self._dintfs.values():
+                    intf.initialize_model_quantities()
+
+                for did, ifdata in data.items():
+                    dif = self._prj.project.interfaces[did]
+                    # process data depending on if it is static and if it is 
+                    # separated into further data-types
+                    zoned_data = None
+                    if dif.static_data and (dif.data_types is None):
+                        zdata = compute_zone_values(
+                            ifdata[self._field], self._zoning, 
+                            zone_name=zcont.zone_name
+                        )
+                        zoned_data = {init_epoch: zdata}
+    
+                    elif dif.static_data and isinstance(dif.data_types, list):
+                        zoned_data = dict(zip(
+                            ifdata[self._field].keys(), 
+                            [None for i in range(len(ifdata[self._field]))]
+                        ))
+                        for dtype, dtdata in ifdata[self._field].items():
+                            zdata = compute_zone_values(
+                                dtdata, zoning, zone_name=zcont.zone_name
+                            )
+                            zoned_data[dtype] = zdata
+                        zoned_data = {init_epoch: zoned_data}
+    
+                    else:
+                        zoned_data = dict(zip(
+                            ifdata[self._field].keys(),  # epochs
+                            [None for i in range(len(ifdata[self._field]))]
+                        ))
+                        for epoch, edata in ifdata[self._field].items():
+                            if dif.data_types is None:
+                                zoned_data[epoch] = compute_zone_values(
+                                    edata, self._zoning, 
+                                    zone_name=zcont.zone_name
+                                )
+                            else:
+                                zoned_data[epoch] = dict(zip(
+                                    edata.keys(),
+                                    [None for i in range(len(edata))]
+                                ))
+                                for dtype, dtdata in edata.items():
+                                    zoned_data[epoch][dtype] = \
+                                    compute_zone_values(
+                                        dtdata, self._zoning, 
+                                        zone_name=zcont.zone_name
+                                    )
+    
+                    self._dintfs[did].process_data(zoned_data)
+                self._mdefs[zcont.zone_name].set_from_interfaces(
+                    list(self._dintfs.values())
+                )
