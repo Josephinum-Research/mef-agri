@@ -222,12 +222,12 @@ class __UNITS__:
         return '[ ( MJ ) / ( kg ) ]'
     
     @property
-    def W_m2(self) -> str:
+    def Wh_m2(self) -> str:
         r"""
-        :return: Watt per square meter :math:`\frac{W}{m^2}`
+        :return: Watt-hours per square meter :math:`\frac{W}{m^2}`
         :rtype: str
         """
-        return '[ ( W ) / ( m2 ) ]'
+        return '[ ( Wh ) / ( m2 ) ]'
     
     @property
     def Wh_m2xday(self) -> str:
@@ -243,6 +243,14 @@ class __UNITS__:
         :return: unit used for factor to convert energy to biomass :math:`\frac{kg\cdot m^2}{MJ\cdot ha\cdot day}`
         :rtype: str
         """
+
+    @property
+    def Pa(self) -> str:
+        r"""
+        :return: pressure in Pascal :math:`Pa`
+        :rtype: str
+        """
+        return '[ Pa ]'
     
     @property
     def kPa(self) -> str:
@@ -499,17 +507,17 @@ class __UNITS__:
             return value * 1e-3
         ########################################################################
         # ENERGY CONVERSIONS
-        elif u_source in (self.MJ_m2, self.MJ_m2xday) and u_target == self.W_m2:
+        elif u_source in (self.MJ_m2, self.MJ_m2xday) and u_target == self.Wh_m2:
             return value / 0.0864
-        elif u_source == self.W_m2 and u_target in (self.MJ_m2, self.MJ_m2xday):
+        elif u_source == self.Wh_m2 and u_target in (self.MJ_m2, self.MJ_m2xday):
             return value * 0.0864
         elif u_source == self.Wh_m2xday and u_target == self.MJ_m2xday:
             return value * 0.0036
-        elif u_source == self.MJ_m2xday and u_target == self.Wxh_m2xday:
+        elif u_source == self.MJ_m2xday and u_target == self.Wh_m2xday:
             return value / 0.0036
-        elif u_source == self.Wh_m2xday and u_target == self.W_m2:
+        elif u_source == self.Wh_m2xday and u_target == self.Wh_m2:
             return value / 24.0
-        elif u_source == self.W_m2 and u_target == self.Wh_m2xday:
+        elif u_source == self.Wh_m2 and u_target == self.Wh_m2xday:
             return value * 24.0
         ########################################################################
         # TEMPERATURE CONVERSIONS
@@ -517,6 +525,12 @@ class __UNITS__:
             return value + 273.15
         elif u_source == self.degK and u_target == self.degC:
             return value - 273.15
+        ########################################################################
+        # PRESSURE CONVERSIONS
+        elif u_source == self.kPa and u_target == self.Pa:
+            return value * 1e3
+        elif u_source == self.Pa and u_target == self.kPa:
+            return value * 1e-3
         ########################################################################
         # (BIO)MASS CONVERSIONS
         elif u_source == self.kg_ha and u_target == self.t_ha:

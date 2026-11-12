@@ -7,10 +7,6 @@ from .inca_obs import WeatherINCA
 
 class Weather_V2009(WeatherINCA):
     r"""
-    This model inherits from 
-    :class:`ssc_csm.models.atmosphere.weather.inca_obs.WeatherINCA` and computes 
-    further quantities from the INCA observations based on [R1]_ .
-
     Used constants
     
     * ``SPECIFIC_HEAT = 1.013e-3`` - :math:`\frac{MJ}{kg\cdot\ ^\circ C}`
@@ -31,6 +27,127 @@ class Weather_V2009(WeatherINCA):
         super().__init__(**kwargs)
         self._h:float = None  # site elevation [m]
 
+    @Model.is_quantity(Q.OBS, U.degC)
+    def temperature_min(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{tmin},k}\ [^\circ C]`
+
+        :return: minimum daily temperature 2 m above surface - [R5]_ (fig. 4.7) 
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.degC)
+    def temperature_max(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{tmax},k}\ [^\circ C]`
+
+        :return: maximum daily temperature 2 m above surface - [R5]_ (fig. 4.7)
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.degC)
+    def temperature_mean(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{temp},k}\ [^\circ C]`
+
+        :return: mean daily temperature 2 m above surface [R5]_ (fig. 4.7) 
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.degC)
+    def dewpoint_mean(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{dewp},k}\ [^\circ C]`
+
+        :return: mean daily dewpoint temperature 
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.mm_m2xday)
+    def precipitation_sum(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{prec},k}\ [\frac{mm}{m^2\cdot day}]`
+
+        :return: daily precipitation sum 
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.Wh_m2xday)
+    def radiation_sum(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{rad},k}\ [\frac{Wh}{m^2\cdot day}]`
+
+        :return: daily radiation sum 
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.frac)
+    def humidity_min(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{hmin},k}\ [\ ]`
+
+        :return: minimum value of daily humidity 2 m above surface - [R5]_ (fig. 5.1.5)
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.frac)
+    def humidity_max(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{hmax},k}\ [\ ]`
+
+        :return: maximum value of daily humidity 2 m above surface [R5]_ (fig. 5.1.5) 
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.frac)
+    def humidity_mean(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{hum},k}\ [\ ]`
+
+        :return: mean value of daily humidity 2 m above surface [R5]_ (fig. 5.1.5) 
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.m_s)
+    def wind_speed_mean(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{wsp},k}\ [\frac{m}{s}]`
+
+        :return: mean absolute and directionless value of daily wind speed 10 m above surface [R5]_ (fig. 5.2.3) 
+        :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.OBS, U.kPa)
+    def pressure_msl_mean(self) -> np.ndarray:
+        r"""
+        MQ - Observation
+
+        :math:`a_{\textrm{pmsl},k}\ [kPa]`
+
+        :return: mean value of daily mean-sea-level-pressure 
+        :rtype: numpy.ndarray
+        """
+
     @Model.is_quantity(Q.PARAM, U.degC)
     def temperature_mean_annual(self) -> np.ndarray:
         r"""
@@ -40,6 +157,39 @@ class Weather_V2009(WeatherINCA):
 
         :return: mean annual temperature 
         :rtype: numpy.ndarray
+        """
+
+    @Model.is_quantity(Q.PARAM, U.m)
+    def height_temp_obs(self) -> float:
+        r"""
+        MQ - Parameter
+
+        :math:`a_{\textrm{h-tmp}}\ [m]` - [R5]_ (fig. 4.7) 
+
+        :return: reference height of the temperature observations 
+        :rtype: float
+        """
+
+    @Model.is_quantity(Q.PARAM, U.m)
+    def height_hum_obs(self) -> float:
+        r"""
+        MQ - Parameter
+
+        :math:`a_{\textrm{h-hum}}\ [m]` - [R5]_ (fig. 5.1.5)
+
+        :return: reference height of the humidity observations 
+        :rtype: float
+        """
+
+    @Model.is_quantity(Q.PARAM, U.m)
+    def height_wind_obs(self) -> float:
+        r"""
+        MQ - Parameter
+
+        :math:`a_{\textrm{h-wnd}}\ [m]` - [R5]_ (fig. 5.2.3) 
+
+        :return: reference height of the wind observations 
+        :rtype: float
         """
     
     @Model.is_quantity(Q.ROUT, U.kPa)

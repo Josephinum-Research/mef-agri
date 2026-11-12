@@ -39,6 +39,10 @@ class Interface(object):
             settable - can be also provided as scalar value; when accessing this 
             property, it will be returned as list with one entry
 
+            If no epochs are provided for model-states or -parameters, the 
+            initial evluation epoch will be used in these cases.
+            For observations it is necessary to provide the epochs.
+
             :return: epochs/iso-formatted dates for :func:`values`
             :rtype: list[str]
             """
