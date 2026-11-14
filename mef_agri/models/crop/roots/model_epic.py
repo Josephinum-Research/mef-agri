@@ -3,7 +3,7 @@ import numpy as np
 from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
-from ....farming import crops
+from ....farming.crops import Crops
 from ....evaluation.stats_utils import DISTRIBUTIONS
 
 
@@ -14,7 +14,7 @@ class Roots(Model):
     kwargs :math:`\rightarrow` :class:`mef_agri.models.base.Model`
     """
     DEFAULT_PARAM_VALUES = {
-        crops.maize.__name__: {
+        Crops.Maize.NAME: {
             'depth_max': {
                 'value': 2.0,
                 'distr': {
@@ -25,7 +25,29 @@ class Roots(Model):
                 }
             }
         },
-        crops.winter_wheat.__name__: {
+        Crops.WinterWheat.NAME: {
+            'depth_max': {
+                'value': 2.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.15,
+                    'lb': 1.3,
+                    'ub': 2.1
+                }
+            }
+        },
+        Crops.WinterBarley.NAME: {
+            'depth_max': {
+                'value': 2.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.15,
+                    'lb': 1.3,
+                    'ub': 2.1
+                }
+            }
+        },
+        Crops.Soybean.NAME: {
             'depth_max': {
                 'value': 2.0,
                 'distr': {

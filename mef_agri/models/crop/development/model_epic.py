@@ -4,7 +4,7 @@ from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
 from ....evaluation.stats_utils import DISTRIBUTIONS
-from ....farming import crops
+from ....farming.crops import Crops
 
 
 class Development(Model):
@@ -16,7 +16,7 @@ class Development(Model):
     kwargs :math:`\rightarrow` see :class:`mef_agri.models.base.Model`
     """
     DEFAULT_PARAM_VALUES = {
-        crops.maize.__name__: {
+        Crops.Maize.NAME: {
             'temperature_base': {
                 'value': 8.0,
                 'distr': {
@@ -53,7 +53,7 @@ class Development(Model):
                 }
             }
         },
-        crops.winter_wheat.__name__: {
+        Crops.WinterWheat.NAME: {
             'temperature_base': {
                 'value': 0.0,
                 'distr': {
@@ -84,6 +84,80 @@ class Development(Model):
             },
             'hufl_coeff2': {
                 'value': 10.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.0
+                }
+            }
+        },
+        Crops.WinterBarley.NAME: {
+            'temperature_base': {
+                'value': 0.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'temperature_opt': {
+                'value': 15.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'heat_units_pot': {
+                'value': 1800.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 100.0
+                }
+            },
+            'hufl_coeff1': {
+                'value': 15.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.5
+                }
+            },
+            'hufl_coeff2': {
+                'value': 50.95,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.0
+                }
+            }
+        },
+        Crops.Soybean.NAME: {
+            'temperature_base': {
+                'value': 10.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'temperature_opt': {
+                'value': 25.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.NORMAL_1D,
+                    'std': 0.5
+                }
+            },
+            'heat_units_pot': {
+                'value': 1200.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 100.0
+                }
+            },
+            'hufl_coeff1': {
+                'value': 15.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.5
+                }
+            },
+            'hufl_coeff2': {
+                'value': 50.95,
                 'distr': {
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 1.0

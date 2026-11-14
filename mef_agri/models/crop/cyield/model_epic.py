@@ -3,7 +3,7 @@ import numpy as np
 from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
-from ....farming import crops
+from ....farming.crops import Crops
 from ....evaluation.stats_utils import DISTRIBUTIONS
 
 class Yield(Model):
@@ -16,7 +16,7 @@ class Yield(Model):
     kwargs :math:`\rightarrow` see :class:`mef_agri.models.base.Model`
     """
     DEFAULT_PARAM_VALUES = {
-        crops.maize.__name__: {
+        Crops.Maize.NAME: {
             'harvest_index_max': {
                 'value': 0.5,
                 'distr': {
@@ -27,7 +27,7 @@ class Yield(Model):
                 }
             }
         },
-        crops.winter_wheat.__name__: {
+        Crops.WinterWheat.NAME: {
             'harvest_index_max': {
                 'value': 0.42,
                 'distr': {
@@ -35,6 +35,28 @@ class Yield(Model):
                     'std': 0.02,
                     'lb': 0.4,
                     'ub': 0.5
+                }
+            }
+        },
+        Crops.WinterBarley.NAME: {
+            'harvest_index_max': {
+                'value': 0.42,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.02,
+                    'lb': 0.4,
+                    'ub': 0.6
+                }
+            }
+        },
+        Crops.Soybean.NAME: {
+            'harvest_index_max': {
+                'value': 0.31,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.02,
+                    'lb': 0.4,
+                    'ub': 0.6
                 }
             }
         }
@@ -177,7 +199,7 @@ class Yield_Stressed(Yield):
     i.e. incorporating equations 62 and 63 from [R2]_ .
     """
     DEFAULT_PARAM_VALUES = {
-        crops.maize.__name__: {
+        Crops.Maize.NAME: {
             'harvest_index_max': {
                 'value': 0.5,
                 'distr': {
@@ -197,9 +219,49 @@ class Yield_Stressed(Yield):
                 }
             }
         },
-        crops.winter_wheat.__name__: {
+        Crops.WinterWheat.NAME: {
             'harvest_index_max': {
                 'value': 0.42,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.02,
+                    'lb': 0.4,
+                    'ub': 0.5
+                }
+            },
+            'water_stress_influence': {
+                'value': 0.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.002,
+                    'lb': 0.0,
+                    'ub': 1.0
+                }
+            }
+        },
+        Crops.WinterBarley.NAME: {
+            'harvest_index_max': {
+                'value': 0.42,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.02,
+                    'lb': 0.4,
+                    'ub': 0.5
+                }
+            },
+            'water_stress_influence': {
+                'value': 0.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.002,
+                    'lb': 0.0,
+                    'ub': 1.0
+                }
+            }
+        },
+        Crops.Soybean.NAME: {
+            'harvest_index_max': {
+                'value': 0.31,
                 'distr': {
                     'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
                     'std': 0.02,

@@ -3,13 +3,13 @@ import numpy as np
 from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
-from ....farming import crops
+from ....farming.crops import Crops
 from ....evaluation.stats_utils import DISTRIBUTIONS
 
 
 class Demand(Model):
     DEFAULT_PARAM_VALUES = {
-        crops.maize.__name__: {
+        Crops.Maize.NAME: {
             'ncoeff1': {
                 'value': 0.044,
                 'distr': {
@@ -32,7 +32,7 @@ class Demand(Model):
                 }
             }
         },
-        crops.winter_wheat.__name__: {
+        Crops.WinterWheat.NAME: {
             'ncoeff1': {
                 'value': 0.06,
                 'distr': {
@@ -49,6 +49,52 @@ class Demand(Model):
             },
             'ncoeff3': {
                 'value': 0.0134,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.0005
+                }
+            }
+        },
+        Crops.WinterBarley.NAME: {
+            'ncoeff1': {
+                'value': 0.06,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff2': {
+                'value': 0.0231,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff3': {
+                'value': 0.013,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.0005
+                }
+            }
+        },
+        Crops.Soybean.NAME: {
+            'ncoeff1': {
+                'value': 0.0524,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff2': {
+                'value': 0.032,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.002
+                }
+            },
+            'ncoeff3': {
+                'value': 0.0286,
                 'distr': {
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 0.0005

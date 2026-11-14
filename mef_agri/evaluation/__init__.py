@@ -3,22 +3,26 @@ from pandas import DataFrame
 from inspect import isclass
 from copy import deepcopy
 
-from .interfaces import Interface
-from .interfaces.mdef import ModelDefinition
-from .db import EvalDB
-from .zoning import Zoning
-from .zoning.utils import compute_zone_values
-from ..models.base import Model
-from ..farming.tasks import ProjectTasksExtension, Task
-from ..farming.tasks.sowing import Sowing
-from ..farming.tasks.harvest import Harvest
-
 
 class EvalSetup(object):
-    def __init__(
-            self, edb:EvalDB, prj_dt:ProjectTasksExtension, 
-            data_intfs:list[Interface], task_intfs:list[Interface]
-        ):
+    def __init__(self, edb, prj_dt,data_intfs, task_intfs):
+        """
+        TODO
+
+        :param edb: _description_
+        :type edb: EvalDB
+        :param prj_dt: _description_
+        :type prj_dt: ProjectTasksExtension
+        :param data_intfs: _description_
+        :type data_intfs: list[Interface]
+        :param task_intfs: _description_
+        :type task_intfs: list[Interface]
+        """
+        from .interfaces import Interface
+        from .db import EvalDB
+        from .zoning import Zoning
+        from ..farming.tasks import ProjectTasksExtension
+
         self._edb:EvalDB = edb
         self._prj:ProjectTasksExtension = prj_dt
         self._dintfs:dict[str, Interface] = {}
@@ -33,9 +37,7 @@ class EvalSetup(object):
         self._zinfos:DataFrame = None
 
     def set_up_eval(
-            self, field_name:str, zoning_folder_id:str, 
-            zmodel:Model, cmodels:Model|dict[str, Model], 
-            info:str=None
+            self, field_name, zoning_folder_id, zmodel, cmodels, info=None
         ):
         """
         TODO 
@@ -59,6 +61,8 @@ class EvalSetup(object):
         :param info: _description_, defaults to None
         :type info: str, optional
         """
+        from .interfaces.mdef import ModelDefinition
+
         self._ins_cmds = []  # clear already available insert commands
 
         self._field = field_name
@@ -83,6 +87,8 @@ class EvalSetup(object):
         self._edb.execute_many(self._ins_cmds)
 
     def _ins_eval(self, info:str, zmodel):
+        from .interfaces.mdef import ModelDefinition
+
         if isclass(zmodel):
             zmodel = zmodel()
         zmname = zmodel.__class__.__name__
@@ -105,7 +111,20 @@ class EvalSetup(object):
             mdefs.append(ModelDefinition(zmodel))
         self._mdefs = dict(zip(znames, mdefs))
 
-    def _process_tasks(self, cmodels:Model | dict[str, Model]):
+    def _process_tasks(self, cmodels):
+        """
+        TODO
+
+        :param cmodels: _description_
+        :type cmodels: Model | dict[str, Model]
+        :raises ValueError: _description_
+        :raises ValueError: _description_
+        :raises ValueError: _description_
+        """
+        from .zoning.utils import compute_zone_values
+        from ..farming.tasks.sowing import Sowing
+        from ..farming.tasks.harvest import Harvest
+
         tasks = self._prj.get_tasks(
             self._field, self._zoning.valid_from, self._zoning.valid_until
         )[self._field]
@@ -172,67 +191,69 @@ class EvalSetup(object):
             )
 
     def _process_data(self):
-            data = self._prj.project.get_data(
-                self._zoning.valid_from, self._zoning.valid_until, 
-                dids=list(self._dintfs.keys()), fields=self._field
-            )
+        from .zoning.utils import compute_zone_values
             
-            init_epoch = (
-                self._zoning.valid_from - dt.timedelta(days=1.)
-            ).isoformat()
-            for zcont in self._zinfos.itertuples():
-                # initialize reset mq-definitions of all data-interfaces
-                for intf in self._dintfs.values():
-                    intf.initialize_model_quantities()
+        data = self._prj.project.get_data(
+            self._zoning.valid_from, self._zoning.valid_until, 
+            dids=list(self._dintfs.keys()), fields=self._field
+        )
+            
+        init_epoch = (
+            self._zoning.valid_from - dt.timedelta(days=1.)
+        ).isoformat()
+        for zcont in self._zinfos.itertuples():
+            # initialize reset mq-definitions of all data-interfaces
+            for intf in self._dintfs.values():
+                intf.initialize_model_quantities()
 
-                for did, ifdata in data.items():
-                    dif = self._prj.project.interfaces[did]
-                    # process data depending on if it is static and if it is 
-                    # separated into further data-types
-                    zoned_data = None
-                    if dif.static_data and (dif.data_types is None):
+            for did, ifdata in data.items():
+                dif = self._prj.project.interfaces[did]
+                # process data depending on if it is static and if it is 
+                # separated into further data-types
+                zoned_data = None
+                if dif.static_data and (dif.data_types is None):
+                    zdata = compute_zone_values(
+                        ifdata[self._field], self._zoning, 
+                        zone_name=zcont.zone_name
+                    )
+                    zoned_data = {init_epoch: zdata}
+    
+                elif dif.static_data and isinstance(dif.data_types, list):
+                    zoned_data = dict(zip(
+                        ifdata[self._field].keys(), 
+                        [None for i in range(len(ifdata[self._field]))]
+                    ))
+                    for dtype, dtdata in ifdata[self._field].items():
                         zdata = compute_zone_values(
-                            ifdata[self._field], self._zoning, 
-                            zone_name=zcont.zone_name
+                            dtdata, self._zoning, zone_name=zcont.zone_name
                         )
-                        zoned_data = {init_epoch: zdata}
+                        zoned_data[dtype] = zdata
+                    zoned_data = {init_epoch: zoned_data}
     
-                    elif dif.static_data and isinstance(dif.data_types, list):
-                        zoned_data = dict(zip(
-                            ifdata[self._field].keys(), 
-                            [None for i in range(len(ifdata[self._field]))]
-                        ))
-                        for dtype, dtdata in ifdata[self._field].items():
-                            zdata = compute_zone_values(
-                                dtdata, zoning, zone_name=zcont.zone_name
+                else:
+                    zoned_data = dict(zip(
+                        ifdata[self._field].keys(),  # epochs
+                        [None for i in range(len(ifdata[self._field]))]
+                    ))
+                    for epoch, edata in ifdata[self._field].items():
+                        if dif.data_types is None:
+                            zoned_data[epoch] = compute_zone_values(
+                                edata, self._zoning, 
+                                zone_name=zcont.zone_name
                             )
-                            zoned_data[dtype] = zdata
-                        zoned_data = {init_epoch: zoned_data}
-    
-                    else:
-                        zoned_data = dict(zip(
-                            ifdata[self._field].keys(),  # epochs
-                            [None for i in range(len(ifdata[self._field]))]
-                        ))
-                        for epoch, edata in ifdata[self._field].items():
-                            if dif.data_types is None:
-                                zoned_data[epoch] = compute_zone_values(
-                                    edata, self._zoning, 
+                        else:
+                            zoned_data[epoch] = dict(zip(
+                                edata.keys(),
+                                [None for i in range(len(edata))]
+                            ))
+                            for dtype, dtdata in edata.items():
+                                zoned_data[epoch][dtype] = \
+                                compute_zone_values(
+                                    dtdata, self._zoning, 
                                     zone_name=zcont.zone_name
                                 )
-                            else:
-                                zoned_data[epoch] = dict(zip(
-                                    edata.keys(),
-                                    [None for i in range(len(edata))]
-                                ))
-                                for dtype, dtdata in edata.items():
-                                    zoned_data[epoch][dtype] = \
-                                    compute_zone_values(
-                                        dtdata, self._zoning, 
-                                        zone_name=zcont.zone_name
-                                    )
     
-                    self._dintfs[did].process_data(zoned_data)
-                self._mdefs[zcont.zone_name].set_from_interfaces(
-                    list(self._dintfs.values())
-                )
+                self._dintfs[did].process_data(zoned_data)
+            self._mdefs[zcont.zone_name].set_from_interfaces(
+                list(self._dintfs.values())
+            )

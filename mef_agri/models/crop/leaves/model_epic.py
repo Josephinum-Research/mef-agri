@@ -3,7 +3,7 @@ import numpy as np
 from ...base import Model, Quantities as Q
 from ...utils import Units as U
 from ...requ import Requirement
-from ....farming import crops
+from ....farming.crops import Crops
 from ....evaluation.stats_utils import DISTRIBUTIONS
 
 
@@ -13,7 +13,7 @@ class Leaves(Model):
     ...).
     """
     DEFAULT_PARAM_VALUES = {
-        crops.maize.__name__: {
+        Crops.Maize.NAME: {
             'lai_max': {
                 'value': 6.0,
                 'distr': {
@@ -36,7 +36,7 @@ class Leaves(Model):
                 }
             }
         },
-        crops.winter_wheat.__name__: {
+        Crops.WinterWheat.NAME: {
             'lai_max': {
                 'value': 8.0,
                 'distr': {
@@ -52,7 +52,53 @@ class Leaves(Model):
                 }
             },
             'lai_regr_coeff': {
-                'value': 0.5,
+                'value': 1.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.02
+                }
+            }
+        },
+        Crops.WinterBarley.NAME: {
+            'lai_max': {
+                'value': 8.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'hui_leaf_decline': {
+                'value': 0.75,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.02
+                }
+            },
+            'lai_regr_coeff': {
+                'value': 1.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.02
+                }
+            }
+        },
+        Crops.Soybean.NAME: {
+            'lai_max': {
+                'value': 9.0,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'hui_leaf_decline': {
+                'value': 0.6,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.02
+                }
+            },
+            'lai_regr_coeff': {
+                'value': 1.,
                 'distr': {
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 0.02

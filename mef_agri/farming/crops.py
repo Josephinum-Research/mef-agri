@@ -1,5 +1,34 @@
 import json
 
+class Crops:
+    class Maize:
+        NAME = 'maize'
+        class Cultivars:
+            class Generic:
+                NAME = 'generic'
+                PARAMS = {}
+
+    class Soybean:
+        NAME = 'soybean'
+        class Cultivars:
+            class Generic:
+                NAME = 'generic'
+                PARAMS = {}
+
+    class WinterWheat:
+        NAME = 'winter_wheat'
+        class Cultivars:
+            class Generic:
+                NAME = 'generic'
+                PARAMS = {}
+
+    class WinterBarley:
+        NAME = 'winter_barley'
+        class Cultivars:
+            class Generic:
+                NAME = 'generic'
+                PARAMS = {}
+
 
 class DBIntegration(object):
     COL_CROP = 'crop'
@@ -59,23 +88,23 @@ class DBIntegration(object):
     def default_cultivars(self) -> list[dict]:
         return [
             {
-                'crop': 'winter_wheat',
-                'cultivar': 'generic',
-                'params': {}
+                'crop': Crops.WinterWheat.NAME,
+                'cultivar': Crops.WinterWheat.Cultivars.Generic.NAME,
+                'params': Crops.WinterWheat.Cultivars.Generic.PARAMS
             },
             {
-                'crop': 'winter_barley',
-                'cultivar': 'generic',
-                'params': {}
+                'crop': Crops.WinterBarley.NAME,
+                'cultivar': Crops.WinterBarley.Cultivars.Generic.NAME,
+                'params': Crops.WinterBarley.Cultivars.Generic.PARAMS
             },
             {
-                'crop': 'maize',
-                'cultivar': 'generic',
-                'params': {}
+                'crop': Crops.Maize.NAME,
+                'cultivar': Crops.Maize.Cultivars.Generic.NAME,
+                'params': Crops.Maize.Cultivars.Generic.PARAMS
             },
             {
-                'crop': 'soybean',
-                'cultivar': 'generic',
-                'params': {}
+                'crop': Crops.Soybean.NAME,
+                'cultivar': Crops.Soybean.Cultivars.Generic.NAME,
+                'params': Crops.Soybean.Cultivars.Generic.PARAMS
             }
         ]

@@ -16,7 +16,7 @@ from .roots.model_epic import Roots as RootsEPIC
 from .cyield.model_epic import (
     Yield as YieldEPIC, Yield_Stressed as YieldStrEPIC
 )
-from ...farming import crops
+from ...farming.crops import Crops
 from ...evaluation.stats_utils import DISTRIBUTIONS
 
 """
@@ -42,7 +42,7 @@ class Crop_Simple(Model):
 
     """
     DEFAULT_PARAM_VALUES = {
-        crops.maize.__name__: {
+        Crops.Maize.NAME: {
             'water_storage_max': {
                 'value': 2.4,  # [ mm ] - deduced from winter wheat value
                 'distr': {
@@ -97,7 +97,7 @@ class Crop_Simple(Model):
                 }
             }
         },
-        crops.winter_wheat.__name__: {
+        Crops.WinterWheat.NAME: {
             'water_storage_max': {
                 'value': 1.2,  # [ mm ] - approx. max. values from [1] figures 4 and 5
                 'distr': {
@@ -138,7 +138,7 @@ class Crop_Simple(Model):
                 }
             },
             'frost_coeff2': {
-                'value': 15.05,
+                'value': 15.1,
                 'distr': {
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 0.3
@@ -146,6 +146,116 @@ class Crop_Simple(Model):
             },
             'cn_ratio_res': {
                 'value': 100.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 3.
+                }
+            }
+        },
+        Crops.WinterBarley.NAME: {
+            'water_storage_max': {
+                'value': 1.2,  # [ mm ] - approx. max. values from [1] figures 4 and 5
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'energy_conversion': {
+                'value': 25.0,  # [( kg x m2 ) / (ha x MJ x day)]
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.0
+                }
+            },
+            'critical_aeration_factor': {
+                'value': 0.85,  # []
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.002,
+                    'lb': 0.0,
+                    'ub': 1.0
+                }
+            },
+            'height_max': {
+                'value': 1.2,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.1,
+                    'lb': 1.15,
+                    'ub': 1.5
+                }
+            },
+            'frost_coeff1': {
+                'value': 5.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'frost_coeff2': {
+                'value': 15.1,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.3
+                }
+            },
+            'cn_ratio_res': {
+                'value': 100.,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 3.
+                }
+            }
+        },
+        Crops.Soybean.NAME: {
+            'water_storage_max': {
+                'value': 1.2,  # [ mm ] - deduced from winterwheat
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'energy_conversion': {
+                'value': 25.0,  # [( kg x m2 ) / (ha x MJ x day)]
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 1.0
+                }
+            },
+            'critical_aeration_factor': {
+                'value': 0.85,  # []
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.002,
+                    'lb': 0.0,
+                    'ub': 1.0
+                }
+            },
+            'height_max': {
+                'value': 1.5,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.TRUNCNORM_1D,
+                    'std': 0.1,
+                    'lb': 1.15,
+                    'ub': 1.5
+                }
+            },
+            'frost_coeff1': {
+                'value': 5.01,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.1
+                }
+            },
+            'frost_coeff2': {
+                'value': 15.05,
+                'distr': {
+                    'distr_id': DISTRIBUTIONS.GAMMA_1D,
+                    'std': 0.3
+                }
+            },
+            'cn_ratio_res': {
+                'value': 25.,
                 'distr': {
                     'distr_id': DISTRIBUTIONS.GAMMA_1D,
                     'std': 3.
