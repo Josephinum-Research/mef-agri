@@ -186,6 +186,7 @@ class ProjectTab(BaseTab):
             )
             self.store.project_data.initialize()
             self.store.project_data.create_tables()
+            self.store.project_path = self.store.project_data.directory
             self._show_prjcont()
 
     def _sel_project(self):
@@ -196,6 +197,7 @@ class ProjectTab(BaseTab):
             return
         
         self.store.project_data = ProjectDataGUI(pdir, dbn)
+        self.store.project_path = self.store.project_data.directory
         self._show_prjcont()
 
     def _add_field(self, msg:Messages.GotDrawnField):
