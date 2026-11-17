@@ -11,7 +11,11 @@ class ModelDefinition(object):
     def __init__(self, zone_model:Model):
         self._qdefs:dict = {}
         self._mtree:dict = {}
-        self._add_top_level_model(zone_model)
+        if isclass(zone_model):
+            zone_model = zone_model()
+        self._mtree['zone'] = self._create_model_def(
+            zone_model, self._mtree['zone']
+        )
 
     @property
     def model_quantities(self) -> dict:
@@ -21,35 +25,42 @@ class ModelDefinition(object):
         .. code-block::
 
             {
-                'model1': {
-                    'state': {
-                        'state1': {
-                            'values': [...],
-                            'epochs': [...],
-                            'distr': [{...}, ...],
-                            'unit': ....
-                        },
-                        ...
-                    }
-                    'parameter': {
-                        'param1': {
-                            'values': [...],
-                            'epochs': [...],
-                            'distr': [{...}, ...],
-                            'unit': ....
-                        },
-                        ...
-                    },
-                    'observation': {
-                        'obs1': {
-                            'values': [...],
-                            'epochs': [...],
-                            'distr': [{...}, ...],
-                            'unit': ....
+                'zone': {
+                    'model1': {
+                        'state': {
+                            'state1': {
+                                'values': [...],
+                                'epochs': [...],
+                                'distr': [{...}, ...],
+                                'unit': ....
+                            },
+                            ...
                         }
-                    }
+                        'parameter': {
+                            'param1': {
+                                'values': [...],
+                                'epochs': [...],
+                                'distr': [{...}, ...],
+                                'unit': ....
+                            },
+                            ...
+                        },
+                        'observation': {
+                            'obs1': {
+                                'values': [...],
+                                'epochs': [...],
+                                'distr': [{...}, ...],
+                                'unit': ....
+                            }
+                        }
+                    },
+                    'model1.model2': {...},
+                }
+                'crop-1': {
+                    'model1': {...},
+                    ...
                 },
-                'model1.model2': {...},
+                'crop-2': {...},
                 ...
             }
 
@@ -66,17 +77,24 @@ class ModelDefinition(object):
         .. code-block::
 
             {
-                'model1': {
-                    'model1.model2': {
-                        'model1.model2.model4': {},
-                        'model1.model2.model5': {
-                            'model1.model2.model5.model6: {...},
-                            'mdoel1.model2.model5.model7: {}
-                        }
+                'zone': {
+                    'model1': {
+                        'model1.model2': {
+                            'model1.model2.model4': {},
+                            'model1.model2.model5': {
+                                'model1.model2.model5.model6: {...},
+                                'mdoel1.model2.model5.model7: {}
+                            }
+                        },
+                        'model1.model3': {}
                     },
-                    'model1.model3': {}
+                    'model10': {...}
                 },
-                'model10': {...}
+                'crop-1': {
+                    'model1': {...}
+                },
+                'crop-2': {...},
+                ...
             }
 
         i.e. empty dictionaries at the leaves of the model-tree (no child 
@@ -87,8 +105,10 @@ class ModelDefinition(object):
         """
         return self._mtree
 
-    def add_crop_model(self, crop_model:Model):
-        self._add_top_level_model(crop_model)
+    def add_crop_model(self, crop_model:Model, mid:str):
+        if isclass(crop_model):
+            crop_model = crop_model()
+        self._mtree[mid] = self._create_model_def(crop_model, self._mtree[mid])
 
     def set_from_interfaces(self, intfs:list[Interface]):
         for intf in intfs:
@@ -125,11 +145,6 @@ class ModelDefinition(object):
                         get_sql = edb.schema.table_obs_def.sql_insert
                     cmds.append(get_sql(**ins_data))
         return cmds
-
-    def _add_top_level_model(self, model:Model):
-        if isclass(model):
-            model = model()
-        self._metree = self._create_model_def(model, self._mtree)
 
     def _create_model_def(self, model:Model, mtree_parent_dict:dict):
         self._qdefs[model.model_id] = self._get_model_qdefs(model)

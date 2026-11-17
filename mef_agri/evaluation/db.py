@@ -14,6 +14,104 @@ from .zoning import Zoning
 
 
 class DBSchema(object):
+    """
+    Database schema to evaluate soil and crop growth models.
+
+    Zones
+    =====
+
+    columns of :func:`table_zones`
+
+    * ``zid`` (INT) - unique integer-id for a zone (i.e. primary key)
+    * ``field`` (TEXT) - name of the field
+    * ``zoning`` (TEXT) - unique name within a field for a zoning approach (also corresponds to the folder-name within a field where a zoning-georaster is saved)
+    * ``zone_name`` (TEXT) - name of a zone within a zoning approache (layer-ids of a zoning-georaster)
+    * ``height``  (REAL) - representative height for a zone
+
+    Zones are defined by the use of a zoning (see 
+    :func:`mef_agri.evaluation.zoning`). 
+    Thus, each zone in a zoning for a field represents a line in 
+    :func:`table_zones`.
+    A zone/row is defined by the columns ``field``, ``zoning`` and 
+    ``zone_name``.
+    As the zones also appear as foreign key in other tables, the column ``zid`` 
+    is introduced as primary key for convenience.
+
+    Evaluations
+    ===========
+
+    columns of :func:`table_evals`
+
+    * ``eid`` (INT) - unique integer-id for an evaluation
+    * ``zid`` (INT) - FK to :func:`table_zones`
+    * ``epoch_start`` (TEXT) - iso-formatted date-string with first evaluation-day/epoch
+    * ``epoch_end`` (TEXT) - iso-formatted date-string with last evaluation-day/epoch
+    * ``zone_model`` (TEXT) - name of the class which represents the zone-model to be used in the evaluation
+    * ``zone_model_module`` (TEXT) - name of the python-module containing the zone-model
+    * ``info`` (TEXT) - further informations which should be attached to the evaluation
+
+    Within one evaluation (i.e. the same ``eid``), every definition has to be 
+    the same (i.e. same zone from :func:`table_zones`, same model-definitions 
+    for zone and crops, ...).
+    Otherwise inconsistencies appear in the database which - in the best case - 
+    appear through raised exceptions already at the stage of insertion of 
+    model-quantity definitions into the database.
+
+    Crop Rotation
+    =============
+
+    columns of :func:`table_croprot`
+
+    * ``eid`` (INT) - foreign-key to :func:`table_evals`
+    * ``crop`` (TEXT) - name of the sown crop (see :class:`mef_agri.farming.crops.Crops`)
+    * ``cultivar`` (TEXT) - name of the sown cultivar (see :class:`mef_agri.farming.crops.Crops`)
+    * ``mid`` (TEXT) - unique name/id within an ``eid`` for the crop-model to identify/connect corresponding model-quantities (i.e. quantity-definitions and evaluated quantities)
+    * ``epoch_start`` (TEXT) - iso-formatted date-string representing the sowing-date
+    * ``epoch_end`` (TEXT) - iso-formatted date-string representing the date when crop is removed (usually harvesting, but can be also mulching, ...)
+    * ``crop_model`` (TEXT) - name of the class which represents the crop-model to be used for evaluation
+    * ``crop_model_module`` (TEXT) - name of the python-module containing the crop-model
+
+    ``mid`` is necessary to provide the possibility to evaluate multiple crop 
+    models at a time (e.g. for evaluating growth of catch crop mixtures).
+    It has to be a unique string within an evaluation/``eid``.
+    Thus, it has to be also unique over multiple vegetation periods.
+    ``mid`` appears in all quantity-related tables, thus also for zone-model 
+    quantities. 
+    It is recommended to use ``'zone'`` as value for ``mid`` for these 
+    quantities.
+
+    Model Quantity Definitions
+    ==========================
+
+    columns of :func:`table_states_def`, :func:`table_params_def`, 
+    :func:`table_obs_def`
+
+    * ``eid`` (INT) - foreign-key to :func:`table_evals`
+    * ``mid`` (TEXT) - unique name/id within an ``eid`` to identify top-level models used in an evaluation
+    * ``name`` (TEXT) - name of the quantity within the model
+    * ``model`` (TEXT) - model-id (from :class:`mef_agri.models.tree.ModelTree`)
+    * ``epoch`` (TEXT) - iso-formatted date-string
+    * ``value`` (REAL) - value of model-quantity which will be used in the distribution-generation (i.e. sampling) accordingly
+    * ``distr`` (TEXT) - json-string to define the distribution of a model-quantity (see :func:`mef_agri.evaluation.stats_utils.RVSampler.get_sampled_values`)
+
+    columns of :func:`table_pfuncs_def`
+
+    * ``eid`` (INT) - foreign-key to :func:`table_evals`
+    * ``mid`` (TEXT) - unique name/id within an ``eid`` to identify top-level models used in an evaluation
+    * ``name`` (TEXT) - name of the quantity within the model
+    * ``model`` (TEXT) - model-id (from :class:`mef_agri.models.tree.ModelTree`)
+    * ``epoch`` (TEXT) - iso-formatted date-string
+    * ``fdef`` (TEXT) - json-string which contains the function-definitions (see :class:`mef_agri.models.utils.PFunction`)
+
+    ``epoch`` should be set to one day before ``epoch_start`` from 
+    :func:`table_evals` for states, parameters and parameter-functions of the 
+    zone-model.
+    For states, parameters and parameter-functions of a crop model, ``epoch`` 
+    should be set equal to the sowing date (i.e. the evaluation of the 
+    crop-models starts one day after sowing).
+
+    """
+
     def __init__(self):
         self._tzones = SQLTable()
         self._tzones.name = 'zones'
@@ -62,9 +160,10 @@ class DBSchema(object):
             'model': 'TEXT',
             'epoch': 'TEXT',
             'value': 'REAL',
-            'distr': 'TEXT'
+            'distr': 'TEXT',
+            'mid': 'TEXT'
         }
-        self._tdobs.primary_key = ['eid', 'name', 'model', 'epoch']
+        self._tdobs.primary_key = ['eid', 'name', 'model', 'epoch', 'mid']
         self._tdobs.foreign_keys = [deepcopy(fk_te)]
 
         self._tdstates = SQLTable()
@@ -72,12 +171,13 @@ class DBSchema(object):
         self._tdstates.columns = {
             'eid': 'INT',
             'name': 'TEXT',
-            'model': 'TEXT',
+            'model': 'TEXT',  # NOTE model-id from model-tree
             'epoch': 'TEXT',
             'value': 'REAL',
-            'distr': 'TEXT'
+            'distr': 'TEXT',
+            'mid': 'TEXT'  # NOTE id to distinguish between zone/soil model and multiple crop models being evaluated at the same epoch (e.g. for catch crop mixtures)
         }
-        self._tdstates.primary_key = ['eid', 'name', 'model', 'epoch']
+        self._tdstates.primary_key = ['eid', 'name', 'model', 'epoch', 'mid']
         self._tdstates.foreign_keys = [deepcopy(fk_te)]
 
         self._tdparams = SQLTable()
@@ -88,9 +188,10 @@ class DBSchema(object):
             'model': 'TEXT',
             'epoch': 'TEXT',
             'value': 'REAL',
-            'distr': 'TEXT'
+            'distr': 'TEXT',
+            'mid': 'TEXT'
         }
-        self._tdparams.primary_key = ['eid', 'name', 'model', 'epoch']
+        self._tdparams.primary_key = ['eid', 'name', 'model', 'epoch', 'mid']
         self._tdparams.foreign_keys = [deepcopy(fk_te)]
 
         self._tdpfuncs = SQLTable()
@@ -101,20 +202,24 @@ class DBSchema(object):
             'model': 'TEXT',
             'epoch': 'TEXT',
             'fdef': 'TEXT',
+            'mid':'TEXT'
         }
-        self._tdpfuncs.primary_key = ['eid', 'name', 'model', 'epoch']
+        self._tdpfuncs.primary_key = ['eid', 'name', 'model', 'epoch', 'mid']
         self._tdpfuncs.foreign_keys = [deepcopy(fk_te)]
 
         self._tcrpr = SQLTable()
         self._tcrpr.name = 'crop_rotation'
         self._tcrpr.columns = {
             'eid': 'INT',
+            'crop': 'TEXT',
+            'cultivar': 'TEXT',
+            'mid': 'TEXT',
             'crop_model': 'TEXT',
             'crop_model_module': 'TEXT',
             'epoch_start': 'TEXT',
             'epoch_end': 'TEXT'
         }
-        self._tcrpr.primary_key = ['eid', 'epoch_start']
+        self._tcrpr.primary_key = ['eid', 'epoch_start', 'mid']
         self._tcrpr.foreign_keys = [deepcopy(fk_te)]
     
     @property
@@ -124,6 +229,10 @@ class DBSchema(object):
     @property
     def table_evals(self) -> SQLTable:
         return self._tevals
+
+    @property
+    def table_croprot(self) -> SQLTable:
+        return self._tcrpr
     
     @property
     def table_obs_def(self) -> SQLTable:
@@ -141,10 +250,6 @@ class DBSchema(object):
     def table_pfuncs_def(self) -> SQLTable:
         return self._tdpfuncs
     
-    @property
-    def table_croprot(self) -> SQLTable:
-        return self._tcrpr
-
 
 class DBQueries(object):
     def __init__(self, edb:EvalDB):
@@ -393,6 +498,7 @@ class EvalDB(Geopackage):
 
     ############################################################################
     # data definition stuff
+    # TODO check if these methods are necessary
     ############################################################################
     def add_crop_rotation(
             self, eid:int, crop_model, epoch_start:dt.date|str, 

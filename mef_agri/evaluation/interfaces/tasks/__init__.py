@@ -5,6 +5,10 @@ from ....farming.tasks import Task, Application
 
 
 class TaskInterface(Interface):
+    META_KEY_CMODEL = 'crop_model_obj'
+    META_KEY_CROP = 'sown_crop'
+    META_KEY_CULT = 'sown_cultivar'
+
     def process_data(self, data:dict, meta:dict):
         """
         The ``data`` dictionary has to have the following structure

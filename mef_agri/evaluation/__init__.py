@@ -3,6 +3,8 @@ from pandas import DataFrame
 from inspect import isclass
 from copy import deepcopy
 
+from .interfaces.tasks import TaskInterface
+
 
 class EvalSetup(object):
     def __init__(self, edb, prj_dt,data_intfs, task_intfs):
@@ -113,13 +115,16 @@ class EvalSetup(object):
 
     def _process_tasks(self, cmodels):
         """
-        TODO
+        ``cmodels`` can exhibit three structures
 
-        :param cmodels: _description_
-        :type cmodels: Model | dict[str, Model]
-        :raises ValueError: _description_
-        :raises ValueError: _description_
-        :raises ValueError: _description_
+        * if it is provided as one crop-model, the same crop-model will be used for all vegetation periods in the desired evaluation-run
+        * if it is proivded as dictionary the keys have to represent the sowing-dates and for the values two further possibilities exist
+
+            * if the values are crop-models, they will be used in the corresponding vegetation periods (also if multiple crops are sown, e.g. catch crops)
+            * if the values are arrays, the elements of such an array are again dictionaries with keys ``'crop'``, ``'cultivar'``, ``'cmodel'`` (class or instance)
+
+        :param cmodels: crop models which should be used to evaluate crop related processes
+        :type cmodels: Model | dict[str, Model] | dict[str, list[dict]]
         """
         from .zoning.utils import compute_zone_values
         from ..farming.tasks.sowing import Sowing
@@ -129,8 +134,15 @@ class EvalSetup(object):
             self._field, self._zoning.valid_from, self._zoning.valid_until
         )[self._field]
 
-        epsow = None
         zoned_tasks = {}
+        sowinfo_init = {
+            'epoch': None,
+            'crops': [],
+            'cultivars': [],
+            'cmodels': [],
+            'mids': []
+        }
+        nthcrop = 1
         for zcont in self._zinfos.itertuples():
             for intf in self._tintfs.values():
                 intf.initialize_model_quantities()
@@ -140,48 +152,83 @@ class EvalSetup(object):
                     epoch = task.date_begin.isoformat()
                     # determine vegetation periods
                     if tname == Sowing.__name__:
-                        if epsow is not None:
-                            msg = f'There is already a sown crop from {epsow} '
-                            msg += f'present on field {self._field} which has not '
-                            msg += 'been harvested yet - cannot add another '
+                        if sowinfo['epoch'] is not None:
+                            msg = 'There is already a sowing task done from '
+                            msg += f'on field {self._field} from '
+                            msg += f'{sowinfo['epoch']} with no associated '
+                            msg += 'harvest-task - cannot add another '
                             msg += 'Sowing-task!'
                             raise ValueError(msg)
-                        epsow = deepcopy(epoch)
+
+                        sowinfo = deepcopy(sowinfo_init)
+                        sowinfo['epoch'] = deepcopy(epoch)
+                        for appl in task.applications:
+                            sowinfo['crops'].append(appl.crop.value)
+                            sowinfo['cultivars'].append(appl.cultivar.value)
+                            if isinstance(cmodels, dict):
+                                cminfo = cmodels[epoch]
+                                if isinstance(cminfo, list):
+                                    for partcrop in cminfo:
+                                        c1 = partcrop['crop'] == appl.crop.value
+                                        c2 = partcrop['cultivar'] == \
+                                             appl.cultivar.value
+                                        if c1 and c2:
+                                            cmodel = partcrop['cmodel']
+                                    # TODO check if a model is provided for all 
+                                    # TODO crops sown at a specific epoch
+                                else:
+                                    cmodel = cminfo
+                            else:
+                                cmodel = cmodels
+                            if isclass(cmodel):
+                                cmodel = cmodel()
+                            mid = f'crop-{nthcrop}'
+                            self._mdefs[zcont.zone_name].add_crop_model(
+                                cmodel, mid
+                            )
+                            sowinfo['cmodels'].append(cmodel)
+                            sowinfo['mids'].append(mid)
+                            nthcrop += 1
+
                     elif tname == Harvest.__name__:
-                        if epsow is None:
-                            msg = f'No crop has been sown on field {self._field_} -'
+                        if sowinfo is None:
+                            msg = 'No sowing-task has been performed on field '
+                            msg += f'{self._field_} - '
                             msg += ' cannot add another Harvest-task!'
                             raise ValueError(msg)
-                        if isinstance(cmodels, dict):
-                            if not epsow in cmodels.keys():
-                                msg = 'There is no crop model available for sowing '
-                                msg += f'task with `date_begin`={epsow}!'
-                                raise ValueError(msg)
-                            cmodel = cmodels[epsow]
-                        else:
-                            cmodel = cmodels
-                        if isclass(cmodel):
-                            cmodel = cmodel()
-                        cmname = cmodel.__class__.__name__
-                        cmmodule = cmodels.__class__.__module__
+                        cmnames = [cmdl.__class__.__name__ for \
+                                   cmdl in sowinfo['cmodels']]
+                        cmmodules = [cmdl.__class.__module__ for \
+                                     cmdl in sowinfo['cmodels']]
+                        eids = [zcont.eid for i in range(len(sowinfo['crops']))]
+                        eps_start = [sowinfo['epoch'] for \
+                                  i in range(len(sowinfo['crops']))]
+                        eps_end = [epoch for i in range(len(sowinfo['crops']))]
                         self._ins_cmds.append(
                             self._edb.schema.table_croprot.sql_insert(
-                                eid=zcont.eid,
-                                crop_model=cmname,
-                                crop_model_module=cmmodule,
-                                epoch_start=epsow,
-                                epoch_end=epoch
+                                eid=eids,
+                                crop=sowinfo['crops'],
+                                cultivar=sowinfo['cultivars'],
+                                crop_model=cmnames,
+                                crop_model_module=cmmodules,
+                                mid=sowinfo['mids'],
+                                epoch_start=eps_start,
+                                epoch_end=eps_end
                             )
                         )
+                        sowinfo['epoch'] = None
 
                     # process tasks for zone
-                    tname = task.__class__.__name__
                     if not tname in zoned_tasks.keys():
                         zoned_tasks[tname] = {'numvals': {},'metadata': {}}
                     zoned_tasks[tname]['numvals'][epoch] = compute_zone_values(
                         task, self._zoning, zone_name=zcont.zone_name
                     )
-                    zoned_tasks[tname]['metadata'][epoch] = task.metadata
+                    meta = deepcopy(task.metadata)
+                    meta[TaskInterface.META_KEY_CMODEL] = sowinfo['cmodels']
+                    meta[TaskInterface.META_KEY_CROP] = sowinfo['crops']
+                    meta[TaskInterface.META_KEY_CULT] = sowinfo['cultivars']
+                    zoned_tasks[tname]['metadata'][epoch] = deepcopy(meta)
             for tname, etasks in zoned_tasks.items():
                 self._tintfs[tname].process_data(
                     etasks['numvals'], meta=etasks['metadata']

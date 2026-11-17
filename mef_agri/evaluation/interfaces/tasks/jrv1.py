@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from . import TaskInterface
 from ...stats_utils import DISTRIBUTIONS as D
-from ....models.base import Quantities as Q
+from ....models.base import Model, Quantities as Q
 from ....models.utils import Units as U
 from ....models.crop.model_epic import Crop_Extended
 from ....farming.crops import Crops
@@ -33,6 +33,10 @@ class SowingInterface(TaskInterface):
         self.sowing_amount.unit = U.kg_ha
 
         epochs, samnt = [], []
+        mqdef_init = self.MQDefinition()
+        mqdef_init.epochs = []
+        mqdef_init.values = []
+        mqdef_init.distributions = []
         for epoch, zvals in data.items():
             appls = self._get_appls(zvals, meta[epoch])
             for appl in appls:
@@ -58,6 +62,31 @@ class SowingInterface(TaskInterface):
                 # TODO from Crop_Extended and child models by using 
                 # TODO appl.crop.value
                 # TODO set sowing amount as initial value for biomass and root-biomass
+                cmodel:Model = meta[self.META_KEY_CMODEL]
+                for mid in cmodel.model_tree.model_ids_intern:
+                    mdl = cmodel.model_tree.get_model(mid)
+                    if hasattr(mdl, 'DEFAULT_PARAM_VALUES'):
+                        defpvals = mdl.DEFAULT_PARAM_VALUES[appl.crop.value]
+                        for pname, pdef in defpvals.items():
+                            if not pname in self.model_quantities:
+                                self._mqs.append(pname)
+                                mqdef = deepcopy(mqdef_init)
+                                mqdef.assign_crop_model = {
+                                    'crop': appl.crop.value,
+                                    'cultivar': appl.cultivar.value,
+                                    'sowing_date': epoch
+                                }
+                                mqdef.qtype = Q.PARAM
+                                mqdef.model = mid
+                                mqdef.unit = cmodel.model_tree.get_qinfos(
+                                    pname, mid
+                                )['unit']
+                                mqdef.values = pdef['value']
+                                mqdef.epochs = epoch
+                                mqdef.distributions = pdef['distr']
+                            
+                    if hasattr(mdl, 'INITIAL_STATE_VALUES'):
+                        pass
 
         self.sowing_amount.values = samnt
         self.sowing_amount.epochs = epochs
@@ -91,7 +120,8 @@ class HarvestInterface(TaskInterface):
         self.residues_removed.model = 'zone.management.harvest'
         self.residues_removed.unit = U.frac
 
-        epochs, cyield, resrem = [], [], []
+        epochs, cyield, resrem, distr_yld = [], [], [], []
+        cereals = (Crops.WinterBarley.NAME, Crops.WinterWheat.NAME)
         for epoch, zvals in data.items():
             appls = self._get_appls(zvals, meta[epoch])
             for appl in appls:
@@ -111,9 +141,20 @@ class HarvestInterface(TaskInterface):
                         self.residues_removed.unit
                     )
                 )
+                ystd = None
+                if meta[self.META_KEY_CROP] == Crops.Maize.NAME:
+                    ystd = 150.
+                elif meta[self.META_KEY_CROP] == Crops.Soybean.NAME:
+                    ystd = 30.
+                elif meta[self.META_KEY_CROP] in cereals:
+                    ystd = 50.
+                distr_yld.append({
+                    'distr_id': D.GAMMA_1D, 'std': ystd
+                })
+
         self.cyield.values = cyield
         self.cyield.epochs = deepcopy(epochs)
-        self.cyield.distributions = {'distr_id': D.GAMMA_1D, 'std': 100.}
+        self.cyield.distributions = distr_yld
         self.residues_removed.values = resrem
         self.residues_removed.epochs = deepcopy(epochs)
         self.residues_removed.distributions = {
