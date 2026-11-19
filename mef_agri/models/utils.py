@@ -52,6 +52,14 @@ class __UNITS__:
         :rtype: str
         """
         return '[ day ]'
+
+    @property
+    def Hz(self) -> str:
+        r"""
+        :return: frequency :math:`\frac{1}{s}`
+        :rtype: str
+        """
+        return '[ 1 / s ]'
     
     @property
     def m(self) -> str:
@@ -76,6 +84,22 @@ class __UNITS__:
         :rtype: str
         """
         return '[ mm ]'
+
+    @property
+    def m2(self) -> str:
+        r"""
+        :return: square meters :math:`m^2`
+        :rtype: str
+        """
+        return '[ m2 ]'
+
+    @property
+    def m4(self) -> str:
+        r"""
+        :return: :math:`m^4` meters to the power of four (e.g. for mechanical computations in crop-lodging models)
+        :rtype: str
+        """
+        return '[ m4 ]'
     
     @property
     def g(self) -> str:
@@ -311,7 +335,7 @@ class __UNITS__:
     @property
     def kg_t(self) -> str:
         r"""
-        :return: kg nutrient per ton biomass :math:`\frac{kg}{t}`
+        :return: concentration (e.g. kg nutrient per ton biomass) :math:`\frac{kg}{t}`
         :rtype: str
         """
         return '[ ( kg ) / ( t ) ]'
