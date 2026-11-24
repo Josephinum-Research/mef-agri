@@ -28,6 +28,12 @@ class TaskInterface(Interface):
         :param meta: task metadata
         :type meta: dict
         """
+        for epoch, zvals in data.items():
+            appls = self._get_appls(zvals, meta[epoch])
+            for appl in appls:
+                self._process_appl(appl, meta, epoch)
+
+    def _process_appl(self, appl:Application, meta:dict, epoch:str):
         pass
 
     @staticmethod
