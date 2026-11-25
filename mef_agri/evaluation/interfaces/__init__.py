@@ -164,9 +164,47 @@ class Interface(object):
             self.CROP_MODELS_KEY: {}
         }
         self._nthcrop:int = 1
+        self._did:str = None
+        self._zvm:str = None
 
     @property
     def quantities(self) -> dict:
+        """
+        Contains all model-quantity definitions for the interface (see 
+        :class:`Interface.MQDefinition`).
+        The dictionary has the following structure
+
+        .. code-block::
+
+            {
+                'zone': {
+                    'state': {
+                        'some-state': Interface.MQDefinition(...)  # instance Interface.MQDefinition
+                    },
+                    'parameter': {...},
+                    'observation': {...},
+                    'pfunction': {...}
+                },
+                'crop_models': {
+                    'crop_1': {
+                        'crop': 'name-of-crop',
+                        'cultivar': 'name-of-cultivar',
+                        'sowing_date': 'iso-formatted-datestring',
+                        'quantities': {
+                            'state': {...},
+                            'parameter': {...},
+                            'observation': {...},
+                            'pfunction': {...}
+                        }
+                    },
+                    'crop_2': {...},
+                    ...
+                }
+            }
+
+        :return: dictionary with model-quantity definitions
+        :rtype: dict
+        """
         return self._qs
 
     @property
@@ -187,6 +225,20 @@ class Interface(object):
     @data_source_id.setter
     def data_source_id(self, did):
         self._did = did
+
+    @property
+    def zone_value_method(self) -> str:
+        """
+        settable - fix it in the constructor of the child class
+
+        :return: method to compute a representative value for a zone (see :class:`mef_agri.evaluation.zoning.utils.ZONE_VALUE_METHOD`)
+        :rtype: str
+        """
+        return self._zvm
+
+    @zone_value_method.setter
+    def zone_value_method(self, zvm):
+        self._zvm = zvm
 
     def process_data(self, data:dict):
         """
@@ -334,6 +386,16 @@ class Interface(object):
             ][cmid][self.CMODEL_QS_KEY][qtype][qname] = qdef.to_dict()
 
     def reset_quantity_defs(self):
+        """
+        Resets the following properties of all :class:`Interface.MQDefinition` 
+        contained in :func:`quantities`
+        
+        * :func:`Interface.MQDefinition.values`
+        * :func:`Interface.MQDefinition.epochs`
+        * :func:`Interface.MQDefinition.distributions`
+
+        to empty lists.
+        """
         for mid in self._qs.keys():
             for qtype in (Q.STATE, Q.PARAM, Q.PFUNC, Q.OBS):
                 if mid == self.ZONE_MODEL_KEY:

@@ -7,11 +7,11 @@ from .interfaces.tasks import TaskInterface
 
 
 class EvalSetup(object):
-    def __init__(self, edb, prj_dt,data_intfs, task_intfs):
+    def __init__(self, edb, prj_dt, data_intfs, task_intfs):
         """
         TODO
 
-        :param edb: _description_
+        :param edb: _description_/
         :type edb: EvalDB
         :param prj_dt: _description_
         :type prj_dt: ProjectTasksExtension
@@ -33,6 +33,8 @@ class EvalSetup(object):
         self._tintfs:dict[str, Interface] = {}
         for intf in task_intfs:
             self._tintfs[intf.data_source_id] = intf
+
+        # other internal variables
         self._ins_cmds:list[str] = []
         self._field:str = None
         self._zoning:Zoning = None
@@ -66,27 +68,24 @@ class EvalSetup(object):
         from .interfaces.mdef import ModelDefinition
 
         self._ins_cmds = []  # clear already available insert commands
-
         self._field = field_name
-        last_eid = self._edb.number_of_rows(self._edb.schema.table_evals.name)
         self._zoning = self._edb.zoning_data.get_zoning_by_id(
             field_name, zoning_folder_id
         )
         self._zinfos = self._edb.queries.zids_zones_by_field_zoning(
             self._field, zoning_folder_id
         )
+
+        last_eid = self._edb.number_of_rows(self._edb.schema.table_evals.name)
         self._zinfos['eid'] = [
             last_eid + i + 1 for i in range(len(self._zinfos))
         ]
+        # dictionary containing the model-structure for each zone in the field
         self._mdefs:dict[str, ModelDefinition] = None
 
         self._ins_eval(info, zmodel)
         self._process_tasks(cmodels)
         self._process_data()
-
-    def save_eval_defs(self):
-        # TODO
-        self._edb.execute_many(self._ins_cmds)
 
     def _ins_eval(self, info:str, zmodel):
         from .interfaces.mdef import ModelDefinition
@@ -110,7 +109,7 @@ class EvalSetup(object):
                 )
             )
             znames.append(tpl.zone_name)
-            mdefs.append(ModelDefinition(zmodel))
+            mdefs.append(ModelDefinition(self._edb, zmodel))
         self._mdefs = dict(zip(znames, mdefs))
 
     def _process_tasks(self, cmodels):
@@ -145,7 +144,7 @@ class EvalSetup(object):
         nthcrop = 1
         for zcont in self._zinfos.itertuples():
             for intf in self._tintfs.values():
-                intf.initialize_model_quantities()
+                intf.reset_quantity_defs()
 
             for etasks in tasks.values():
                 for tname, task in etasks.items():
@@ -182,7 +181,7 @@ class EvalSetup(object):
                                 cmodel = cmodels
                             if isclass(cmodel):
                                 cmodel = cmodel()
-                            mid = f'crop-{nthcrop}'
+                            mid = f'crop_{nthcrop}'
                             self._mdefs[zcont.zone_name].add_crop_model(
                                 cmodel, mid
                             )
@@ -221,6 +220,8 @@ class EvalSetup(object):
                     # process tasks for zone
                     if not tname in zoned_tasks.keys():
                         zoned_tasks[tname] = {'numvals': {},'metadata': {}}
+                    # TODO implement method for zone-value computation if 
+                    # TODO something else than the median is required
                     zoned_tasks[tname]['numvals'][epoch] = compute_zone_values(
                         task, self._zoning, zone_name=zcont.zone_name
                     )
@@ -254,14 +255,16 @@ class EvalSetup(object):
                 intf.initialize_model_quantities()
 
             for did, ifdata in data.items():
-                dif = self._prj.project.interfaces[did]
+                dif = self._prj.project.interfaces[did]   # data interface
+                eif = self._dintfs[did]   # evaluation interface
+
                 # process data depending on if it is static and if it is 
                 # separated into further data-types
                 zoned_data = None
                 if dif.static_data and (dif.data_types is None):
                     zdata = compute_zone_values(
                         ifdata[self._field], self._zoning, 
-                        zone_name=zcont.zone_name
+                        zone_name=zcont.zone_name, method=eif.zone_value_method
                     )
                     zoned_data = {init_epoch: zdata}
     
@@ -272,7 +275,8 @@ class EvalSetup(object):
                     ))
                     for dtype, dtdata in ifdata[self._field].items():
                         zdata = compute_zone_values(
-                            dtdata, self._zoning, zone_name=zcont.zone_name
+                            dtdata, self._zoning, zone_name=zcont.zone_name,
+                            method=eif.zone_value_method
                         )
                         zoned_data[dtype] = zdata
                     zoned_data = {init_epoch: zoned_data}
@@ -286,7 +290,8 @@ class EvalSetup(object):
                         if dif.data_types is None:
                             zoned_data[epoch] = compute_zone_values(
                                 edata, self._zoning, 
-                                zone_name=zcont.zone_name
+                                zone_name=zcont.zone_name,
+                                method=eif.zone_value_method
                             )
                         else:
                             zoned_data[epoch] = dict(zip(
@@ -297,10 +302,15 @@ class EvalSetup(object):
                                 zoned_data[epoch][dtype] = \
                                 compute_zone_values(
                                     dtdata, self._zoning, 
-                                    zone_name=zcont.zone_name
+                                    zone_name=zcont.zone_name,
+                                    method=eif.zone_value_method
                                 )
     
-                self._dintfs[did].process_data(zoned_data)
+                eif.process_data(zoned_data)
             self._mdefs[zcont.zone_name].set_from_interfaces(
                 list(self._dintfs.values())
             )
+
+    def save_eval_defs(self):
+        # TODO
+        self._edb.execute_many(self._ins_cmds)

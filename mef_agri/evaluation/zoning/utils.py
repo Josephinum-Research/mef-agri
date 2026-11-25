@@ -4,6 +4,12 @@ from ...utils.raster import GeoRaster
 from . import Zoning
 
 
+class ZONE_VALUE_METHOD:
+    MEDIAN = 'median'
+    MEAN = 'mean'
+    MODE = 'mode'
+
+
 def pixels_in_zone(
         zarr:np.ndarray, trafo_z_i2g:np.ndarray, trafo_d_g2i:np.ndarray, 
         dshape:tuple[int, int], corder='img'
@@ -105,9 +111,12 @@ def pixels_in_zone(
     return np.unique(ics_d_4, axis=1)
 
 
-def compute_zone_values(r:GeoRaster, z:Zoning, zone_name:str=None) -> dict:
+def compute_zone_values(
+        r:GeoRaster, z:Zoning, zone_name:str=None, method:str=None
+    ) -> dict:
     """
-    Compute the median of all pixels from ``r`` which touch a zone of ``z``.
+    Compute a representative value of all pixels from ``r`` which touch a zone 
+    of ``z``.
     The returned value is a dictionary where the first level of keys 
     corresponds to the zone-names (i.e. ``z.layer_ids``) with values being again 
     dictionaries.
@@ -116,16 +125,21 @@ def compute_zone_values(r:GeoRaster, z:Zoning, zone_name:str=None) -> dict:
     zone from the first level of keys.
     If ``zname`` is specified, only one dictionary with keys representing the 
     data-layers is returned.
+    If ``method=None``, the median will be used to compute the zone value.
 
     :param r: georaster containing the data
     :type r: mef_agri.utils.raster.GeoRaster
     :param z: zoning
     :type z: mef_agri.evaluation.zoning.Zoning
-    :param zone_name: if provided, zoned values are only computed for this zone
-    :type zone_name: str
+    :param zone_name: if provided, zoned values are only computed for this zone, defaults to None
+    :type zone_name: str, optional
+    :param method: specify method to compute a representative value for a zone (see :class:`ZONE_VALUE_METHOD`), defaults to None
+    :type method: str, optional
     :return: median values of data-pixels which touch the zones
     :rtype: dict
     """
+    if method is None:
+        method = ZONE_VALUE_METHOD.MEDIAN
     ret = {}
     dshape = r.raster_shape[1:] if r.layer_index == 0 else r.raster_shape[:2]
 
@@ -143,7 +157,18 @@ def compute_zone_values(r:GeoRaster, z:Zoning, zone_name:str=None) -> dict:
             zvals = r.raster[:, ics[0, :], ics[1, :]]
         elif r.layer_index == 2:
             zvals = r.raster[ics[0, :], ics[1, :], :].T
-        ret[zname] = dict(zip(r.layer_ids, np.nanmedian(zvals, axis=1)))
+
+        rzv = None  # representative zone values
+        if method == ZONE_VALUE_METHOD.MEDIAN:
+            rzv = np.nanmedian(zvals, axis=1)
+        elif method == ZONE_VALUE_METHOD.MEAN:
+            rzv = np.nanmean(zvals, axis=1)
+        elif method == ZONE_VALUE_METHOD.MODE:
+            rzv = np.zeros((zvals.shape[0],))
+            for i in range(zvals.shape[0]):
+                uvals, counts = np.unique(zvals[i, :], return_counts=True)
+                rzv[i] = uvals[np.argmax(counts)]
+        ret[zname] = dict(zip(r.layer_ids, rzv))
 
     if zone_name is None:
         return ret

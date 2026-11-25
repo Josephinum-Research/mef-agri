@@ -79,6 +79,9 @@ class DBSchema(object):
     quantities. 
     It is recommended to use ``'zone'`` as value for ``mid`` for these 
     quantities.
+    :func:`table_croprot` acts as link between ``mid`` and the knowledge of the 
+    sown crop+cultivar with corresponding sowing-date (i.e. column 
+    ``epoch_start``).
 
     Model Quantity Definitions
     ==========================
